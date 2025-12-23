@@ -89,7 +89,7 @@ class LoginPage extends StatelessWidget {
                   // INPUT USERNAME
                   TextField(
                     decoration: InputDecoration(
-                      labelText: "Username",
+                      labelText: "Username atau email",
                       prefixIcon: const Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),

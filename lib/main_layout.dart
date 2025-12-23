@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 
-// Import semua halaman account
 import 'pages/account/login_page.dart';
 import 'pages/account/signup_page.dart';
 import 'pages/account/forgot_pw_page.dart'; // Pastikan nama file ini sesuai di folder kamu
