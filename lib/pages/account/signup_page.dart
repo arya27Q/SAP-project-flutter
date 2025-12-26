@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget { // Ubah ke StatefulWidget
   final VoidCallback onGoToLogin;
   final VoidCallback onBackToDashboard;
 
@@ -12,9 +12,24 @@ class SignUpPage extends StatelessWidget {
   });
 
   @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  // Variabel untuk menyimpan pilihan Company
+  String? selectedCompany;
+
+  // Daftar Company (Samakan dengan di Login agar konsisten)
+  final List<String> companies = [
+    "PT. Dempo Laser Metalindo Surabaya",
+    "PT. Duta Laserindo Metal",
+    "PT. Senzo Feinmetal",
+    "PT. ATMI Duta Engineering",
+  ];
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Penting agar keyboard tidak menutupi input di HP
       resizeToAvoidBottomInset: true, 
       body: Container(
         width: double.infinity,
@@ -28,11 +43,9 @@ class SignUpPage extends StatelessWidget {
         ),
         child: Center(
           child: SingleChildScrollView(
-            // Memberikan jarak aman di sekeliling layar mobile
             padding: const EdgeInsets.all(24), 
             child: Container(
               width: double.infinity,
-              // Batas lebar maksimal di desktop, fleksibel di mobile
               constraints: const BoxConstraints(maxWidth: 450),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               decoration: BoxDecoration(
@@ -49,11 +62,10 @@ class SignUpPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Tombol Close di pojok kanan atas
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: onBackToDashboard,
+                      onPressed: widget.onBackToDashboard,
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
@@ -72,6 +84,29 @@ class SignUpPage extends StatelessWidget {
                       style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 32),
                   
+                  // --- DROPDOWN PILIH COMPANY ---
+                  DropdownButtonFormField<String>(
+                    value: selectedCompany,
+                    decoration: InputDecoration(
+                      labelText: "Daftar untuk Company",
+                      prefixIcon: const Icon(Icons.business_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    hint: const Text("Pilih Unit Bisnis"),
+                    items: companies.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value, style: const TextStyle(fontSize: 12)),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedCompany = newValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
                   TextField(
                     decoration: InputDecoration(
                       labelText: "Nama Lengkap",
@@ -106,7 +141,7 @@ class SignUpPage extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Nanti tambahkan logika daftar di sini
+                        // Nanti kirim selectedCompany, nama, email, password ke Laravel
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryIndigo,
@@ -122,7 +157,7 @@ class SignUpPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   TextButton(
-                    onPressed: onGoToLogin, 
+                    onPressed: widget.onGoToLogin, 
                     child: const Text("Sudah punya akun? Masuk di sini"),
                   ),
 
@@ -131,9 +166,8 @@ class SignUpPage extends StatelessWidget {
                     child: Divider(),
                   ),
 
-                  // Tombol Kembali
                   TextButton.icon(
-                    onPressed: onBackToDashboard,
+                    onPressed: widget.onBackToDashboard,
                     icon: const Icon(Icons.arrow_back, size: 16),
                     label: const Text("Kembali ke Dashboard"),
                     style: TextButton.styleFrom(foregroundColor: Colors.grey),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
+class ForgotPasswordPage extends StatefulWidget { // Diubah menjadi StatefulWidget
   final VoidCallback onGoToLogin;
   final VoidCallback onBackToDashboard;
 
@@ -12,9 +12,24 @@ class ForgotPasswordPage extends StatelessWidget {
   });
 
   @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  // Variabel untuk menyimpan pilihan Company
+  String? selectedCompany;
+
+  // Daftar Company (Samakan dengan di Login & Sign Up agar konsisten)
+  final List<String> companies = [
+    "PT. Dempo Laser Metalindo Surabaya",
+    "PT. Duta Laserindo Metal",
+    "PT. Senzo Feinmetal",
+    "PT. ATMI Duta Engineering",
+  ];
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Penting agar keyboard tidak menutupi input di HP
       resizeToAvoidBottomInset: true, 
       body: Container(
         width: double.infinity,
@@ -28,11 +43,9 @@ class ForgotPasswordPage extends StatelessWidget {
         ),
         child: Center(
           child: SingleChildScrollView(
-            // Memberikan jarak aman di sekeliling layar mobile agar kotak tidak menempel
             padding: const EdgeInsets.all(24),
             child: Container(
               width: double.infinity,
-              // Batas lebar maksimal 400px di desktop, namun fleksibel mengikuti layar di mobile
               constraints: const BoxConstraints(maxWidth: 400),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               decoration: BoxDecoration(
@@ -49,11 +62,11 @@ class ForgotPasswordPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Tombol Close di pojok kanan atas
+                  // Tombol Close
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: onBackToDashboard,
+                      onPressed: widget.onBackToDashboard,
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
@@ -70,12 +83,37 @@ class ForgotPasswordPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "Masukkan email Anda untuk menerima instruksi reset password.",
+                    "Pilih company dan masukkan email untuk menerima instruksi reset.",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                   const SizedBox(height: 32),
                   
+                  // --- DROPDOWN PILIH COMPANY ---
+                  DropdownButtonFormField<String>(
+                    value: selectedCompany,
+                    isExpanded: true, // Agar teks panjang tidak berantakan
+                    decoration: InputDecoration(
+                      labelText: "Pilih Company",
+                      prefixIcon: const Icon(Icons.business_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    hint: const Text("Pilih Unit Bisnis"),
+                    items: companies.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value, style: const TextStyle(fontSize: 12)),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedCompany = newValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // INPUT EMAIL
                   TextField(
                     decoration: InputDecoration(
                       labelText: "Email Terdaftar",
@@ -86,12 +124,13 @@ class ForgotPasswordPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
                   
+                  // TOMBOL KIRIM
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Logika kirim email reset password
+                        // Logika: Kirim 'selectedCompany' dan 'email' ke Laravel
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryIndigo,
@@ -107,7 +146,7 @@ class ForgotPasswordPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   TextButton(
-                    onPressed: onGoToLogin, 
+                    onPressed: widget.onGoToLogin, 
                     child: const Text("Kembali ke Login"),
                   ),
 
@@ -116,9 +155,9 @@ class ForgotPasswordPage extends StatelessWidget {
                     child: Divider(),
                   ),
 
-                  // Tombol Kembali ke Dashboard agar user tidak terjebak
+                  // Tombol Kembali ke Dashboard
                   TextButton.icon(
-                    onPressed: onBackToDashboard,
+                    onPressed: widget.onBackToDashboard,
                     icon: const Icon(Icons.arrow_back, size: 16),
                     label: const Text("Kembali ke Dashboard"),
                     style: TextButton.styleFrom(foregroundColor: Colors.grey),
