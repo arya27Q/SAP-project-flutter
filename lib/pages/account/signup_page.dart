@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 
-class SignUpPage extends StatefulWidget { // Ubah ke StatefulWidget
+class SignUpPage extends StatefulWidget {
   final VoidCallback onGoToLogin;
   final VoidCallback onBackToDashboard;
 
@@ -16,10 +16,13 @@ class SignUpPage extends StatefulWidget { // Ubah ke StatefulWidget
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  // Variabel untuk menyimpan pilihan Company
   String? selectedCompany;
 
-  // Daftar Company (Samakan dengan di Login agar konsisten)
+  // Controller untuk menangkap input teks
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   final List<String> companies = [
     "PT. Dempo Laser Metalindo Surabaya",
     "PT. Duta Laserindo Metal",
@@ -28,9 +31,39 @@ class _SignUpPageState extends State<SignUpPage> {
   ];
 
   @override
+  void dispose() {
+    // Penting: Bersihkan controller agar tidak memakan memori
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleSignUp() {
+    // Validasi sederhana
+    if (selectedCompany == null || 
+        _nameController.text.isEmpty || 
+        _emailController.text.isEmpty || 
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Mohon lengkapi semua data!")),
+      );
+      return;
+    }
+
+    // Logika pengiriman ke Laravel nantinya
+    print("Mendaftar di: $selectedCompany");
+    print("Nama: ${_nameController.text}");
+    print("Email: ${_emailController.text}");
+    
+    // Untuk testing, kita asumsikan sukses dan kembali ke login
+    widget.onGoToLogin();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, 
+      resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -43,7 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24), 
+            padding: const EdgeInsets.all(24),
             child: Container(
               width: double.infinity,
               constraints: const BoxConstraints(maxWidth: 450),
@@ -69,18 +102,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
-
-                  const Icon(Icons.person_add_alt_1_rounded, 
+                  const Icon(Icons.person_add_alt_1_rounded,
                       color: AppColors.primaryIndigo, size: 50),
                   const SizedBox(height: 16),
                   const Text(
                     "Buat Akun Baru",
                     style: TextStyle(
-                        fontSize: 22, 
-                        fontWeight: FontWeight.bold, 
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                         color: AppColors.darkIndigo),
                   ),
-                  const Text("Lengkapi data untuk mendaftar", 
+                  const Text("Lengkapi data untuk mendaftar",
                       style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 32),
                   
@@ -96,7 +128,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     items: companies.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value, style: const TextStyle(fontSize: 12)),
+                        child: Text(value, 
+                            style: const TextStyle(fontSize: 12),
+                            overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
                     onChanged: (newValue) {
@@ -107,7 +141,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // --- INPUT NAMA ---
                   TextField(
+                    controller: _nameController,
                     decoration: InputDecoration(
                       labelText: "Nama Lengkap",
                       prefixIcon: const Icon(Icons.badge_outlined),
@@ -116,7 +152,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // --- INPUT EMAIL ---
                   TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: "Email",
                       prefixIcon: const Icon(Icons.email_outlined),
@@ -125,7 +165,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // --- INPUT PASSWORD ---
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: "Password",
@@ -140,9 +183,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Nanti kirim selectedCompany, nama, email, password ke Laravel
-                      },
+                      onPressed: _handleSignUp,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryIndigo,
                         foregroundColor: Colors.white,
@@ -150,14 +191,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text("Daftar Sekarang", 
+                      child: const Text("Daftar Sekarang",
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 16),
                   
                   TextButton(
-                    onPressed: widget.onGoToLogin, 
+                    onPressed: widget.onGoToLogin,
                     child: const Text("Sudah punya akun? Masuk di sini"),
                   ),
 

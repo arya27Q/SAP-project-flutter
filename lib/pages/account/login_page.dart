@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   String? selectedCompany;
+  bool _isLoading = false; // Status loading untuk tombol
 
   final List<String> companies = [
     "PT. Dempo Laser Metalindo Surabaya",
@@ -32,80 +33,86 @@ class _LoginPageState extends State<LoginPage> {
     "PT. ATMI Duta Engineering",
   ];
 
+  @override
+  void dispose() {
+    _userController.dispose();
+    _passController.dispose();
+    super.dispose();
+  }
+
   Future<void> loginTest() async {
+    // 1. Validasi Input Dasar
+    if (selectedCompany == null) {
+      _showErrorSnackBar("Silakan pilih Company terlebih dahulu");
+      return;
+    }
+    if (_userController.text.isEmpty || _passController.text.isEmpty) {
+      _showErrorSnackBar("Username/Email dan Password wajib diisi");
+      return;
+    }
+
+    setState(() => _isLoading = true);
     print("Mencoba hubungi Laravel...");
-    
+
     try {
-    
-var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
-      
+      // Pastikan IP ini bisa diakses dari HP/Emulator (Gunakan 10.0.2.2 untuk Emulator Android)
+      var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
+
       var response = await http.post(
         url,
         body: {
-          'user_email': _userController.text,
+          'user_email': _userController.text.trim(),
           'password': _passController.text,
-          'company': selectedCompany ?? 'Belum Pilih',
+          'company': selectedCompany!,
         },
-      );
+      ).timeout(const Duration(seconds: 10)); // Tambahkan timeout biar gak nunggu selamanya
 
       if (response.statusCode == 200) {
-        print("I/flutter: [SUCCESS] LARAVEL API BERHASIL DIAKSES!");
+        print("I/flutter: [SUCCESS] API TERHUBUNG!");
+        if (mounted) _showSuccessSnackBar(selectedCompany!);
         
-        String namaPT = selectedCompany ?? "Perusahaan";
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "Berhasil masuk ke halaman dashboard $namaPT",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green.shade700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              // LOGIKA AGAR NOTIFIKASI DI ATAS:
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height - 82, // Dorong ke atas
-                left: 20,
-                right: 20,
-              ),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-
         Future.delayed(const Duration(milliseconds: 1500), () {
-          widget.onLoginSuccess(); 
+          widget.onLoginSuccess();
         });
-
       } else {
-        print("I/flutter: Server merespon tapi error status: ${response.statusCode}");
+        _showErrorSnackBar("Gagal Masuk: Server merespon ${response.statusCode}");
       }
     } catch (e) {
-      print("I/flutter: GAGAL TOTAL: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text("Gagal terhubung ke server. Cek koneksi internet/IP."),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height - 100,
-                left: 20,
-                right: 20,
-            ),
-          ),
-        );
-      }
+      print("I/flutter: ERROR KONEKSI: $e");
+      _showErrorSnackBar("Gagal terhubung ke server. Pastikan Laravel running dan satu Wi-Fi.");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  // --- Helper Notifikasi ---
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade800,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, left: 20, right: 20),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String namaPT) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text("Selamat Datang di $namaPT", style: const TextStyle(fontWeight: FontWeight.bold))),
+          ],
+        ),
+        backgroundColor: Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 82, left: 20, right: 20),
+      ),
+    );
   }
 
   @override
@@ -133,11 +140,7 @@ var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
+                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(
@@ -150,45 +153,29 @@ var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
-
-                  // LOGO SAP
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryIndigo,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.primaryIndigo, borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.bolt, color: Colors.white, size: 30),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    "SAP SYSTEM",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkIndigo),
-                  ),
+                  const Text("SAP SYSTEM", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkIndigo)),
                   const Text("Masuk ke Sistem", style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 32),
-
-                  // DROPDOWN COMPANY
+                  
                   DropdownButtonFormField<String>(
                     value: selectedCompany,
-                    isExpanded: true, 
+                    isExpanded: true,
                     decoration: InputDecoration(
                       labelText: "Pilih Company",
                       prefixIcon: const Icon(Icons.business_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    hint: const Text("Pilih Unit Bisnis"),
-                    items: companies.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, style: const TextStyle(fontSize: 11)),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) => setState(() => selectedCompany = newValue),
+                    items: companies.map((String value) => DropdownMenuItem(value: value, child: Text(value, style: const TextStyle(fontSize: 11)))).toList(),
+                    onChanged: (val) => setState(() => selectedCompany = val),
                   ),
                   const SizedBox(height: 20),
-
-                  // INPUT USERNAME
+                  
                   TextField(
                     controller: _userController,
                     decoration: InputDecoration(
@@ -198,8 +185,7 @@ var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // INPUT PASSWORD
+                  
                   TextField(
                     controller: _passController,
                     obscureText: true,
@@ -209,40 +195,32 @@ var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
-
+                  
                   Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: widget.onForgotPassword,
-                      child: const Text("Lupa Password?"),
-                    ),
+                    child: TextButton(onPressed: widget.onForgotPassword, child: const Text("Lupa Password?")),
                   ),
                   const SizedBox(height: 20),
-
-                  // TOMBOL MASUK
+                  
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: loginTest,
+                      onPressed: _isLoading ? null : loginTest,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryIndigo,
                         foregroundColor: Colors.white,
-                        elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text("Masuk", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: _isLoading 
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text("Masuk", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: widget.onGoToSignUp,
-                    child: const Text("Belum punya akun? Daftar di sini"),
-                  ),
-
+                  
+                  TextButton(onPressed: widget.onGoToSignUp, child: const Text("Belum punya akun? Daftar di sini")),
                   const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider()),
-
                   TextButton.icon(
                     onPressed: widget.onBackToDashboard,
                     icon: const Icon(Icons.arrow_back, size: 16),

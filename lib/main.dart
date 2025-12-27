@@ -18,7 +18,7 @@ class SAPModernApp extends StatelessWidget {
         fontFamily: 'Segoe UI',
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
-      home: const MainLayout(),
+      home: const MainLayout(), 
     );
   }
 }

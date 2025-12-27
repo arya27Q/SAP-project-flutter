@@ -13,7 +13,7 @@ class DashboardPage extends StatefulWidget {
     required this.userName,
     required this.userDivision,
     required this.onLogout,
-    this.currentDatabase = "DB_METALINDO_UTAMA",
+    this.currentDatabase = "DB_UTAMA",
   });
 
   @override
@@ -24,7 +24,6 @@ class _DashboardPageState extends State<DashboardPage> {
   final Color primaryIndigo = const Color(0xFF6366F1);
   final Color darkSlate = const Color(0xFF1E293B);
 
-  // --- LOGIKA PENERJEMAH DATA DARI LARAVEL ---
   Color parseStatusColor(int id) {
     switch (id) {
       case 1: return Colors.green;
@@ -46,7 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 246, 248, 250),
+      backgroundColor: const Color.fromARGB(255, 242, 244, 247),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
         child: Column(
@@ -62,12 +61,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
             _buildSectionHeader("Critical Alerts & Approvals"),
             const SizedBox(height: 15),
-            _buildApprovalAlertGrid(),
+            _buildApprovalAlertGrid(), // FIXED OVERFLOW FOR MOBILE
             const SizedBox(height: 30),
 
             _buildSectionHeader("Financials Summary"),
             const SizedBox(height: 15),
-            _buildFinancialGrid(),
+            _buildFinancialGrid(), // FIXED OVERFLOW FOR MOBILE
             const SizedBox(height: 30),
 
             _buildSectionHeader("Strategic Intelligence Hub"),
@@ -111,7 +110,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  
+  // --- 1. SUBSIDIARY SYNC (DENGAN BORDER & SHADOW) ---
   Widget _buildBranchSyncStatusRow() {
     final List<Map<String, dynamic>> branchSyncData = [
       {"name": "PT. Dempo Laser Metalindo Surabaya", "status_id": 1},
@@ -121,31 +120,30 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     return SizedBox(
-      height: 70,
+      height: 75,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: branchSyncData.length,
         itemBuilder: (context, index) {
           int sId = branchSyncData[index]['status_id'];
           return Container(
-            margin: const EdgeInsets.only(right: 12),
+            margin: const EdgeInsets.only(right: 12, bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              // ADD BORDER GAMBAR 8
               border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 3))
+              ],
             ),
             child: Row(
               children: [
-                CircleAvatar(radius: 3, backgroundColor: parseStatusColor(sId)),
-                const SizedBox(width: 8),
-                Text(branchSyncData[index]['name'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 8),
-                Text(
-                  parseStatusText(sId), 
-                  style: TextStyle(fontSize: 9, color: parseStatusColor(sId), fontWeight: FontWeight.w900)
-                ),
+                CircleAvatar(radius: 4, backgroundColor: parseStatusColor(sId)),
+                const SizedBox(width: 10),
+                Text(branchSyncData[index]['name'], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 10),
+                Text(parseStatusText(sId), style: TextStyle(fontSize: 10, color: parseStatusColor(sId), fontWeight: FontWeight.w900)),
               ],
             ),
           );
@@ -154,40 +152,123 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
- 
+  // --- 2. CRITICAL ALERTS (FIXED OVERFLOW MOBILE) ---
+  Widget _buildApprovalAlertGrid() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Jika layar kecil (mobile), gunakan 2 kolom atau kurangi rasio
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: constraints.maxWidth < 600 ? 2 : 3, 
+          crossAxisSpacing: 15,
+          mainAxisSpacing: 15,
+          childAspectRatio: 2.8, 
+          children: [
+            _alertCard("Approvals", "12", const Color.fromARGB(255, 0, 139, 126), Icons.fact_check),
+            _alertCard("Stock Low", "3", const Color(0xFFE91E63), Icons.inventory),
+            _alertCard("A/R Over", "Rp 450M", const Color(0xFF9C27B0), Icons.receipt),
+          ],
+        );
+      }
+    );
+  }
+
+  Widget _alertCard(String title, String val, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+        boxShadow: [
+          BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 22),
+          const SizedBox(width: 10),
+          Expanded( // Menghindari teks nabrak batas
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(child: Text(title, style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.bold))),
+                FittedBox(child: Text(val, style: const TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w900))),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // --- 3. FINANCIALS GRID (FIXED OVERFLOW MOBILE) ---
+  Widget _buildFinancialGrid() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: constraints.maxWidth < 600 ? 2 : 4,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.6,
+          children: [
+            _kpiSmallCard("Profit", "Rp 0", Icons.insights, Colors.teal),
+            _kpiSmallCard("Income", "Rp 0", Icons.file_download, Colors.blue),
+            _kpiSmallCard("Expense", "Rp 0", Icons.file_upload, Colors.red),
+            _kpiSmallCard("Assets", "Rp 0", Icons.account_balance, Colors.indigo),
+          ],
+        );
+      }
+    );
+  }
+
+  Widget _kpiSmallCard(String title, String val, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        boxShadow: [
+          BoxShadow(color: color.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 5))
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const Spacer(),
+          Text(title, style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.8), fontWeight: FontWeight.bold)),
+          FittedBox(child: Text(val, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w900))),
+        ],
+      ),
+    );
+  }
+
+  // --- 4. INVENTORY (DENGAN BORDER & SHADOW) ---
   Widget _buildInventoryWarehouseGrid() {
     return Row(
       children: [
-        // KOTAK CRITICAL STOCK (FULL RED PEKAT)
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(15),
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.red.shade700, // Merah pekat (Full Solid)
+              color: Colors.red.shade700,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2), width: 1), // Garis pinggir halus
+              border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.red.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
+                BoxShadow(color: Colors.red.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 5))
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      "Critical Stock", 
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)
-                    ),
-                  ],
-                ),
+                const Row(children: [Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18), SizedBox(width: 8), Text("Critical Stock", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white))]),
                 const Spacer(),
                 _stockLine("Plat Besi 5mm", "3 U", Colors.white),
                 _stockLine("Oxygen Gas", "12 U", Colors.white),
@@ -197,7 +278,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         const SizedBox(width: 20),
-        // KOTAK WAREHOUSE A (GELAP SAP)
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(15),
@@ -206,6 +286,9 @@ class _DashboardPageState extends State<DashboardPage> {
               color: darkSlate, 
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 5))
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,20 +308,18 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Helper fungsi stockLine disesuaikan agar teks bisa berubah warna (misal jadi putih)
-  Widget _stockLine(String name, String qty, Color textColor) {
+  Widget _stockLine(String name, String qty, Color txtColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-        children: [
-          Text(name, style: TextStyle(fontSize: 10, color: textColor.withOpacity(0.9))),
-          Text(qty, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textColor)),
-        ]
-      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(name, style: TextStyle(fontSize: 10, color: txtColor.withOpacity(0.9))),
+        Text(qty, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: txtColor)),
+      ]),
     );
   }
-  // --- GRAFIK TAHUNAN (GAMBAR 949c61) ---
+
+  // --- GRAFIK & LAINNYA (DENGAN BORDER & SHADOW) ---
+
   Widget _buildYearlyComparisonChart() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -246,9 +327,8 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        // ADD BORDER GAMBAR 6
-        border: Border.all(color: Colors.grey.withOpacity(0.15), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text("Annual Revenue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -262,7 +342,7 @@ class _DashboardPageState extends State<DashboardPage> {
               children: List.generate(5, (idx) {
                 double hRatio = [0.4, 0.6, 0.7, 0.85, 1.0][idx];
                 return Column(mainAxisSize: MainAxisSize.min, children: [
-                  Container(width: 35, height: maxH * hRatio * 0.8, decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [primaryIndigo, primaryIndigo.withOpacity(0.1)]), borderRadius: const BorderRadius.vertical(top: Radius.circular(5)))),
+                  Container(width: 30, height: maxH * hRatio * 0.8, decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [primaryIndigo, primaryIndigo.withOpacity(0.1)]), borderRadius: const BorderRadius.vertical(top: Radius.circular(5)))),
                   const SizedBox(height: 8),
                   Text((2021 + idx).toString(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                 ]);
@@ -274,7 +354,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- MONTHLY ANALYTICS (GAMBAR 949cdc) ---
   Widget _buildMonthlyDualChart() {
     final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return Row(children: [
@@ -291,8 +370,8 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        // ADD BORDER GAMBAR 8
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
@@ -304,7 +383,7 @@ class _DashboardPageState extends State<DashboardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List.generate(labels.length, (i) => Column(mainAxisSize: MainAxisSize.min, children: [
-                Container(width: 6, height: maxH * values[i] * 0.8, decoration: BoxDecoration(color: color.withOpacity(0.6), borderRadius: BorderRadius.circular(2))),
+                Container(width: 5, height: maxH * values[i] * 0.8, decoration: BoxDecoration(color: color.withOpacity(0.6), borderRadius: BorderRadius.circular(2))),
                 const SizedBox(height: 4),
                 Text(labels[i], style: const TextStyle(fontSize: 6, color: Colors.grey)),
               ])),
@@ -315,150 +394,14 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- HELPERS ---
-  Widget _buildSectionHeader(String title) {
-    return Row(children: [
-      Container(width: 3, height: 16, decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(10))),
-      const SizedBox(width: 10),
-      Text(title.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF64748B))),
-    ]);
-  }
-
-  Widget _buildGlobalDatabaseHeader() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [darkSlate, const Color(0xFF334155)]), 
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-      ),
-      child: Row(children: [
-        const Icon(Icons.hub_rounded, color: Colors.blueAccent, size: 30),
-        const SizedBox(width: 20),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text("SAP B1 ENTERPRISE GROUP", style: TextStyle(color: Colors.blueAccent, fontSize: 8, fontWeight: FontWeight.w900)),
-          Text(widget.currentDatabase, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-        ])),
-        _statusBadge("ONLINE", Colors.greenAccent),
-        const SizedBox(width: 10),
-        IconButton(onPressed: widget.onLogout, icon: const Icon(Icons.logout, color: Colors.white70, size: 20)),
-      ]),
-    );
-  }
-
-  Widget _buildApprovalAlertGrid() {
-    return GridView.count(
-      shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 3, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 3,
-      children: [
-        _alertCard("Approvals", "12", const Color.fromARGB(255, 27, 157, 77), Icons.fact_check),
-        _alertCard("Stock Low", "3", const Color(0xFFE91E63), Icons.inventory),
-        _alertCard("A/R Over", "Rp 450M", const Color(0xFF9C27B0), Icons.receipt),
-      ],
-    );
-  }
-
-  Widget _alertCard(String title, String val, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color, 
-        borderRadius: BorderRadius.circular(12),
-        // ADD BORDER PADA ALERT CARD (GAMBAR 2,3,4)
-        border: Border.all(color: Colors.black.withOpacity(0.05), width: 1),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 20), 
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(title, style: TextStyle(fontSize: 9, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.bold)), 
-              Text(val, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w900)),
-            ]
-          )
-        ]
-      ),
-    );
-  }
-
-  // --- MODUL KPI DENGAN WARNA FULL SOLID ---
-  Widget _buildFinancialGrid() {
-    return GridView.count(
-      shrinkWrap: true, 
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4, 
-      crossAxisSpacing: 16, 
-      mainAxisSpacing: 16, 
-      childAspectRatio: 1.5,
-      children: [
-        _kpiSmallCard("Profit", "Rp 0", Icons.insights, Colors.teal),
-        _kpiSmallCard("Income", "Rp 0", Icons.file_download, Colors.blue),
-        _kpiSmallCard("Expense", "Rp 0", Icons.file_upload, Colors.red),
-        _kpiSmallCard("Assets", "Rp 0", Icons.account_balance, Colors.indigo),
-      ],
-    );
-  }
-
-  Widget _kpiSmallCard(String title, String val, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        // WARNA DI-FULL-IN (SOLID)
-        color: color, 
-        borderRadius: BorderRadius.circular(16),
-        // GARIS PINGGIR HALUS BIAR ELEGAN
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, 
-        children: [
-          // Icon diubah jadi putih agar kontras
-          Icon(icon, color: Colors.white, size: 18),
-          const Spacer(),
-          // Teks Judul (Putih agak transparan)
-          Text(
-            title, 
-            style: TextStyle(
-              fontSize: 9, 
-              color: Colors.white.withOpacity(0.8), 
-              fontWeight: FontWeight.bold
-            )
-          ),
-          // Nilai Angka (Putih Solid)
-          FittedBox(
-            child: Text(
-              val, 
-              style: const TextStyle(
-                fontSize: 14, 
-                color: Colors.white, 
-                fontWeight: FontWeight.w900
-              )
-            )
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAgingReportCard() {
     return Container(
       padding: const EdgeInsets.all(20), height: 180,
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        // ADD BORDER GAMBAR 5 BAWAH
         border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text("A/R Aging", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -472,8 +415,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _agingLine(String label, String val, Color color) {
     return Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(children: [CircleAvatar(radius: 2, backgroundColor: color), const SizedBox(width: 5), Text(label, style: const TextStyle(fontSize: 9))]),
-      Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9)),
+      Row(children: [CircleAvatar(radius: 2, backgroundColor: color), const SizedBox(width: 5), Text(label, style: const TextStyle(fontSize: 10))]),
+      Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
     ]));
   }
 
@@ -483,8 +426,8 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        // ADD BORDER GAMBAR 7
         border: Border.all(color: color.withOpacity(0.2), width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Icon(icon, color: color, size: 16), const SizedBox(width: 5), Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
@@ -502,6 +445,7 @@ class _DashboardPageState extends State<DashboardPage> {
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Column(children: [
         const Text("Resources", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -523,12 +467,44 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A), 
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))]
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text(">_ LOG_V6", style: TextStyle(color: Colors.tealAccent, fontFamily: 'monospace', fontSize: 9, fontWeight: FontWeight.bold)),
         const SizedBox(height: 5),
         const Text("[SYS] Data Sync Complete", style: TextStyle(color: Colors.white70, fontSize: 8)),
+      ]),
+    );
+  }
+
+  // --- BASIC HELPERS ---
+
+  Widget _buildSectionHeader(String title) {
+    return Row(children: [
+      Container(width: 3, height: 16, decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(10))),
+      const SizedBox(width: 10),
+      Text(title.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF64748B))),
+    ]);
+  }
+
+  Widget _buildGlobalDatabaseHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [darkSlate, const Color(0xFF334155)]), 
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 15, offset: const Offset(0, 8))]
+      ),
+      child: Row(children: [
+        const Icon(Icons.hub_rounded, color: Colors.blueAccent, size: 30),
+        const SizedBox(width: 20),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text("SAP B1 ENTERPRISE GROUP", style: TextStyle(color: Colors.blueAccent, fontSize: 8, fontWeight: FontWeight.w900)),
+          Text(widget.currentDatabase, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        ])),
+        _statusBadge("ONLINE", Colors.greenAccent),
+        const SizedBox(width: 10),
+        IconButton(onPressed: widget.onLogout, icon: const Icon(Icons.logout, color: Colors.white70, size: 20)),
       ]),
     );
   }
@@ -542,6 +518,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _statusLine(String label, String val) {
-    return Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: const TextStyle(fontSize: 9, color: Colors.grey)), Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9))]));
+    return Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)), Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10))]));
   }
 }

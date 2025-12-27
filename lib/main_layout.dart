@@ -14,9 +14,11 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  String currentView = "Dashboard";
-  bool isLoggedIn = true; 
+  // --- UBAH: Mulai dari halaman Login agar tidak langsung masuk ---
+  String currentView = "Login"; 
+  bool isLoggedIn = false;      
   
+  // Data user (Nanti diisi setelah loginTest sukses)
   int userLevel = 1; 
   String userName = "Admin SAP";
   String userDiv = "Super User";
@@ -25,20 +27,46 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    // --- 1. LOGIKA HALAMAN FULL SCREEN (LOGIN/SIGNUP) ---
-    if (currentView == "Login") {
-      return LoginPage(
-        onLoginSuccess: () => setState(() { 
-          isLoggedIn = true; 
-          currentView = "Dashboard"; 
-        }),
-        onGoToSignUp: () => setState(() => currentView = "Sign Up"),
-        onForgotPassword: () => setState(() => currentView = "Forgot Password"),
-        onBackToDashboard: () => setState(() => currentView = "Dashboard"),
-      );
+    // --- 1. LOGIKA HALAMAN FULL SCREEN (LOGIN/SIGNUP/FORGOT PW) ---
+    // Jika belum login atau sedang di view auth, tampilkan tanpa Sidebar
+    if (!isLoggedIn || currentView == "Login" || currentView == "Sign Up" || currentView == "Forgot Password") {
+      if (currentView == "Login") {
+        return LoginPage(
+          onLoginSuccess: () {
+            setState(() { 
+              isLoggedIn = true; 
+              currentView = "Dashboard"; 
+            });
+          },
+          onGoToSignUp: () => setState(() => currentView = "Sign Up"),
+          onForgotPassword: () => setState(() => currentView = "Forgot Password"),
+          onBackToDashboard: () {
+            // Jika user klik close/back tapi belum login, tetap di login
+            if (!isLoggedIn) {
+              setState(() => currentView = "Login");
+            } else {
+              setState(() => currentView = "Dashboard");
+            }
+          },
+        );
+      } 
+      
+      if (currentView == "Sign Up") {
+        return SignUpPage(
+          onGoToLogin: () => setState(() => currentView = "Login"),
+          onBackToDashboard: () => setState(() => currentView = isLoggedIn ? "Dashboard" : "Login"),
+        );
+      }
+
+      if (currentView == "Forgot Password") {
+        return ForgotPasswordPage(
+          onGoToLogin: () => setState(() => currentView = "Login"),
+          onBackToDashboard: () => setState(() => currentView = isLoggedIn ? "Dashboard" : "Login"),
+        );
+      }
     }
     
-    // --- 2. LAYOUT UTAMA (DASHBOARD & SIDEBAR) ---
+    // --- 2. LAYOUT UTAMA (DASHBOARD & MENU DENGAN SIDEBAR) ---
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 850;
 
@@ -46,7 +74,7 @@ class _MainLayoutState extends State<MainLayout> {
       key: _scaffoldKey,
       backgroundColor: AppColors.backgroundGrey,
       
-      // Drawer hanya untuk mobile agar bisa panggil menu
+      // Sidebar untuk Mobile (Drawer)
       drawer: isMobile 
         ? SidebarWidget(
             currentView: currentView,
@@ -59,7 +87,7 @@ class _MainLayoutState extends State<MainLayout> {
 
       body: Row(
         children: [
-          // Sidebar Desktop
+          // Sidebar untuk Desktop
           if (!isMobile)
             SidebarWidget(
               currentView: currentView,
@@ -68,10 +96,10 @@ class _MainLayoutState extends State<MainLayout> {
           
           Expanded(
             child: Container(
-              color: const Color(0xFFF1F5F9), // Background senada dashboard modern
+              color: const Color(0xFFF1F5F9), 
               child: Column(
                 children: [
-                  // TOMBOL MENU KHUSUS MOBILE (Hanya muncul jika di HP)
+                  // Header Menu Button untuk Mobile
                   if (isMobile)
                     Container(
                       padding: const EdgeInsets.all(10),
@@ -82,7 +110,7 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                     ),
                   
-                  // AREA KONTEN DINAMIS (Langsung memanggil Dashboard tanpa header putih)
+                  // Area Konten Halaman
                   Expanded(
                     child: _buildPageContent(),
                   ),
@@ -110,15 +138,20 @@ class _MainLayoutState extends State<MainLayout> {
           userLevel: userLevel,
           userName: userName,
           userDivision: userDiv,
-          onLogout: () => setState(() {
-            isLoggedIn = false;
-            currentView = "Login";
-          }),
+          onLogout: () {
+            setState(() {
+              isLoggedIn = false;
+              currentView = "Login";
+            });
+          },
         );
       default:
         return Center(
           key: ValueKey(currentView),
-          child: Text("Halaman $currentView", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkIndigo)),
+          child: Text(
+            "Halaman $currentView", 
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkIndigo)
+          ),
         );
     }
   }
