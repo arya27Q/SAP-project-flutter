@@ -52,34 +52,39 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() => _isLoading = true);
-    print("Mencoba hubungi Laravel...");
+    debugPrint("Mencoba hubungi Laravel...");
 
     try {
-      // Pastikan IP ini bisa diakses dari HP/Emulator (Gunakan 10.0.2.2 untuk Emulator Android)
       var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
 
-      var response = await http.post(
-        url,
-        body: {
-          'user_email': _userController.text.trim(),
-          'password': _passController.text,
-          'company': selectedCompany!,
-        },
-      ).timeout(const Duration(seconds: 10)); // Tambahkan timeout biar gak nunggu selamanya
+      var response = await http
+          .post(
+            url,
+            body: {
+              'user_email': _userController.text.trim(),
+              'password': _passController.text,
+              'company': selectedCompany!,
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         print("I/flutter: [SUCCESS] API TERHUBUNG!");
         if (mounted) _showSuccessSnackBar(selectedCompany!);
-        
+
         Future.delayed(const Duration(milliseconds: 1500), () {
           widget.onLoginSuccess();
         });
       } else {
-        _showErrorSnackBar("Gagal Masuk: Server merespon ${response.statusCode}");
+        _showErrorSnackBar(
+          "Gagal Masuk: Server merespon ${response.statusCode}",
+        );
       }
     } catch (e) {
       print("I/flutter: ERROR KONEKSI: $e");
-      _showErrorSnackBar("Gagal terhubung ke server. Pastikan Laravel running dan satu Wi-Fi.");
+      _showErrorSnackBar(
+        "Gagal terhubung ke server. Pastikan Laravel running dan satu Wi-Fi.",
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -93,7 +98,11 @@ class _LoginPageState extends State<LoginPage> {
         content: Text(message),
         backgroundColor: Colors.red.shade800,
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, left: 20, right: 20),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 100,
+          left: 20,
+          right: 20,
+        ),
       ),
     );
   }
@@ -105,12 +114,21 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 10),
-            Expanded(child: Text("Selamat Datang di $namaPT", style: const TextStyle(fontWeight: FontWeight.bold))),
+            Expanded(
+              child: Text(
+                "Selamat Datang di $namaPT",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
         backgroundColor: Colors.green.shade700,
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 82, left: 20, right: 20),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 82,
+          left: 20,
+          right: 20,
+        ),
       ),
     );
   }
@@ -140,99 +158,203 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              // --- PAKAI STACK UNTUK OVERLAY LOADING ---
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: widget.onBackToDashboard,
-                      icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+                  // 1. LAYER FORM LOGIN
+                  Opacity(
+                    opacity: _isLoading ? 0.2 : 1.0, // Memudar saat loading
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                            onPressed: widget.onBackToDashboard,
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryIndigo,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.bolt,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "SAP SYSTEM",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkIndigo,
+                          ),
+                        ),
+                        const Text(
+                          "Masuk ke Sistem",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // --- DROPDOWN COMPANY ---
+                        DropdownButtonFormField<String>(
+                          value: selectedCompany,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: "Pilih Company",
+                            prefixIcon: const Icon(Icons.business_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          items: companies
+                              .map(
+                                (String value) => DropdownMenuItem(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _isLoading
+                              ? null
+                              : (val) => setState(() => selectedCompany = val),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // --- INPUT USERNAME ---
+                        TextField(
+                          controller: _userController,
+                          enabled: !_isLoading,
+                          decoration: InputDecoration(
+                            labelText: "Username atau email",
+                            prefixIcon: const Icon(Icons.person_outline),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // --- INPUT PASSWORD ---
+                        TextField(
+                          controller: _passController,
+                          enabled: !_isLoading,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _isLoading
+                                ? null
+                                : widget.onForgotPassword,
+                            child: const Text("Lupa Password?"),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // --- TOMBOL MASUK ---
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : loginTest,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryIndigo,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              "Masuk",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: _isLoading ? null : widget.onGoToSignUp,
+                          child: const Text("Belum punya akun? Daftar di sini"),
+                        ),
+                      ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: AppColors.primaryIndigo, borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.bolt, color: Colors.white, size: 30),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text("SAP SYSTEM", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkIndigo)),
-                  const Text("Masuk ke Sistem", style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 32),
-                  
-                  DropdownButtonFormField<String>(
-                    value: selectedCompany,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: "Pilih Company",
-                      prefixIcon: const Icon(Icons.business_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+
+                  if (_isLoading)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryIndigo,
+                          ),
+                          strokeWidth: 3,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          "Memuat halaman...",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkIndigo,
+                          ),
+                        ),
+                        const Text(
+                          "Menuju ke Beranda...",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: 140,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: const LinearProgressIndicator(
+                              minHeight: 5,
+                              backgroundColor: Colors.black12,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primaryIndigo,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    items: companies.map((String value) => DropdownMenuItem(value: value, child: Text(value, style: const TextStyle(fontSize: 11)))).toList(),
-                    onChanged: (val) => setState(() => selectedCompany = val),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  TextField(
-                    controller: _userController,
-                    decoration: InputDecoration(
-                      labelText: "Username atau email",
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  TextField(
-                    controller: _passController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(onPressed: widget.onForgotPassword, child: const Text("Lupa Password?")),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : loginTest,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryIndigo,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: _isLoading 
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text("Masuk", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  TextButton(onPressed: widget.onGoToSignUp, child: const Text("Belum punya akun? Daftar di sini")),
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider()),
-                  TextButton.icon(
-                    onPressed: widget.onBackToDashboard,
-                    icon: const Icon(Icons.arrow_back, size: 16),
-                    label: const Text("Kembali ke Dashboard"),
-                    style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                  ),
                 ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+              ), // Akhir Stack
+            ), // Akhir Container Putih
+          ), // Akhir ScrollView
+        ), // Akhir Center
+      ), // Akhir Container Background
+    ); // Akhir Scaffold
   }
 }
