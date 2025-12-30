@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SalesOrderPage extends StatefulWidget {
   const SalesOrderPage({super.key});
@@ -21,9 +22,8 @@ class _SalesOrderPageState extends State<SalesOrderPage> with SingleTickerProvid
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-
-  final ScrollController _verticalScroll = ScrollController();
   final ScrollController _horizontalScroll = ScrollController();
+  final Map<String, String?> _formValues = {};
   
   @override
   void initState() {
@@ -90,21 +90,22 @@ class _SalesOrderPageState extends State<SalesOrderPage> with SingleTickerProvid
 
   
   Widget _buildContentsTab() {
-  return Column(
-    children: [
-      // --- BAGIAN ATAS: ACTION BAR ---
-      Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(bottom: BorderSide(color: borderGrey)),
-        ),
-        child: Row(
-          children: [
-            const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 12),
-            _buildSmallDropdown("item_type_main", ["Item", "Service"]),
-            const Spacer(),
+  return SingleChildScrollView( 
+    child: Column(
+      children: [
+        // --- CONTAINER !
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: borderGrey)),
+          ),
+          child: Row(
+            children: [
+              const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              const Spacer(),
             
             // TOMBOL FILTER
             PopupMenuButton<String>(
@@ -157,67 +158,64 @@ class _SalesOrderPageState extends State<SalesOrderPage> with SingleTickerProvid
               label: const Text("Remove Row", style: TextStyle(fontSize: 11, color: Colors.white)),
               style: OutlinedButton.styleFrom(backgroundColor: Colors.red, side: BorderSide.none, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
             ),
-          ],
+            ],
+          ),
         ),
-      ),
 
-     
-      Expanded(
-        child: Scrollbar(
-          controller: _verticalScroll,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: _verticalScroll,
-            scrollDirection: Axis.vertical,
-            child: Scrollbar(
+        // --- CONTAINER 2: TENGAH (TABEL) ---
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: borderGrey, width: 0.5),
+          ),
+          child: Scrollbar(
+            controller: _horizontalScroll,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
               controller: _horizontalScroll,
-              thumbVisibility: true,
-              notificationPredicate: (notif) => notif.depth == 1,
-              child: SingleChildScrollView(
-                controller: _horizontalScroll,
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 45,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  dataRowMinHeight: 40,
-                  dataRowMaxHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(const Color(0xFFF1F5F9)),
-                  border: TableBorder.all(color: borderGrey, width: 0.5),
-                  columns: _buildStaticColumns(), 
-                  rows: List.generate(_rowCount, (index) => DataRow(
-                    cells: [
-                      DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 11))), 
-                      _buildModernTableCell("item_no_$index"), 
-                      _buildModernTableCell("jenis_brg_$index"), 
-                      _buildModernTableCell("desc_$index"), 
-                      _buildModernTableCell("jenis_item_$index"), 
-                      _buildModernTableCell("orbit_$index"), 
-                      _buildModernTableCell("details_$index"), 
-                      _buildModernTableCell("qty_$index", initial: "0"), 
-                      _buildModernTableCell("stock_$index", initial: "0"), 
-                      _buildModernTableCell("price_$index", initial: "0.00"), 
-                      _buildModernTableCell("p_service_$index", initial: "0.00"), 
-                      _buildModernTableCell("p_ref_$index", initial: "0.00"), 
-                      _buildModernTableCell("uom_$index"), 
-                      _buildModernTableCell("free_text_$index"), 
-                      _buildModernTableCell("proj_$index"), 
-                      _buildModernTableCell("line_$index"), 
-                      _buildModernTableCell("disc_$index", initial: "0.00"), 
-                      _buildModernTableCell("total_$index", initial: "0.00"), 
-                    ],
-                  )),
-                ),
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 45,
+                horizontalMargin: 15,
+                headingRowHeight: 40,
+                dataRowMinHeight: 40,
+                dataRowMaxHeight: 40,
+                headingRowColor: WidgetStateProperty.all(const Color(0xFFF1F5F9)),
+                border: TableBorder.all(color: borderGrey, width: 0.5),
+                columns: _buildStaticColumns(), 
+                rows: List.generate(_rowCount, (index) => DataRow(
+                  cells: [
+                    DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 11))), 
+                    _buildModernTableCell("item_no_$index"), 
+                    _buildModernTableCell("jenis_brg_$index"), 
+                    _buildModernTableCell("desc_$index"), 
+                    _buildModernTableCell("jenis_item_$index"), 
+                    _buildModernTableCell("orbit_$index"), 
+                    _buildModernTableCell("details_$index"), 
+                    _buildModernTableCell("qty_$index", initial: "0"), 
+                    _buildModernTableCell("stock_$index", initial: "0"), 
+                    _buildModernTableCell("price_$index", initial: "0.00"), 
+                    _buildModernTableCell("p_service_$index", initial: "0.00"), 
+                    _buildModernTableCell("p_ref_$index", initial: "0.00"), 
+                    _buildModernTableCell("uom_$index"), 
+                    _buildModernTableCell("free_text_$index"), 
+                    _buildModernTableCell("proj_$index"), 
+                    _buildModernTableCell("line_$index"), 
+                    _buildModernTableCell("disc_$index", initial: "0.00"), 
+                    _buildModernTableCell("total_$index", initial: "0.00"), 
+                  ],
+                )),
               ),
             ),
           ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
-// --- FUNGSI PENDUKUNG ---
+
 List<DataColumn> _buildStaticColumns() {
   return const [
     DataColumn(label: Text("#", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold))), 
@@ -250,7 +248,7 @@ List<DataColumn> _buildStaticColumns() {
           Expanded(child: Column(children: [
             _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
             _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-            _buildModernFieldRow("Shipping Type", "log_ship_type"),
+            _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [""]),
           ])),
           const SizedBox(width: 40),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -262,7 +260,7 @@ List<DataColumn> _buildStaticColumns() {
             const SizedBox(height: 12),
             _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
             _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-            _buildModernFieldRow("BP Channel Contact", "log_bp_cont"),
+            _buildSmallDropdownRowModern("BP Channel Contact", "log_bp_cont", [""]),
           ])),
         ],
       ),
@@ -279,9 +277,9 @@ List<DataColumn> _buildStaticColumns() {
           Expanded(child: Column(children: [
             _buildModernFieldRow("Journal Remark", "acc_journal"),
             const SizedBox(height: 10),
-            _buildModernFieldRow("Payment Terms", "acc_pay_terms"),
-            _buildModernFieldRow("Payment Method", "acc_pay_method"),
-            _buildModernFieldRow("Central Bank Ind.", "acc_central_bank"),
+            _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [""]),
+            _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [""]),
+            _buildSmallDropdownRowModern("Central Bank Ind.", "acc_central_bank", [""]),
             const SizedBox(height: 10),
             _buildModernFieldRow("Manually Recalculate Due Date", "acc_manual_due"),
             _buildModernFieldRow("Cash Discount Date Offset", "acc_cash_disc"),
@@ -293,7 +291,7 @@ List<DataColumn> _buildStaticColumns() {
             _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
             _buildModernFieldRow("Required Date", "acc_req_date"),
             const SizedBox(height: 10),
-            _buildModernFieldRow("Indicator", "acc_indicator"),
+            _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
             _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
             const SizedBox(height: 10),
             _buildModernFieldRow("Order Number", "acc_order_no"),
@@ -316,8 +314,8 @@ List<DataColumn> _buildStaticColumns() {
             _buildModernFieldRow("Customer", "h_cust"),
             _buildModernFieldRow("Name", "h_name"),
             _buildModernFieldRow("Contact Person", "h_cont"),
-            _buildSmallDropdownRowModern("Customer Ref. No.", "h_ref", [""]),
-            _buildModernFieldRow("Local Currency", "h_curr", initial: "IDR"),
+            _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+           _buildSmallDropdownRowModern("Local Currency", "h_curr", ["IDR", "USD", "EUR"]),
           ])),
           const SizedBox(width: 40),
           Expanded(child: Column(children: [
@@ -331,6 +329,7 @@ List<DataColumn> _buildStaticColumns() {
       ),
     );
   }
+  
 
   Widget _buildModernFooter() {
   return Column(
@@ -361,6 +360,7 @@ List<DataColumn> _buildStaticColumns() {
             const Spacer(),
            
             SizedBox(
+
               width: 350, 
               child: Column(
                 children: [
@@ -428,7 +428,7 @@ List<DataColumn> _buildStaticColumns() {
         ),
       ),
 
-      const SizedBox(height: 16),
+      const SizedBox(height: 12),
      Row(
   children: [
     _buildSAPActionButton("Add", isPrimary: true),
@@ -658,6 +658,7 @@ Widget _buildSummaryBox(String val, {bool isBold = false, bool isReadOnly = true
       ),
     );
   }
+  
 
   DataCell _buildModernTableCell(String key, {String initial = ""}) {
     return DataCell(
@@ -694,7 +695,64 @@ Widget _buildSummaryBox(String val, {bool isBold = false, bool isReadOnly = true
     );
   }
 
- 
+
+
+// 2. FUNGSI UNTUK MEMBUAT BARIS UPLOAD FILE
+Widget _buildFileUploadRow(String label, String key) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 140, // Lebar label disesuaikan dengan field Sales Employe/Owner
+          child: Text(label, style: const TextStyle(fontSize: 12)),
+        ),
+        Expanded(
+          child: InkWell(
+            onTap: () async {
+              // Menjalankan File Picker
+              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+              );
+
+              if (result != null) {
+                setState(() {
+                  // Simpan nama file ke dalam Map menggunakan key (misal: 'cfg_f1')
+                  _formValues[key] = result.files.first.name; 
+                });
+              }
+            },
+            child: Container(
+              height: 28, // Tinggi disesuaikan dengan field input lainnya
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: borderGrey), // Menggunakan variabel borderGrey kamu
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _formValues[key] ?? "No file selected",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: _formValues[key] != null ? Colors.black : Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(Icons.upload_file, size: 14, color: Colors.grey),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildFloatingSidePanel() {
     return Container(
@@ -715,8 +773,10 @@ Widget _buildSummaryBox(String val, {bool isBold = false, bool isReadOnly = true
               padding: const EdgeInsets.all(16),
               children: [
                 _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
-                _buildModernFieldRow("File 1", "cfg_f1"), _buildModernFieldRow("File 2", "cfg_f2"),
-                _buildModernFieldRow("File 3", "cfg_f3"), _buildModernFieldRow("File 4", "cfg_f4"),
+               _buildFileUploadRow("File 1", "cfg_f1"),
+_buildFileUploadRow("File 2", "cfg_f2"),
+_buildFileUploadRow("File 3", "cfg_f3"),
+_buildFileUploadRow("File 4", "cfg_f4"),
                 _buildModernFieldRow("Create By", "cfg_by"),
                 _buildSmallDropdownRowModern("Upload Status", "cfg_up", ["No", "Yes"]),
                 _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", ["No", "Yes", "N/A"]),

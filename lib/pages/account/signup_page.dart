@@ -17,8 +17,8 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   String? selectedCompany;
+  bool _isLoading = false; // 1. Tambahkan state loading
 
-  // Controller untuk menangkap input teks
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -32,14 +32,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
-    // Penting: Bersihkan controller agar tidak memakan memori
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleSignUp() {
+  // 2. Ubah fungsi handle menjadi async
+  Future<void> _handleSignUp() async {
     // Validasi sederhana
     if (selectedCompany == null || 
         _nameController.text.isEmpty || 
@@ -51,13 +51,32 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // Logika pengiriman ke Laravel nantinya
+    setState(() {
+      _isLoading = true; // Mulai loading
+    });
+
+    // Simulasi proses pengiriman data ke server (2 detik)
+    await Future.delayed(const Duration(seconds: 2));
+
     print("Mendaftar di: $selectedCompany");
     print("Nama: ${_nameController.text}");
     print("Email: ${_emailController.text}");
     
-    // Untuk testing, kita asumsikan sukses dan kembali ke login
-    widget.onGoToLogin();
+    if (mounted) {
+      setState(() {
+        _isLoading = false; // Berhenti loading
+      });
+      
+      // Tampilkan pesan sukses sebelum pindah
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Pendaftaran Berhasil! Silahkan Login."),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      widget.onGoToLogin();
+    }
   }
 
   @override
@@ -98,7 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: widget.onBackToDashboard,
+                      onPressed: _isLoading ? null : widget.onBackToDashboard, // Matikan tombol jika loading
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
@@ -116,9 +135,15 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 32),
                   
-                  // --- DROPDOWN PILIH COMPANY ---
+                  // --- DROPDOWN ---
                   DropdownButtonFormField<String>(
                     value: selectedCompany,
+                    // Matikan dropdown jika sedang loading
+                    onChanged: _isLoading ? null : (newValue) {
+                      setState(() {
+                        selectedCompany = newValue;
+                      });
+                    },
                     decoration: InputDecoration(
                       labelText: "Daftar untuk Company",
                       prefixIcon: const Icon(Icons.business_outlined),
@@ -133,17 +158,13 @@ class _SignUpPageState extends State<SignUpPage> {
                             overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedCompany = newValue;
-                      });
-                    },
                   ),
                   const SizedBox(height: 16),
 
                   // --- INPUT NAMA ---
                   TextField(
                     controller: _nameController,
+                    enabled: !_isLoading, // Disable jika loading
                     decoration: InputDecoration(
                       labelText: "Nama Lengkap",
                       prefixIcon: const Icon(Icons.badge_outlined),
@@ -156,6 +177,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   // --- INPUT EMAIL ---
                   TextField(
                     controller: _emailController,
+                    enabled: !_isLoading, // Disable jika loading
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: "Email",
@@ -169,6 +191,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   // --- INPUT PASSWORD ---
                   TextField(
                     controller: _passwordController,
+                    enabled: !_isLoading, // Disable jika loading
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: "Password",
@@ -179,11 +202,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 30),
                   
+                  // --- TOMBOL DAFTAR DENGAN LOADING ---
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _handleSignUp,
+                      onPressed: _isLoading ? null : _handleSignUp, 
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryIndigo,
                         foregroundColor: Colors.white,
@@ -191,14 +215,23 @@ class _SignUpPageState extends State<SignUpPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text("Daftar Sekarang",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: _isLoading 
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : const Text("Daftar Sekarang",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 16),
                   
                   TextButton(
-                    onPressed: widget.onGoToLogin,
+                    onPressed: _isLoading ? null : widget.onGoToLogin,
                     child: const Text("Sudah punya akun? Masuk di sini"),
                   ),
 
@@ -208,7 +241,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
 
                   TextButton.icon(
-                    onPressed: widget.onBackToDashboard,
+                    onPressed: _isLoading ? null : widget.onBackToDashboard,
                     icon: const Icon(Icons.arrow_back, size: 16),
                     label: const Text("Kembali ke Dashboard"),
                     style: TextButton.styleFrom(foregroundColor: Colors.grey),

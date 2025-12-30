@@ -25,7 +25,6 @@ class SidebarWidget extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 40),
-          // HEADER LOGO
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
@@ -45,7 +44,7 @@ class SidebarWidget extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           
-          // MENU LIST
+          
           Expanded(
             child: ListView(
               physics: const BouncingScrollPhysics(),
@@ -137,7 +136,6 @@ class SidebarWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Penyesuaian lebar SizedBox agar sejajar dengan leading ExpansionTile
             const SizedBox(width: 12), 
             SizedBox(
               width: 24,

@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        print("I/flutter: [SUCCESS] API TERHUBUNG!");
+        debugPrint("I/flutter: [SUCCESS] API TERHUBUNG!");
         if (mounted) _showSuccessSnackBar(selectedCompany!);
 
         Future.delayed(const Duration(milliseconds: 1500), () {
@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
-      print("I/flutter: ERROR KONEKSI: $e");
+      debugPrint("I/flutter: ERROR KONEKSI: $e");
       _showErrorSnackBar(
         "Gagal terhubung ke server. Pastikan Laravel running dan satu Wi-Fi.",
       );
@@ -350,11 +350,11 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                 ],
-              ), // Akhir Stack
-            ), // Akhir Container Putih
-          ), // Akhir ScrollView
-        ), // Akhir Center
-      ), // Akhir Container Background
-    ); // Akhir Scaffold
+              ), 
+            ), 
+          ), 
+        ), 
+      ), 
+    ); 
   }
 }

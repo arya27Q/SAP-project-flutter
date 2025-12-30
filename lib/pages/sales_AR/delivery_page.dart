@@ -21,8 +21,6 @@ class _DeliveryPageState extends State<DeliveryPage> with SingleTickerProviderSt
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-
-  final ScrollController _verticalScroll = ScrollController();
   final ScrollController _horizontalScroll = ScrollController();
   
   @override
@@ -87,25 +85,24 @@ class _DeliveryPageState extends State<DeliveryPage> with SingleTickerProviderSt
     );
   }
 
-  
- Widget _buildContentsTab() {
-  return Column(
-    children: [
-      // --- BAGIAN ATAS: ACTION BAR ---
-      Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(bottom: BorderSide(color: borderGrey)),
-        ),
-        child: Row(
-          children: [
-            const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 12),
-            _buildSmallDropdown("item_type_main", ["Item", "Service"]),
-            const Spacer(),
-            
-            // TOMBOL FILTER
+   Widget _buildContentsTab() {
+  return SingleChildScrollView( // Memungkinkan seluruh halaman di-scroll ke bawah
+    child: Column(
+      children: [
+        // --- CONTAINER 1
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: borderGrey)),
+          ),
+          child: Row(
+            children: [
+              const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              const Spacer(),
+          
             PopupMenuButton<String>(
               onSelected: (value) => debugPrint("Filter berdasarkan: $value"),
               offset: const Offset(0, 40), 
@@ -156,38 +153,36 @@ class _DeliveryPageState extends State<DeliveryPage> with SingleTickerProviderSt
               label: const Text("Remove Row", style: TextStyle(fontSize: 11, color: Colors.white)),
               style: OutlinedButton.styleFrom(backgroundColor: Colors.red, side: BorderSide.none, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
             ),
-          ],
+            ],
+          ),
         ),
-      ),
 
-
-      Expanded(
-        child: Scrollbar(
-          controller: _verticalScroll,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: _verticalScroll,
-            scrollDirection: Axis.vertical,
-            child: Scrollbar(
+        // --- CONTAINER 2: TENGAH (TABEL) ---
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: borderGrey, width: 0.5),
+          ),
+          child: Scrollbar(
+            controller: _horizontalScroll,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
               controller: _horizontalScroll,
-              thumbVisibility: true,
-              notificationPredicate: (notif) => notif.depth == 1,
-              child: SingleChildScrollView(
-                controller: _horizontalScroll,
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 45,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  dataRowMinHeight: 40,
-                  dataRowMaxHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(const Color(0xFFF1F5F9)),
-                  border: TableBorder.all(color: borderGrey, width: 0.5),
-                  columns: _buildStaticColumns(), 
-                  rows: List.generate(_rowCount, (index) => DataRow(
-                    cells: [
-                      DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 11))), 
-                      _buildModernTableCell("in_stock_$index"), 
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: 45,
+                horizontalMargin: 15,
+                headingRowHeight: 40,
+                dataRowMinHeight: 40,
+                dataRowMaxHeight: 40,
+                headingRowColor: WidgetStateProperty.all(const Color(0xFFF1F5F9)),
+                border: TableBorder.all(color: borderGrey, width: 0.5),
+                columns: _buildStaticColumns(), 
+                rows: List.generate(_rowCount, (index) => DataRow(
+                  cells: [
+                    DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 11))), 
+                     _buildModernTableCell("in_stock_$index"), 
                       _buildModernTableCell("item_no_$index"), 
                       _buildModernTableCell("desc_$index"), 
                       _buildModernTableCell("details_$index"), 
@@ -203,19 +198,18 @@ class _DeliveryPageState extends State<DeliveryPage> with SingleTickerProviderSt
                       _buildModernTableCell("uom_code_$index"), 
                       _buildModernTableCell("no_code_$index"), 
                       _buildModernTableCell("p_line_$index"), 
-                      _buildModernTableCell("material_$index", initial: "0.00"), 
-                      
-                    ],
-                  )),
-                ),
+                      _buildModernTableCell("material_$index", initial: "0.00"),  
+                  ],
+                )),
               ),
             ),
           ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
+ 
 
 List<DataColumn> _buildStaticColumns() {
   return const [
@@ -249,7 +243,7 @@ List<DataColumn> _buildStaticColumns() {
           Expanded(child: Column(children: [
             _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
             _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-            _buildModernFieldRow("Shipping Type", "log_ship_type"),
+             _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [""]),
           ])),
           const SizedBox(width: 40),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -261,7 +255,7 @@ List<DataColumn> _buildStaticColumns() {
             const SizedBox(height: 12),
             _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
             _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-            _buildModernFieldRow("BP Channel Contact", "log_bp_cont"),
+            _buildSmallDropdownRowModern("BP Channel Contact", "log_bp_cont", [""]),
           ])),
         ],
       ),
@@ -278,9 +272,9 @@ List<DataColumn> _buildStaticColumns() {
           Expanded(child: Column(children: [
             _buildModernFieldRow("Journal Remark", "acc_journal"),
             const SizedBox(height: 10),
-            _buildModernFieldRow("Payment Terms", "acc_pay_terms"),
-            _buildModernFieldRow("Payment Method", "acc_pay_method"),
-            _buildModernFieldRow("Central Bank Ind.", "acc_central_bank"),
+            _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [""]),
+            _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [""]),
+            _buildSmallDropdownRowModern("Central Bank Ind.", "acc_central_bank", [""]),
             const SizedBox(height: 10),
             _buildModernFieldRow("Manually Recalculate Due Date", "acc_manual_due"),
             _buildModernFieldRow("Cash Discount Date Offset", "acc_cash_disc"),
@@ -292,7 +286,7 @@ List<DataColumn> _buildStaticColumns() {
             _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
             _buildModernFieldRow("Required Date", "acc_req_date"),
             const SizedBox(height: 10),
-            _buildModernFieldRow("Indicator", "acc_indicator"),
+            _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
             _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
             const SizedBox(height: 10),
             _buildModernFieldRow("Order Number", "acc_order_no"),
