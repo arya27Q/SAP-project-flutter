@@ -8,6 +8,7 @@ import 'pages/dashboard.dart';
 import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
+import 'pages/bpmasterdata_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -144,6 +145,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Delivery":
         return const DeliveryPage(key: ValueKey("Delivery"));
+
+      case "Business Partner Master Data":
+      return const BpMasterDataPage(key: ValueKey("Business Partner Master Data"));
 
       default:
         return Center(
