@@ -105,15 +105,14 @@ class SidebarWidget extends StatelessWidget {
                 ]),
   
                 _buildSimpleMenu(Icons.assessment_rounded, "Reports"),
+                 _buildSimpleMenu(Icons.people_alt_rounded, "Business Partner Master Data"),
+                _buildSimpleMenu(Icons.admin_panel_settings_outlined, "Data Admin"),
 
                 _buildExpansionMenu(context, Icons.account_circle_rounded, "Account", [
                   _buildSubMenu("Login", Icons.login_rounded),
                   _buildSubMenu("Sign Up", Icons.person_add_alt_1_rounded),
-                  _buildSubMenu("Forgot Password", Icons.lock_reset_rounded),
+                  _buildSubMenu("Forgot Password", Icons.lock_reset_rounded)
                 ]),
-                
-                _buildSimpleMenu(Icons.people_alt_rounded, "Business Partner Master Data"),
-                _buildSimpleMenu(Icons.admin_panel_settings_outlined, "Data Admin"),
                 
                 const SizedBox(height: 50),
               ],
