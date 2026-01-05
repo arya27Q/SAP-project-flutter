@@ -666,184 +666,177 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
-  Widget _buildContactPersonsTab() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // --- SISI KIRI: DAFTAR KONTAK DINAMIS ---
-          SizedBox(
-            width: 250,
+ Widget _buildContactPersonsTab() {
+  return Padding(
+    padding: const EdgeInsets.all(20.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // --- SISI KIRI: DAFTAR KONTAK DINAMIS ---
+        SizedBox(
+          width: 250,
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: borderGrey),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: ListView(
+                    children: List.generate(_contactRowCount, (index) {
+                      return _buildContactListItem(
+                        "cp_list_key_$index",
+                        initial: index == 0 ? "Define New" : "",
+                        isSelected: index == 0,
+                      );
+                    }),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => setState(() => _contactRowCount++),
+                      icon: const Icon(Icons.add, size: 14),
+                      label: const Text("Add", style: TextStyle(fontSize: 11)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.green),
+                        foregroundColor: Colors.green,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        if (_contactRowCount > 1) setState(() => _contactRowCount--);
+                      },
+                      icon: const Icon(Icons.remove, size: 14),
+                      label: const Text("Remove", style: TextStyle(fontSize: 11)),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.red.withOpacity(0.5)),
+                        foregroundColor: Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFDE68A),
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 36),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+                child: const Text("Set as Default", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 40),
+
+        // --- SISI KANAN: FORM DETAIL & STATUS ---
+        Expanded(
+          child: SingleChildScrollView(
             child: Column(
               children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: borderGrey),
-                    ),
-                    child: ListView(
-                      children: List.generate(_contactRowCount, (index) {
-                        return _buildContactListItem(
-                          "cp_list_key_$index",
-                          initial: index == 0 ? "Define New" : "",
-                          isSelected: index == 0,
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _contactRowCount++;
-                          });
-                        },
-                        icon: const Icon(Icons.add, size: 14),
-                        label: const Text(
-                          "Add",
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(
-                            color: const Color.fromARGB(255, 10, 187, 16),
-                          ),
-                          foregroundColor: const Color.fromARGB(
-                            255,
-                            16,
-                            202,
-                            23,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
+                _buildModernFieldRow("Contact ID", "cp_id", initial: "Define New"),
+                _buildModernFieldRow("First Name", "cp_fname"),
+                _buildModernFieldRow("Middle Name", "cp_mname"),
+                _buildModernFieldRow("Last Name", "cp_lname"),
+                _buildModernFieldRow("Title", "cp_title"),
+                _buildModernFieldRow("Position", "cp_pos"),
+                _buildModernFieldRow("Address", "cp_address"),
+                _buildModernFieldRow("Telephone 1", "cp_tel1"),
+                _buildModernFieldRow("Telephone 2", "cp_tel2"),
+                _buildModernFieldRow("Mobile Phone", "cp_hp"),
+                _buildModernFieldRow("Fax", "cp_fax"),
+                _buildModernFieldRow("E-Mail", "cp_email"),
+                _buildModernFieldRow("E-Mail Group", "cp_email_grp"),
+                _buildModernFieldRow("Pager", "cp_pager"),
+                _buildModernFieldRow("Remarks 1", "cp_rem1"),
+                _buildModernFieldRow("Remarks 2", "cp_rem2"),
+                _buildModernFieldRow("Password", "cp_pass"),
+                _buildModernFieldRow("Country of Birth", "cp_country"),
+                _buildModernFieldRow("Date of Birth", "cp_dob"),
+                _buildModernFieldRow("Gender", "cp_gender"),
+                _buildModernFieldRow("Profession", "cp_prof"),
+                _buildModernFieldRow("City of Birth", "cp_city"),
 
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            if (_contactRowCount > 1) {
-                              _contactRowCount--;
-                            }
-                          });
-                        },
-                        icon: const Icon(Icons.remove, size: 14),
-                        label: const Text(
-                          "Remove",
-                          style: TextStyle(fontSize: 11),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          side: BorderSide(color: Colors.red.withOpacity(0.5)),
-                          foregroundColor: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
+                const Divider(),
 
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFDE68A),
-                    foregroundColor: Colors.black,
-                    minimumSize: const Size(double.infinity, 36),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: const Text(
-                    "Set as Default",
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
+                // AREA STATUS & CHECKBOX (Ditaruh di bawah Field Row)
+                _buildContactStatusArea(),
               ],
             ),
           ),
-
-          const SizedBox(width: 40),
-
-          // --- SISI KANAN: FORM DETAIL  ---
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildModernFieldRow(
-                    "Contact ID",
-                    "cp_id",
-                    initial: "Define New",
-                  ),
-                  _buildModernFieldRow("First Name", "cp_fname"),
-                  _buildModernFieldRow("Middle Name", "cp_mname"),
-                  _buildModernFieldRow("Last Name", "cp_lname"),
-                  _buildModernFieldRow("Title", "cp_title"),
-                  _buildModernFieldRow("Position", "cp_pos"),
-                  _buildModernFieldRow("Address", "cp_address"),
-                  _buildModernFieldRow("Telephone 1", "cp_tel1"),
-                  _buildModernFieldRow("Telephone 2", "cp_tel2"),
-                  _buildModernFieldRow("Mobile Phone", "cp_hp"),
-                  _buildModernFieldRow("Fax", "cp_fax"),
-                  _buildModernFieldRow("E-Mail", "cp_email"),
-                  _buildModernFieldRow("E-Mail Group", "cp_email_grp"),
-                  _buildModernFieldRow("Pager", "cp_pager"),
-                  _buildModernFieldRow("Remarks 1", "cp_rem1"),
-                  _buildModernFieldRow("Remarks 2", "cp_rem2"),
-                  _buildModernFieldRow("Password", "cp_pass"),
-                  _buildModernFieldRow("Country of Birth", "cp_country"),
-                  _buildModernFieldRow("Date of Birth", "cp_dob"),
-                  _buildModernFieldRow("Gender", "cp_gender"),
-                  _buildModernFieldRow("Profession", "cp_prof"),
-                  _buildModernFieldRow("City of Birth", "cp_city"),
-
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  _buildContactStatusArea(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildContactStatusArea() {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 16),
-    child: Column(
+    child: Row( 
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+       
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Bagian Radio Status
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatusRadio("Active"),
-                _buildStatusRadio("Inactive"),
-              ],
+            _buildStatusRadio("Active"),
+            _buildStatusRadio("Inactive"),
+          ],
+        ),
+
+       
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(
+              value: _checkStates["cp_block_marketing"] ?? false,
+              onChanged: (v) => setState(() => _checkStates["cp_block_marketing"] = v!),
             ),
-            // Bagian Checkbox Marketing
-            Row(
-              children: [
-                Checkbox(
-                  value: _checkStates["cp_block_marketing"] ?? false,
-                  onChanged: (v) => setState(() => _checkStates["cp_block_marketing"] = v!),
-                ),
-                const Text("Block Sending Marketing Content", style: TextStyle(fontSize: 11)),
-              ],
-            ),
+            const Text("Block Sending Marketing Content", style: TextStyle(fontSize: 11)),
+            const SizedBox(width: 8),
+            _buildSmallIconButton(Icons.more_horiz),
           ],
         ),
       ],
+    ),
+  );
+}
+
+Widget _buildSmallIconButton(IconData icon) {
+  return InkWell(
+    onTap: () {
+      
+      debugPrint("Tombol detail diklik!"); 
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Membuka detail ..."), duration: Duration(seconds: 1)),
+      );
+    },
+    borderRadius: BorderRadius.circular(4), 
+    child: Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Icon(icon, size: 14, color: Colors.grey),
     ),
   );
 }
