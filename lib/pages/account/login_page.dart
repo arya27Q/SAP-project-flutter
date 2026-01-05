@@ -153,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // 1. LAYER FORM LOGIN
+                  
                   Opacity(
                     opacity: (_isLoading || _isSuccess || _isError) ? 0.0 : 1.0, 
                     child: IgnorePointer(
@@ -238,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
-                  // 2. LAYER LOADING
+                 
                   if (_isLoading)
                     const Column(
                       mainAxisSize: MainAxisSize.min,
@@ -249,7 +249,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
 
-                  // 3. LAYER SUCCESS (KOTAK PERSEGI HIJAU)
+                 
                   if (_isSuccess)
                     _buildStatusBox(
                       color: Colors.green.shade600,
@@ -258,7 +258,7 @@ class _LoginPageState extends State<LoginPage> {
                       subtitle: "Selamat Datang",
                     ),
 
-                  // 4. LAYER ERROR (KOTAK PERSEGI MERAH)
+                  
                   if (_isError)
                     _buildStatusBox(
                       color: Colors.red.shade600,
@@ -275,7 +275,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Helper untuk membuat kotak status persegi (Sukses/Gagal)
   Widget _buildStatusBox({required Color color, required IconData icon, required String title, required String subtitle}) {
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 400),
