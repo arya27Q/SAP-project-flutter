@@ -231,7 +231,7 @@ class _DeliveryPageState extends State<DeliveryPage>
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+             color: const Color.fromARGB(255, 175, 172, 172),
               border: Border.all(color: borderGrey, width: 0.5),
             ),
             child: Scrollbar(
@@ -247,7 +247,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                   dataRowMinHeight: 40,
                   dataRowMaxHeight: 40,
                   headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFFF1F5F9),
+                    const Color.fromARGB(255, 37, 117, 117),
                   ),
                   border: TableBorder.all(color: borderGrey, width: 0.5),
                   columns: _buildStaticColumns(),
@@ -302,116 +302,33 @@ class _DeliveryPageState extends State<DeliveryPage>
     );
   }
 
-  List<DataColumn> _buildStaticColumns() {
-    return const [
-      DataColumn(
-        label: Text(
-          "#",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "In Stock.",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Item No",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Item Description",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Item Details",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Ordered Qty",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Open_Qty",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Quantity",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Whse",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Inventory UoM",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Unit Price",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Discount %",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Total (LC)",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "G/L Account",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "UoM Code",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "No Code",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Project Line",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Material From",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
+List<DataColumn> _buildStaticColumns() {
+    
+    const headerStyle = TextStyle(
+      fontSize: 11, 
+      fontWeight: FontWeight.bold, 
+      color: Color.fromARGB(255, 255, 255, 255), 
+    );
+
+    return [
+      const DataColumn(label: Text("#", style: headerStyle)),
+      const DataColumn(label: Text("In Stock.", style: headerStyle)),
+      const DataColumn(label: Text("Item No", style: headerStyle)),
+      const DataColumn(label: Text("Item Description", style: headerStyle)),
+      const DataColumn(label: Text("Item Details", style: headerStyle)),
+      const DataColumn(label: Text("Ordered Qty", style: headerStyle)),
+      const DataColumn(label: Text("Open_Qty", style: headerStyle)),
+      const DataColumn(label: Text("Quantity", style: headerStyle)),
+      const DataColumn(label: Text("Whse", style: headerStyle)),
+      const DataColumn(label: Text("Inventory UoM", style: headerStyle)),
+      const DataColumn(label: Text("Unit Price", style: headerStyle)),
+      const DataColumn(label: Text("Discount %", style: headerStyle)),
+      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
+      const DataColumn(label: Text("G/L Account", style: headerStyle)),
+      const DataColumn(label: Text("UoM Code", style: headerStyle)),
+      const DataColumn(label: Text("No Code", style: headerStyle)),
+      const DataColumn(label: Text("Project Line", style: headerStyle)),
+      const DataColumn(label: Text("Material From", style: headerStyle)),
     ];
   }
 

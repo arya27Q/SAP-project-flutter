@@ -14,6 +14,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   late TabController _tabController;
   int _rowCount = 10;
 
+  
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
@@ -126,7 +127,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                   itemBuilder: (BuildContext context) => [
                     const PopupMenuItem(
                       value: "item_no",
-                      child: Text("Item No.", style: TextStyle(fontSize: 11)),
+                      child: Text("Item No.", style: TextStyle(fontSize: 12)),
                     ),
                     const PopupMenuItem(
                       value: "desc",
@@ -233,7 +234,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color.fromARGB(255, 175, 172, 172),
               border: Border.all(color: borderGrey, width: 0.5),
             ),
             child: Scrollbar(
@@ -249,7 +250,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                   dataRowMinHeight: 40,
                   dataRowMaxHeight: 40,
                   headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFFF1F5F9),
+                    const Color.fromARGB(255, 37, 117, 117),
                   ),
                   border: TableBorder.all(color: borderGrey, width: 0.5),
                   columns: _buildStaticColumns(),
@@ -260,7 +261,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                         DataCell(
                           Text(
                             "${index + 1}",
-                            style: const TextStyle(fontSize: 11),
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ),
                         _buildModernTableCell("item_no_$index"),
@@ -296,115 +297,33 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   }
 
   List<DataColumn> _buildStaticColumns() {
-    return const [
-      DataColumn(
-        label: Text(
-          "#",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
+    const headerStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    );
+
+    return [
+      const DataColumn(label: Text("#", style: headerStyle)),
+      const DataColumn(label: Text("Item No.", style: headerStyle)),
+      const DataColumn(
+        label: Text("Jenis Barang dan Jasa", style: headerStyle),
       ),
-      DataColumn(
-        label: Text(
-          "Item No.",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Jenis Barang dan Jasa",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Item Description",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Jenis Item",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Klasifikasi Orbit",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Item Details",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Quantity",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Quantity Stock",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Unit Price",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Price Service",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Price Reference",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "UoM Name",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Free Text",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Project Line",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "LineID",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Discount %",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          "Total (LC)",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-        ),
-      ),
+      const DataColumn(label: Text("Item Description", style: headerStyle)),
+      const DataColumn(label: Text("Jenis Item", style: headerStyle)),
+      const DataColumn(label: Text("Klasifikasi Orbit", style: headerStyle)),
+      const DataColumn(label: Text("Item Details", style: headerStyle)),
+      const DataColumn(label: Text("Quantity", style: headerStyle)),
+      const DataColumn(label: Text("Quantity Stock", style: headerStyle)),
+      const DataColumn(label: Text("Unit Price", style: headerStyle)),
+      const DataColumn(label: Text("Price Service", style: headerStyle)),
+      const DataColumn(label: Text("Price Reference", style: headerStyle)),
+      const DataColumn(label: Text("UoM Name", style: headerStyle)),
+      const DataColumn(label: Text("Free Text", style: headerStyle)),
+      const DataColumn(label: Text("Project Line", style: headerStyle)),
+      const DataColumn(label: Text("LineID", style: headerStyle)),
+      const DataColumn(label: Text("Discount %", style: headerStyle)),
+      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
     ];
   }
 
