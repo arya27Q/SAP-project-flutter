@@ -1329,37 +1329,83 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           ),
           Expanded(
             child: InkWell(
-              // Sekarang klik di mana saja (teks atau icon) akan buka dialog
-              onTap: () => showDialog(
-                context: context,
-                builder: (c) => AlertDialog(
-                  title: Text(
-                    "Pilih $label",
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  content: SizedBox(
-                    width: 300,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: data
-                          .map(
-                            (e) => ListTile(
-                              dense: true,
-                              title: Text(
-                                e,
-                                style: const TextStyle(fontSize: 13),
+              onTap: () {
+                // Copy data asli ke variabel temporary buat difilter
+                List<String> filteredList = List.from(data);
+
+                showDialog(
+                  context: context,
+                  builder: (c) => StatefulBuilder(
+                    // WAJIB ada ini biar bisa ngetik & list berubah
+                    builder: (context, setDialogState) {
+                      return AlertDialog(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Pilih $label",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(height: 10),
+                            // INI TEMPAT NGETIKNYA
+                            TextField(
+                              style: const TextStyle(fontSize: 12),
+                              decoration: InputDecoration(
+                                hintText: "Cari data...",
+                                prefixIcon: const Icon(Icons.search, size: 16),
+                                isDense: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
                               ),
-                              onTap: () {
-                                setState(() => _getCtrl(key).text = e);
-                                Navigator.pop(c);
+                              onChanged: (value) {
+                                // Setiap ngetik, list di bawah langsung berubah
+                                setDialogState(() {
+                                  filteredList = data
+                                      .where(
+                                        (e) => e.toLowerCase().contains(
+                                          value.toLowerCase(),
+                                        ),
+                                      )
+                                      .toList();
+                                });
                               },
                             ),
-                          )
-                          .toList(),
-                    ),
+                          ],
+                        ),
+                        content: SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: filteredList.isEmpty
+                              ? const Center(
+                                  child: Text("Data tidak ditemukan"),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: filteredList.length,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        filteredList[index],
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _getCtrl(key).text =
+                                              filteredList[index],
+                                        );
+                                        Navigator.pop(c);
+                                      },
+                                    );
+                                  },
+                                ),
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ),
+                );
+              },
               child: Container(
                 height: 30, // Tinggi tetap 30
                 decoration: BoxDecoration(
@@ -1380,7 +1426,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                         ),
                       ),
                     ),
-                    // Icon search sekarang menyatu (tanpa kotak background)
                     const Padding(
                       padding: EdgeInsets.only(right: 8),
                       child: Icon(Icons.search, size: 16, color: Colors.grey),

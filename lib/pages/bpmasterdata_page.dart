@@ -276,56 +276,83 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
-  Widget _buildSearchField(String label, String key, List<String> options) {
+ Widget _buildSearchField(String label, String key, List<String> options) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 8.0),
     child: Row(
       children: [
         SizedBox(
-          width: 130, // Tetap 130 agar sejajar dengan dropdown
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 12, color: secondarySlate),
-          ),
+          width: 130, // Tetap 130 agar sejajar
+          child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate)),
         ),
         Expanded(
           child: GestureDetector(
-            onTap: () async { // Pakai onTap biasa untuk memicu dialog tengah
-              // Memunculkan Pop Up di Tengah Layar
+            onTap: () async {
+              // Simpan list filter di dalam StateSetter agar dialog bisa update sendiri
+              List<String> filteredOptions = List.from(options);
+
               final String? selected = await showDialog<String>(
                 context: context,
                 builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Select $label", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    content: SizedBox(
-                      width: 300, // Lebar kotak pop up
-                      height: 250, // Tinggi kotak pop up
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: options.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(options[index], style: const TextStyle(fontSize: 13)),
-                            onTap: () => Navigator.pop(context, options[index]), // Kirim data kembali
-                          );
-                        },
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Close"),
-                      ),
-                    ],
+                  return StatefulBuilder( // Agar isi dialog bisa di-refresh saat mengetik
+                    builder: (context, setDialogState) {
+                      return AlertDialog(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Select $label", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 10),
+                            // INPUT PENCARIAN DI DALAM DIALOG
+                            TextField(
+                              style: const TextStyle(fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: "Type to search...",
+                                prefixIcon: const Icon(Icons.search, size: 18),
+                                isDense: true,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onChanged: (value) {
+                                // Filter list berdasarkan ketikan
+                                setDialogState(() {
+                                  filteredOptions = options
+                                      .where((opt) => opt.toLowerCase().contains(value.toLowerCase()))
+                                      .toList();
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        content: SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: filteredOptions.isEmpty
+                              ? const Center(child: Text("No data found", style: TextStyle(fontSize: 12)))
+                              : ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: filteredOptions.length,
+                                  separatorBuilder: (context, index) => const Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      title: Text(filteredOptions[index], style: const TextStyle(fontSize: 13)),
+                                      onTap: () => Navigator.pop(context, filteredOptions[index]),
+                                    );
+                                  },
+                                ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Close"),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
               );
 
               if (selected != null) {
-                setState(() {
-                  _dropdownValues[key] = selected; // Simpan hasil pilihan
-                });
+                setState(() => _dropdownValues[key] = selected);
               }
             },
             child: Container(
