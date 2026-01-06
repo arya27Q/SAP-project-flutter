@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      var url = Uri.parse('http://192.168.0.106:8000/api/test-koneksi');
+      var url = Uri.parse('http://192.168.0.102:8000/api/test-koneksi');
       var response = await http.post(
         url,
         body: {
