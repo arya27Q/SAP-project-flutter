@@ -361,7 +361,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         _buildExpandableAddressItem(
                           "Ship To",
                           isSelected: true,
-                        ), // Sesuai pilihan di gambar
+                        ), 
                       ],
                     ),
                   ),
@@ -370,7 +370,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFDE68A), // Kuning SAP
+                    backgroundColor: const Color(0xFFFDE68A), 
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 36),
                     shape: RoundedRectangleBorder(
@@ -543,8 +543,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   }
 
 
-
-
 Widget _buildPaymentRunTab() {
   return Padding(
     padding: const EdgeInsets.all(20.0),
@@ -616,20 +614,21 @@ Widget _buildPaymentRunTab() {
 }
 
 
+
 Widget _buildPaymentMethodsTable() {
   return Container(
     decoration: BoxDecoration(
       border: Border.all(color: borderGrey),
-      color: const Color(0xFFF2F2F2),
+      color: const Color.fromARGB(255, 255, 255, 255),
     ),
     child: ListView.builder(
       itemCount: 20,
       itemBuilder: (context, index) {
         if (index == 0) {
-          // Header Tetap
+
           return Container(
             height: 25,
-            color: const Color(0xFFE5E7EB),
+            color: const Color.fromARGB(255, 177, 205, 156),
             child: Row(
               children: [
                 _simpleCell("#", 30, isHeader: true),
@@ -641,11 +640,10 @@ Widget _buildPaymentMethodsTable() {
             ),
           );
         }
-        // Baris yang bisa diketik dengan Key unik
         return Container(
           height: 22,
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: borderGrey, width: 0.5)),
+            border: Border(bottom: BorderSide(color: const Color.fromARGB(255, 188, 204, 115), width: 0.5)),
           ),
           child: Row(
             children: [
@@ -662,8 +660,6 @@ Widget _buildPaymentMethodsTable() {
   );
 }
 
-
-// Cell khusus kotak putih yang bisa diketik (Garis Khusus)
 Widget _buildSpecialInputCell(double width, String key) {
   return Container(
     width: width,
@@ -674,7 +670,7 @@ Widget _buildSpecialInputCell(double width, String key) {
     ),
     child: Container(
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: const Color.fromARGB(255, 181, 203, 220), 
         border: Border.all(color: borderGrey, width: 0.5),
       ),
       child: TextField(
