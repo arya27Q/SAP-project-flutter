@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // Pastikan import http sudah ada
 import '../../constants.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -17,7 +18,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   String? selectedCompany;
-  bool _isLoading = false; // 1. Tambahkan state loading
+  bool _isLoading = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -38,9 +39,8 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // 2. Ubah fungsi handle menjadi async
   Future<void> _handleSignUp() async {
-    // Validasi sederhana
+    // 1. Validasi Input
     if (selectedCompany == null || 
         _nameController.text.isEmpty || 
         _emailController.text.isEmpty || 
@@ -52,31 +52,59 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     setState(() {
-      _isLoading = true; // Mulai loading
+      _isLoading = true;
     });
 
-    // Simulasi proses pengiriman data ke server (2 detik)
-    await Future.delayed(const Duration(seconds: 2));
+    // 2. Mapping Nama PT ke ID Koneksi Laravel agar masuk ke database yang benar
+    Map<String, String> companyMapping = {
+      "PT. Dempo Laser Metalindo Surabaya": "pt1",
+      "PT. Duta Laserindo Metal": "pt2",
+      "PT. Senzo Feinmetal": "pt3",
+      "PT. ATMI Duta Engineering": "pt4",
+    };
+    String targetPT = companyMapping[selectedCompany!]!;
 
-    print("Mendaftar di: $selectedCompany");
-    print("Nama: ${_nameController.text}");
-    print("Email: ${_emailController.text}");
-    
-    if (mounted) {
-      setState(() {
-        _isLoading = false; // Berhenti loading
-      });
-      
-      // Tampilkan pesan sukses sebelum pindah
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Pendaftaran Berhasil! Silahkan Login."),
-          backgroundColor: Colors.green,
-        ),
-      );
+    try {
+      // 3. Kirim Data ke API Laravel menggunakan IP 192.168.0.102
+      var url = Uri.parse('http://192.168.0.102:8000/api/test-register');
+      var response = await http.post(
+        url,
+        body: {
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+          'target_pt': targetPT, // Mengirim identitas database tujuan
+        },
+      ).timeout(const Duration(seconds: 10));
 
-      widget.onGoToLogin();
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Pendaftaran Berhasil! Silahkan Login."),
+              backgroundColor: Colors.green,
+            ),
+          );
+          widget.onGoToLogin();
+        }
+      } else {
+        _showErrorSnackBar("Gagal mendaftar. Email mungkin sudah digunakan.");
+      }
+    } catch (e) {
+      _showErrorSnackBar("Koneksi Error: Pastikan server menyala di 192.168.0.102");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red.shade800),
+    );
   }
 
   @override
@@ -117,7 +145,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: _isLoading ? null : widget.onBackToDashboard, // Matikan tombol jika loading
+                      onPressed: _isLoading ? null : widget.onBackToDashboard,
                       icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                     ),
                   ),
@@ -135,10 +163,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 32),
                   
-                  // --- DROPDOWN ---
                   DropdownButtonFormField<String>(
                     value: selectedCompany,
-                    // Matikan dropdown jika sedang loading
                     onChanged: _isLoading ? null : (newValue) {
                       setState(() {
                         selectedCompany = newValue;
@@ -161,10 +187,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // --- INPUT NAMA ---
                   TextField(
                     controller: _nameController,
-                    enabled: !_isLoading, // Disable jika loading
+                    enabled: !_isLoading,
                     decoration: InputDecoration(
                       labelText: "Nama Lengkap",
                       prefixIcon: const Icon(Icons.badge_outlined),
@@ -174,10 +199,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // --- INPUT EMAIL ---
                   TextField(
                     controller: _emailController,
-                    enabled: !_isLoading, // Disable jika loading
+                    enabled: !_isLoading,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: "Email",
@@ -188,10 +212,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // --- INPUT PASSWORD ---
                   TextField(
                     controller: _passwordController,
-                    enabled: !_isLoading, // Disable jika loading
+                    enabled: !_isLoading,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: "Password",
@@ -202,7 +225,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 30),
                   
-                  // --- TOMBOL DAFTAR DENGAN LOADING ---
                   SizedBox(
                     width: double.infinity,
                     height: 50,

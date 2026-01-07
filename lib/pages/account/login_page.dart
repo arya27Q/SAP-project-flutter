@@ -24,11 +24,12 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   String? selectedCompany;
-  bool _isLoading = false; 
-  bool _isSuccess = false; 
-  bool _isError = false; // Status untuk kotak merah gagal
+  bool _isLoading = false;
+  bool _isSuccess = false;
+  bool _isError = false; 
   String _errorMessage = "";
 
+  // Daftar Company sesuai UI kamu
   final List<String> companies = [
     "PT. Dempo Laser Metalindo Surabaya",
     "PT. Duta Laserindo Metal",
@@ -53,19 +54,30 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    // --- LOGIC MULTI-DATABASE MAPPING ---
+    // Mengubah nama tampilan PT menjadi ID Koneksi di Laravel
+    Map<String, String> companyMapping = {
+      "PT. Dempo Laser Metalindo Surabaya": "pt1",
+      "PT. Duta Laserindo Metal": "pt2",
+      "PT. Senzo Feinmetal": "pt3",
+      "PT. ATMI Duta Engineering": "pt4",
+    };
+    String targetPT = companyMapping[selectedCompany!]!;
+
     setState(() {
       _isLoading = true;
       _isError = false;
     });
 
     try {
-      var url = Uri.parse('http://192.168.0.102:8000/api/test-koneksi');
+      // Menggunakan IP Laravel kamu: 192.168.0.107
+      var url = Uri.parse('http://192.168.0.102:8000/api/test-login');
       var response = await http.post(
         url,
         body: {
-          'user_email': _userController.text.trim(),
+          'email': _userController.text.trim(),
           'password': _passController.text,
-          'company': selectedCompany!,
+          'target_pt': targetPT, // ID Koneksi (pt1, pt2, dll)
         },
       ).timeout(const Duration(seconds: 10));
 
@@ -78,21 +90,20 @@ class _LoginPageState extends State<LoginPage> {
           widget.onLoginSuccess();
         });
       } else {
-        _handleLoginError("Gagal: Server Error (${response.statusCode})");
+        // Gagal login (401 atau lainnya)
+        _handleLoginError("Email/Password salah atau PT tidak sesuai");
       }
     } catch (e) {
-      _handleLoginError("Koneksi Terputus / Server Mati");
+      _handleLoginError("Gagal terhubung ke Server (192.168.0.102)");
     }
   }
 
-  // Fungsi untuk memicu kotak merah gagal
   void _handleLoginError(String message) {
     setState(() {
       _isLoading = false;
       _isError = true;
       _errorMessage = message;
     });
-    // Setelah 2 detik, balikkan ke form login lagi supaya user bisa benerin input
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (mounted) {
         setState(() {
@@ -153,9 +164,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  
                   Opacity(
-                    opacity: (_isLoading || _isSuccess || _isError) ? 0.0 : 1.0, 
+                    opacity: (_isLoading || _isSuccess || _isError) ? 0.0 : 1.0,
                     child: IgnorePointer(
                       ignoring: _isLoading || _isSuccess || _isError,
                       child: Column(
@@ -237,8 +247,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
-                 
                   if (_isLoading)
                     const Column(
                       mainAxisSize: MainAxisSize.min,
@@ -248,8 +256,6 @@ class _LoginPageState extends State<LoginPage> {
                         Text("Memproses...", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkIndigo)),
                       ],
                     ),
-
-                 
                   if (_isSuccess)
                     _buildStatusBox(
                       color: Colors.green.shade600,
@@ -257,8 +263,6 @@ class _LoginPageState extends State<LoginPage> {
                       title: "Berhasil!",
                       subtitle: "Selamat Datang",
                     ),
-
-                  
                   if (_isError)
                     _buildStatusBox(
                       color: Colors.red.shade600,
