@@ -13,6 +13,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, bool> _checkStates = {};
+  final Map<String, String> _fieldValues = {};
 
   int _contactRowCount = 10;
   final Color primaryIndigo = const Color(0xFF4F46E5);
@@ -20,7 +21,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color borderGrey = const Color(0xFFE2E8F0);
 
-  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 9, vsync: this);
@@ -361,7 +361,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         _buildExpandableAddressItem(
                           "Ship To",
                           isSelected: true,
-                        ), 
+                        ),
                       ],
                     ),
                   ),
@@ -370,7 +370,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFDE68A), 
+                    backgroundColor: const Color(0xFFFDE68A),
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 36),
                     shape: RoundedRectangleBorder(
@@ -542,212 +542,264 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
+  Widget _buildPaymentRunTab() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- SISI KIRI: HOUSE BANK ---
+                Expanded(
+                  flex: 2,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "House Bank",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildSmallDropdownRowModern(
+                          "Country",
+                          "bank_country",
+                          ["Indonesia", "Singapore"],
+                        ),
+                        _buildSmallDropdownRowModern("Bank", "bank_name", [
+                          "Bank OCBC NISP",
+                          "BCA",
+                          "Mandiri",
+                        ]),
+                        _buildSmallDropdownRowModern(
+                          "Account",
+                          "bank_account",
+                          ["528.010.00197-2"],
+                        ),
+                        _buildModernFieldRow("Branch", "bank_branch"),
+                        _buildSmallDropdownRowModern("IBAN", "bank_iban", [""]),
+                        _buildModernFieldRow("BIC/SWIFT Code", "bank_swift"),
+                        _buildModernFieldRow("Control No.", "bank_control_no"),
+                        const SizedBox(height: 10),
+                        _buildModernFieldRow("DME Identification", "bank_dme"),
+                        _buildModernFieldRow(
+                          "Instruction Key",
+                          "bank_instruction",
+                        ),
+                        _buildModernFieldRow("Reference Details", "bank_ref"),
+                        _buildPaymentCheckbox(
+                          "Payment Block",
+                          "bank_pay_block",
+                        ),
+                        _buildPaymentCheckbox(
+                          "Single Payment",
+                          "bank_single_pay",
+                        ),
+                        const SizedBox(height: 20),
+                        _buildSmallDropdownRowModern(
+                          "Bank Charges Allocation Code",
+                          "bank_charges_code",
+                          [""],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
-Widget _buildPaymentRunTab() {
-  return Padding(
-    padding: const EdgeInsets.all(20.0),
-    child: Column(
-      children: [
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- SISI KIRI: HOUSE BANK ---
-              Expanded(
-                flex: 2,
-                child: SingleChildScrollView(
+                const SizedBox(width: 40),
+
+                // --- SISI KANAN: PAYMENT METHODS TABLE ---
+                Expanded(
+                  flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("House Bank", 
-                        style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+                      const Text(
+                        "Payment Methods",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      _buildSmallDropdownRowModern("Country", "bank_country", ["Indonesia", "Singapore"]),
-                      _buildSmallDropdownRowModern("Bank", "bank_name", ["Bank OCBC NISP", "BCA", "Mandiri"]),
-                      _buildSmallDropdownRowModern("Account", "bank_account", ["528.010.00197-2"]),
-                      _buildModernFieldRow("Branch", "bank_branch"),
-                      _buildSmallDropdownRowModern("IBAN", "bank_iban", [""]),
-                      _buildModernFieldRow("BIC/SWIFT Code", "bank_swift"),
-                      _buildModernFieldRow("Control No.", "bank_control_no"),
-                      const SizedBox(height: 10),
-                      _buildModernFieldRow("DME Identification", "bank_dme"), 
-                      _buildModernFieldRow("Instruction Key", "bank_instruction"),
-                      _buildModernFieldRow("Reference Details", "bank_ref"),
-                      _buildPaymentCheckbox("Payment Block", "bank_pay_block"),
-                      _buildPaymentCheckbox("Single Payment", "bank_single_pay"),
-                      const SizedBox(height: 20),
-                      _buildSmallDropdownRowModern("Bank Charges Allocation Code", "bank_charges_code", [""]),
+                      Expanded(child: _buildPaymentMethodsTable()),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildYellowButtonSmall("Clear Default"),
+                          _buildYellowButtonSmall("Set as Default"),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-              
-              const SizedBox(width: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // --- SISI KANAN: PAYMENT METHODS TABLE ---
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Payment Methods", 
-                      style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
-                    const SizedBox(height: 10),
-                    Expanded(child: _buildPaymentMethodsTable()),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildYellowButtonSmall("Clear Default"),
-                        _buildYellowButtonSmall("Set as Default"),
-                      ],
-                    ),
-                  ],
+  Widget _buildPaymentMethodsTable() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: borderGrey),
+        color: const Color.fromARGB(255, 255, 255, 255),
+      ),
+      child: ListView.builder(
+        itemCount: 20,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Container(
+              height: 25,
+              color: const Color.fromARGB(255, 177, 205, 156),
+              child: Row(
+                children: [
+                  _simpleCell("#", 30, isHeader: true),
+                  _simpleCell("Code", 80, isHeader: true),
+                  _simpleCell("Description", 200, isHeader: true),
+                  _simpleCell("Include", 60, isHeader: true),
+                  _simpleCell("Active", 60, isHeader: true),
+                ],
+              ),
+            );
+          }
+          return Container(
+            height: 22,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: const Color.fromARGB(255, 188, 204, 115),
+                  width: 0.5,
                 ),
               ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
-
-Widget _buildPaymentMethodsTable() {
-  return Container(
-    decoration: BoxDecoration(
-      border: Border.all(color: borderGrey),
-      color: const Color.fromARGB(255, 255, 255, 255),
-    ),
-    child: ListView.builder(
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-
-          return Container(
-            height: 25,
-            color: const Color.fromARGB(255, 177, 205, 156),
+            ),
             child: Row(
               children: [
-                _simpleCell("#", 30, isHeader: true),
-                _simpleCell("Code", 80, isHeader: true),
-                _simpleCell("Description", 200, isHeader: true),
-                _simpleCell("Include", 60, isHeader: true),
-                _simpleCell("Active", 60, isHeader: true),
+                _simpleCell(
+                  "$index",
+                  30,
+                  isHeader: true,
+                ), // Nomor urut teks saja
+                _simpleCell("", 80, key: "pm_code_$index"),
+                _simpleCell("", 200, key: "pm_desc_$index"),
+                _buildSpecialInputCell(
+                  60,
+                  "pm_inc_$index",
+                ), // Kotak putih interaktif
+                _buildSpecialInputCell(
+                  60,
+                  "pm_act_$index",
+                ), // Kotak putih interaktif
               ],
             ),
           );
-        }
-        return Container(
-          height: 22,
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: const Color.fromARGB(255, 188, 204, 115), width: 0.5)),
-          ),
-          child: Row(
-            children: [
-              _simpleCell("$index", 30, isHeader: true), // Nomor urut teks saja
-              _simpleCell("", 80, key: "pm_code_$index"),
-              _simpleCell("", 200, key: "pm_desc_$index"),
-              _buildSpecialInputCell(60, "pm_inc_$index"), // Kotak putih interaktif
-              _buildSpecialInputCell(60, "pm_act_$index"), // Kotak putih interaktif
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+        },
+      ),
+    );
+  }
 
-Widget _buildSpecialInputCell(double width, String key) {
-  return Container(
-    width: width,
-    height: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-    decoration: BoxDecoration(
-      border: Border(left: BorderSide(color: borderGrey, width: 0.5)),
-    ),
-    child: Container(
+  Widget _buildSpecialInputCell(double width, String key) {
+    return Container(
+      width: width,
+      height: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 181, 203, 220), 
-        border: Border.all(color: borderGrey, width: 0.5),
+        border: Border(left: BorderSide(color: borderGrey, width: 0.5)),
       ),
-      child: TextField(
-        controller: _getCtrl(key),
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 10),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: EdgeInsets.zero,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 181, 203, 220),
+          border: Border.all(color: borderGrey, width: 0.5),
         ),
-      ),
-    ),
-  );
-}
-
-// Cell standar yang bisa diketik
-Widget _simpleCell(String text, double width, {bool isHeader = false, String? key}) {
-  return Container(
-    width: width,
-    height: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 4),
-    decoration: BoxDecoration(
-      border: Border(right: BorderSide(color: borderGrey, width: 0.5)),
-    ),
-    alignment: Alignment.centerLeft,
-    child: isHeader
-        ? Text(text, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
-        : TextField(
-            controller: key != null ? _getCtrl(key) : null,
-            style: const TextStyle(fontSize: 10),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
+        child: TextField(
+          controller: _getCtrl(key),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 10),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
           ),
-  );
-}
-
-Widget _buildPaymentCheckbox(String label, String key) {
-  return Row(
-    children: [
-      SizedBox(
-        height: 28, 
-        width: 28,
-        child: Checkbox(
-          // Menggunakan _checkStates yang sudah ada di class kamu
-          value: _checkStates[key] ?? false,
-          onChanged: (v) => setState(() => _checkStates[key] = v!),
         ),
       ),
-      Text(label, style: const TextStyle(fontSize: 11)),
-    ],
-  );
-}
+    );
+  }
 
-Widget _buildYellowButtonSmall(String label) {
-  return ElevatedButton(
-    onPressed: () {
-      debugPrint("$label clicked");
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFDE68A), // Kuning SAP
-      foregroundColor: Colors.black,
-      minimumSize: const Size(120, 30),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
-        side: const BorderSide(color: Colors.black38, width: 0.5),
+  // Cell standar yang bisa diketik
+  Widget _simpleCell(
+    String text,
+    double width, {
+    bool isHeader = false,
+    String? key,
+  }) {
+    return Container(
+      width: width,
+      height: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: borderGrey, width: 0.5)),
       ),
-    ),
-    child: Text(label, style: const TextStyle(fontSize: 11)),
-  );
-}
+      alignment: Alignment.centerLeft,
+      child: isHeader
+          ? Text(
+              text,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            )
+          : TextField(
+              controller: key != null ? _getCtrl(key) : null,
+              style: const TextStyle(fontSize: 10),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+    );
+  }
 
+  Widget _buildPaymentCheckbox(String label, String key) {
+    return Row(
+      children: [
+        SizedBox(
+          height: 28,
+          width: 28,
+          child: Checkbox(
+            // Menggunakan _checkStates yang sudah ada di class kamu
+            value: _checkStates[key] ?? false,
+            onChanged: (v) => setState(() => _checkStates[key] = v!),
+          ),
+        ),
+        Text(label, style: const TextStyle(fontSize: 11)),
+      ],
+    );
+  }
 
+  Widget _buildYellowButtonSmall(String label) {
+    return ElevatedButton(
+      onPressed: () {
+        debugPrint("$label clicked");
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFDE68A), // Kuning SAP
+        foregroundColor: Colors.black,
+        minimumSize: const Size(120, 30),
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: const BorderSide(color: Colors.black38, width: 0.5),
+        ),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 11)),
+    );
+  }
 
   // --- SISA WIDGET BUILDER BAWAANMU (HEADER, GENERAL, CONTACTS, DLL) ---
   Widget _buildHeaderSection() {
@@ -853,9 +905,9 @@ Widget _buildYellowButtonSmall(String label) {
           _buildGeneralTab(),
           _buildContactPersonsTab(),
           _buildAddressesTab(),
-          const Center(child: Text("Payment Terms Configuration")),
+          _buildPaymentTermTab(),
           _buildPaymentRunTab(),
-          _buildAccountingTab(), // Memanggil tab accounting yang baru
+          _buildAccountingTab(),
           const Center(child: Text("BP Properties")),
           const Center(child: Text("Internal Remarks")),
           const Center(child: Text("Document Attachments")),
@@ -990,18 +1042,27 @@ Widget _buildYellowButtonSmall(String label) {
               height: 30,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: borderGrey),
+                color: const Color(0xFFF8FAFF),
+                border: Border.all(color: const Color(0xFFE0E6F0)),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _dropdownValues[key],
                   isDense: true,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12, color: Colors.black),
+                  iconEnabledColor: Colors.black54,
                   onChanged: (v) => setState(() => _dropdownValues[key] = v!),
                   items: items
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(
+                            e,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -1129,7 +1190,6 @@ Widget _buildYellowButtonSmall(String label) {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                                // Logic filter saat diketik
                                 onChanged: (value) {
                                   setDialogState(() {
                                     filteredOptions = options
@@ -1144,7 +1204,6 @@ Widget _buildYellowButtonSmall(String label) {
                               ),
                             ],
                           ),
-                          // --- BAGIAN LIST HASIL ---
                           content: SizedBox(
                             width: 300,
                             height: 300,
@@ -1194,8 +1253,8 @@ Widget _buildYellowButtonSmall(String label) {
                 height: 30,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: borderGrey),
+                  color: Color(0xFFF8FAFC),
+                  border: Border.all(color: Color(0xFFD1D9E6)),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -1214,6 +1273,104 @@ Widget _buildYellowButtonSmall(String label) {
                     const Icon(Icons.search, size: 16, color: Colors.grey),
                   ],
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentTermTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildSmallDropdownRowModern(
+                      "Payment Terms",
+                      "paymentTerm",
+                      [""],
+                    ),
+                    _buildModernFieldRow("Interest on Arreas %", "Interest"),
+                    const SizedBox(height: 20),
+                    _buildSmallDropdownRowModern("Price List", "PriceList", [
+                      "",
+                    ]),
+                    _buildModernFieldRow("Total Discount %", "total disc"),
+                    _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSimpleFieldRow(
+    String label,
+    String key, {
+    String value = "0.00",
+  }) {
+    final TextEditingController _controller = TextEditingController(
+      text: _fieldValues[key] ?? value,
+    );
+    final FocusNode _focusNode = FocusNode();
+
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        String text = _controller.text;
+        double? parsedValue = double.tryParse(text.replaceAll(',', ''));
+        if (parsedValue != null) {
+          _controller.text = parsedValue.toStringAsFixed(2);
+        } else if (text.isEmpty) {
+          _controller.text = "0.00";
+        }
+        _fieldValues[key] = _controller.text;
+      }
+    });
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 12, color: secondarySlate),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: 30,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: const TextStyle(fontSize: 13),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+                  border: InputBorder.none,
+                ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
               ),
             ),
           ),
