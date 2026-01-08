@@ -99,148 +99,162 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   }
 
   Widget _buildAccountingGeneralSubTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSearchField("Consolidating BP", "acc_con_bp", []),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const SizedBox(width: 140),
-              _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
-              const SizedBox(width: 24),
-              _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              const SizedBox(
-                width: 140,
-                child: Text("Control Accounts", style: TextStyle(fontSize: 12)),
-              ),
-              _buildSmallIconButton(Icons.more_horiz),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _buildAccountFieldRow(
-            "Accounts Payable",
-            "acc_payable",
-            "2113102-0-0-00",
-            "Hutang Dagang (Lokal)",
-          ),
-          _buildAccountFieldRow(
-            "Down Payment Clearing",
-            "acc_dp_clear",
-            "1171101-0-0-00",
-            "Uang Muka Pembelian",
-          ),
-          _buildAccountFieldRow(
-            "Down Payment Interim",
-            "acc_dp_interim",
-            "1171101-0-0-00",
-            "Uang Muka Pembelian",
-          ),
-          const SizedBox(height: 24),
-          _buildSearchField("Connected Customer", "acc_conn_cust", []),
-          const SizedBox(height: 24),
-          _buildModernFieldRow("Planning Group", "acc_plan_grp"),
-          const SizedBox(height: 32),
-          Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["acc_affiliate"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["acc_affiliate"] = v!),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text("Affiliate", style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Consolidating BP
+        _buildSearchField("Consolidating BP", "acc_con_bp", []),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const SizedBox(width: 145), 
+            _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
+            const SizedBox(width: 20),
+            _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
+          ],
+        ),
 
-  Widget _buildAccountFieldRow(
-    String label,
-    String key,
-    String accCode,
-    String accName,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(label, style: const TextStyle(fontSize: 11)),
-          ),
-          Icon(Icons.play_arrow, size: 14, color: Colors.orange.shade300),
-          const SizedBox(width: 4),
-          Container(
-            width: 110,
-            height: 25,
-            decoration: BoxDecoration(
-              border: Border.all(color: borderGrey),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: TextField(
-              controller: _getCtrl("${key}_code", initial: accCode),
-              style: const TextStyle(fontSize: 11),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 8,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Container(
-              height: 25,
-              decoration: BoxDecoration(
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: TextField(
-                controller: _getCtrl("${key}_name", initial: accName),
-                style: const TextStyle(fontSize: 11),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Text("=", style: TextStyle(color: Colors.grey, fontSize: 14)),
-        ],
-      ),
-    );
-  }
+        const SizedBox(height: 24),
 
+        
+        Row(
+          children: [
+            const SizedBox(
+              width: 140,
+              child: Text("Control Accounts", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            ),
+            _buildSmallIconButton(Icons.more_horiz),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        _buildAccountFieldRow(
+        "Accounts Payable",
+        "acc_payable",
+        "2113102-0-0-00",
+        "Hutang Dagang (Lokal) Pembelian Non Material (GN, GN, GN)",
+      ),
+      _buildAccountFieldRow(
+        "Down Payment Clearing",
+        "acc_dp_clear",
+        "1171101-0-0-00",
+        "Uang Muka Pembelian Lokal (GN, GN, GN)",
+      ),
+      _buildAccountFieldRow(
+        "Down Payment Interim",
+        "acc_dp_interim",
+        "1171101-0-0-00",
+        "Uang Muka Pembelian Lokal (GN, GN, GN)",
+      ),
+
+        const SizedBox(height: 24),
+
+        // Connected Customer
+        _buildSearchField("Connected Customer", "acc_conn_cust", []),
+        const SizedBox(height: 24),
+
+        // Planning Group
+        _buildModernFieldRow("Planning Group", "acc_plan_grp"),
+
+        const SizedBox(height: 32),
+
+        // Affiliate Checkbox
+        Row(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Checkbox(
+                value: _checkStates["acc_affiliate"] ?? false,
+                onChanged: (v) => setState(() => _checkStates["acc_affiliate"] = v!),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text("Affiliate", style: TextStyle(fontSize: 12)),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+
+Widget _buildAccountFieldRow(
+  String label,
+  String key,
+  String accCode,
+  String accName,
+) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      children: [
+        // 1. Label Utama
+        SizedBox(
+          width: 140,
+          child: Text(label, style: const TextStyle(fontSize: 11)),
+        ),
+
+        // 2. Panah Kuning SAP
+        Icon(Icons.play_arrow, size: 12, color: Colors.orange.shade400),
+        const SizedBox(width: 4),
+
+        // 3. KOTAK PENDEK (Nomor Akun)
+        Container(
+          width: 90, // Tak perpendek dadi 90 biar sesuai gambar
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: borderGrey, width: 0.8),
+          ),
+          child: TextField(
+            controller: _getCtrl("${key}_code", initial: accCode),
+            style: const TextStyle(fontSize: 10),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+        const Text("=", style: TextStyle(fontSize: 11, color: Colors.black54)),
+        const SizedBox(width: 6),
+
+        // 4. TEXT DESKRIPSI (Sing Kepotong / Ellipsis)
+        Expanded(
+          child: Text(
+            accName,
+            style: const TextStyle(fontSize: 11, color: Colors.black87),
+            maxLines: 1, // Ben tetep sak baris
+            overflow: TextOverflow.ellipsis, // Iki sing nggawe "..." nek kepanjangan
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+ 
   Widget _buildStatusRadioSmall(String label, String groupKey) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Radio<String>(
-          value: label,
-          groupValue: _dropdownValues[groupKey] ?? "Payment Consolidation",
-          onChanged: (v) => setState(() => _dropdownValues[groupKey] = v!),
+        SizedBox(
+          width: 32, // Membatasi lebar area klik agar tidak terlalu jauh dari teks
+          child: Radio<String>(
+            value: label,
+            // Membuat ukuran radio lebih compact
+            visualDensity: const VisualDensity(
+              horizontal: VisualDensity.minimumDensity,
+              vertical: VisualDensity.minimumDensity,
+            ),
+            groupValue: _dropdownValues[groupKey] ?? "Accrual",
+            onChanged: (v) => setState(() => _dropdownValues[groupKey] = v!),
+          ),
         ),
         Text(label, style: const TextStyle(fontSize: 11)),
       ],
@@ -256,51 +270,67 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- SISI KIRI (TAX STATUS & WTAX) ---
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildSmallDropdownRowModern("Tax Status", "tax_status", [
                       "Liable",
                       "Exempt",
                     ]),
+                    // Layout Akun (Panah -> Box -> = -> Deskripsi)
                     _buildAccountFieldRow("Tax Group", "tax_group", "", ""),
+                    
                     const SizedBox(height: 20),
+                    
+                    // --- Bagian WTax Sejajar Horizontal ---
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(
                           width: 130,
                           child: Text(
                             "WTax Codes Allowed",
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(fontSize: 11),
                           ),
                         ),
                         _buildSmallIconButton(Icons.more_horiz),
+                        const SizedBox(width: 12),
+                        // Opsi Accrual & Cash disusun vertikal di samping tombol
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildStatusRadioSmall("Accrual", "wtax_type"),
+                            _buildStatusRadioSmall("Cash", "wtax_type"),
+                          ],
+                        ),
                       ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 130),
-                      child: Column(
-                        children: [
-                          _buildStatusRadioSmall("Accrual", "wtax_type"),
-                          _buildStatusRadioSmall("Cash", "wtax_type"),
-                        ],
-                      ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(width: 40),
+
+              // --- SISI KANAN (WITHHOLDING TAX INFO) ---
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Checkbox(
-                          value: _checkStates["tax_subject_wht"] ?? true,
-                          onChanged: (v) => setState(
-                            () => _checkStates["tax_subject_wht"] = v!,
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Checkbox(
+                            value: _checkStates["tax_subject_wht"] ?? true,
+                            onChanged: (v) => setState(
+                              () => _checkStates["tax_subject_wht"] = v!,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 8),
                         const Text(
                           "Subject to Withholding Tax",
                           style: TextStyle(fontSize: 12),
@@ -308,10 +338,13 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       ],
                     ),
                     const SizedBox(height: 10),
+                    // Field dengan input box putih
                     _buildModernFieldRow("Certificate No.", "tax_cert_no"),
                     _buildModernFieldRow("Expiration Date", "tax_exp_date"),
                     _buildModernFieldRow("NI Number", "tax_ni_no"),
-                    const SizedBox(height: 40),
+                    
+                    const SizedBox(height: 30),
+                    
                     _buildSmallDropdownRowModern(
                       "Type for WTax Rpt",
                       "tax_rpt_type",
@@ -322,14 +355,22 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ),
             ],
           ),
-          const SizedBox(height: 50),
+          
+          const SizedBox(height: 60),
+          
+          // --- BAGIAN BAWAH ---
           Row(
             children: [
-              Checkbox(
-                value: _checkStates["tax_deferred"] ?? false,
-                onChanged: (v) =>
-                    setState(() => _checkStates["tax_deferred"] = v!),
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  value: _checkStates["tax_deferred"] ?? false,
+                  onChanged: (v) =>
+                      setState(() => _checkStates["tax_deferred"] = v!),
+                ),
               ),
+              const SizedBox(width: 8),
               const Text("Deferred Tax", style: TextStyle(fontSize: 12)),
             ],
           ),
@@ -852,9 +893,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
                   "All Currencies",
                 ]),
-                _buildSummaryRowWithArrow("Account Balance", "0.00"),
-                _buildSummaryRowWithArrow("Goods Receipt POs", "0.00"),
-                _buildSummaryRowWithArrow("Purchase Orders", "0.00"),
+                _buildSummaryRowWithArrow("Account Balance", ""),
+                _buildSummaryRowWithArrow("Goods Receipt POs", ""),
+                _buildSummaryRowWithArrow("Purchase Orders", ""),
               ],
             ),
           ),
@@ -1073,28 +1114,65 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
-  Widget _buildSummaryRowWithArrow(String label, String val) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 12))),
-          Icon(Icons.play_arrow, size: 14, color: Colors.orange.shade700),
-          const SizedBox(width: 8),
-          Container(
-            width: 100,
-            height: 24,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              border: Border.all(color: borderGrey),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(val, style: const TextStyle(fontSize: 12)),
+  Widget _buildSummaryRowWithArrow(
+    String label,
+    String key, {
+    String value = "0.00",
+  }) {
+    final TextEditingController _controller = TextEditingController(
+      text: _fieldValues[key] ?? value,
+    );
+    final FocusNode _focusNode = FocusNode();
+
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        String text = _controller.text;
+        double? parsedValue = double.tryParse(text.replaceAll(',', ''));
+        if (parsedValue != null) {
+          _controller.text = parsedValue.toStringAsFixed(2);
+        } else if (text.isEmpty) {
+          _controller.text = "0.00";
+        }
+        _fieldValues[key] = _controller.text;
+      }
+    });
+
+    return Padding(padding: const EdgeInsets.only(bottom: 4),
+    child:  Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,style: TextStyle(
+              fontSize: 12,color: secondarySlate),
           ),
-        ],
-      ),
+        ),
+        Icon(Icons.play_arrow, size: 14, color: Colors.orange.shade700),
+        const SizedBox(width: 8),
+        Container(
+          width: 100,
+          height: 24,
+          decoration: BoxDecoration(
+            color: bgSlate,
+            border: Border.all(color: borderGrey),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            textAlign: TextAlign.right, // Angka rata kanan khas SAP
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.only(right: 8, top: 4, bottom: 8), // Sesuaikan padding agar teks di tengah
+              border: InputBorder.none,
+            ),
+            onChanged: (val) {
+              _fieldValues[key] = val;
+            },
+          ),
+        ),
+      ]),
     );
   }
 
@@ -1365,7 +1443,10 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 style: const TextStyle(fontSize: 13),
                 decoration: const InputDecoration(
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {

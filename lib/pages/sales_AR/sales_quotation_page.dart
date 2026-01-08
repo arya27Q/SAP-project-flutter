@@ -14,39 +14,95 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   late TabController _tabController;
   int _rowCount = 10;
 
-  
-  final Map<String, TextEditingController> _controllers = {};
-  final Map<String, bool> _checkStates = {};
-  final Map<String, String> _dropdownValues = {};
-
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
   final ScrollController _horizontalScroll = ScrollController();
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, bool> _checkStates = {};
+  final Map<String, String> _dropdownValues = {};
+  final Map<String, String> _fieldValues = {};
+  final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String?> _formValues = {};
+
+  String formatPrice(String value) {
+  String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+  double parsed = double.tryParse(cleanText) ?? 0.0;
+  return parsed.toStringAsFixed(2);
+}
+
+  TextEditingController _getCtrl(String key, {String initial = ""}) {
+    if (!_controllers.containsKey(key)) {
+      _controllers[key] = TextEditingController(text: initial);
+    }
+    return _controllers[key]!;
+  }
+
+ FocusNode _getFn(String key, {bool isReadOnly = false, String defaultValue = "0.00", bool isPercent = false}) {
+  if (!_focusNodes.containsKey(key)) {
+    _focusNodes[key] = FocusNode();
+  }
+  
+  final fn = _focusNodes[key]!;
+
+  
+  fn.removeListener(() {}); 
+  fn.addListener(() {
+   
+    if (!fn.hasFocus && !isReadOnly) {
+      final controller = _getCtrl(key);
+      String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
+      double? parsed = double.tryParse(cleanText);
+
+      if (mounted) {
+        setState(() {
+          if (parsed != null) {
+           
+            controller.text = isPercent ? parsed.toStringAsFixed(0) : parsed.toStringAsFixed(2);
+          } else {
+            controller.text = defaultValue;
+          }
+          _fieldValues[key] = controller.text;
+        });
+      }
+    }
+  });
+  
+  return fn;
+}
+
+  double _getGrandTotal() {
+  double parse(String key) {
+    
+    String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
+    return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+  }
+
+  double before = parse("f_before_disc");
+  double discVal = parse("f_disc_val");
+  double freight = parse("f_freight");
+  double tax = parse("f_tax");
+  double rounding = parse("f_rounding");
+
+  return (before - discVal) + freight + rounding + tax;
+}
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _rowCount = 10;
-  }
-
-  TextEditingController _getCtrl(String key, {String initial = ""}) {
-    return _controllers.putIfAbsent(
-      key,
-      () => TextEditingController(text: initial),
-    );
   }
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) {
-      controller.dispose();
-    }
+    for (var c in _controllers.values) c.dispose();
+    for (var f in _focusNodes.values) f.dispose();
+    _tabController.dispose();
+    _horizontalScroll.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +158,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     return SingleChildScrollView(
       child: Column(
         children: [
-          // --- CONTAINER !
+          // --- CONTAINER 1: HEADER CONTROLS (TOMBOL-TOMBOL) ---
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -121,8 +177,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
 
                 // TOMBOL FILTER
                 PopupMenuButton<String>(
-                  onSelected: (value) =>
-                      debugPrint("Filter berdasarkan: $value"),
+                  onSelected: (value) => debugPrint("Filter berdasarkan: $value"),
                   offset: const Offset(0, 40),
                   itemBuilder: (BuildContext context) => [
                     const PopupMenuItem(
@@ -131,32 +186,20 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                     ),
                     const PopupMenuItem(
                       value: "desc",
-                      child: Text(
-                        "Description",
-                        style: TextStyle(fontSize: 11),
-                      ),
+                      child: Text("Description", style: TextStyle(fontSize: 11)),
                     ),
                     const PopupMenuItem(
                       value: "qty",
-                      child: Text(
-                        "Quantity > 0",
-                        style: TextStyle(fontSize: 11),
-                      ),
+                      child: Text("Quantity > 0", style: TextStyle(fontSize: 11)),
                     ),
                     const PopupMenuDivider(),
                     const PopupMenuItem(
                       value: "reset",
-                      child: Text(
-                        "Reset Filter",
-                        style: TextStyle(fontSize: 11, color: Colors.red),
-                      ),
+                      child: Text("Reset Filter", style: TextStyle(fontSize: 11, color: Colors.red)),
                     ),
                   ],
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(255, 32, 151, 164),
                       border: Border.all(color: borderGrey),
@@ -167,10 +210,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                       children: [
                         Icon(Icons.filter_list, size: 14, color: Colors.white),
                         SizedBox(width: 8),
-                        Text(
-                          "Filter",
-                          style: TextStyle(fontSize: 11, color: Colors.white),
-                        ),
+                        Text("Filter", style: TextStyle(fontSize: 11, color: Colors.white)),
                       ],
                     ),
                   ),
@@ -181,30 +221,20 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                   onPressed: () => setState(() => showSidePanel = true),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryIndigo,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   ),
-                  child: const Text(
-                    "Add Item SO",
-                    style: TextStyle(color: Colors.white, fontSize: 11),
-                  ),
+                  child: const Text("Add Item SO", style: TextStyle(color: Colors.white, fontSize: 11)),
                 ),
                 const SizedBox(width: 8),
 
                 OutlinedButton.icon(
                   onPressed: () => setState(() => _rowCount++),
                   icon: const Icon(Icons.add, size: 14, color: Colors.white),
-                  label: const Text(
-                    "Add Row",
-                    style: TextStyle(fontSize: 11, color: Colors.white),
-                  ),
+                  label: const Text("Add Row", style: TextStyle(fontSize: 11, color: Colors.white)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.green,
                     side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -214,23 +244,18 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                     if (_rowCount > 1) setState(() => _rowCount--);
                   },
                   icon: const Icon(Icons.remove, size: 14, color: Colors.white),
-                  label: const Text(
-                    "Remove Row",
-                    style: TextStyle(fontSize: 11, color: Colors.white),
-                  ),
+                  label: const Text("Remove Row", style: TextStyle(fontSize: 11, color: Colors.white)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.red,
                     side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   ),
                 ),
               ],
             ),
           ),
 
-          // --- CONTAINER 2: TENGAH (TABEL) ---
+          // --- CONTAINER 2: TENGAH (TABEL DATA) ---
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -249,21 +274,14 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                   headingRowHeight: 40,
                   dataRowMinHeight: 40,
                   dataRowMaxHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    const Color.fromARGB(255, 37, 117, 117),
-                  ),
+                  headingRowColor: WidgetStateProperty.all(const Color.fromARGB(255, 37, 117, 117)),
                   border: TableBorder.all(color: borderGrey, width: 0.5),
                   columns: _buildStaticColumns(),
                   rows: List.generate(
                     _rowCount,
                     (index) => DataRow(
                       cells: [
-                        DataCell(
-                          Text(
-                            "${index + 1}",
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
+                        DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
                         _buildModernTableCell("item_no_$index"),
                         _buildModernTableCell("jenis_brg_$index"),
                         _buildModernTableCell("desc_$index"),
@@ -273,10 +291,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                         _buildModernTableCell("qty_$index", initial: "0"),
                         _buildModernTableCell("stock_$index", initial: "0"),
                         _buildModernTableCell("price_$index", initial: "0.00"),
-                        _buildModernTableCell(
-                          "p_service_$index",
-                          initial: "0.00",
-                        ),
+                        _buildModernTableCell("p_service_$index", initial: "0.00"),
                         _buildModernTableCell("p_ref_$index", initial: "0.00"),
                         _buildModernTableCell("uom_$index"),
                         _buildModernTableCell("free_text_$index"),
@@ -296,19 +311,54 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-  List<DataColumn> _buildStaticColumns() {
-    const headerStyle = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    );
+  // --- HELPER UNTUK ISI CELL TABEL ---
+  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+    final controller = _getCtrl(key, initial: initial);
+    
+    // Cek apakah kolom ini butuh format angka/uang
+    bool isNumeric = key.contains("qty") || key.contains("stock") || 
+                     key.contains("price") || key.contains("p_") || 
+                     key.contains("total") || key.contains("disc");
 
+    // Gunakan _getFn agar otomatis .00 saat pindah kursor
+    final focusNode = _getFn(key, defaultValue: initial.isEmpty ? "0.00" : initial);
+
+    return DataCell(
+      SizedBox(
+        width: 120,
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+          keyboardType: isNumeric ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+          style: const TextStyle(fontSize: 12),
+          decoration: const InputDecoration(
+            isDense: true,
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 8),
+          ),
+          onChanged: (val) {
+            _fieldValues[key] = val;
+            
+            // Jika kolom harga berubah, hitung ulang Grand Total di footer secara real-time
+            if (isNumeric) {
+              setState(() {
+                _syncTotalBeforeDiscount();
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  // --- HEADER KOLOM TABEL ---
+  List<DataColumn> _buildStaticColumns() {
+    const headerStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white);
     return [
       const DataColumn(label: Text("#", style: headerStyle)),
       const DataColumn(label: Text("Item No.", style: headerStyle)),
-      const DataColumn(
-        label: Text("Jenis Barang dan Jasa", style: headerStyle),
-      ),
+      const DataColumn(label: Text("Jenis Barang dan Jasa", style: headerStyle)),
       const DataColumn(label: Text("Item Description", style: headerStyle)),
       const DataColumn(label: Text("Jenis Item", style: headerStyle)),
       const DataColumn(label: Text("Klasifikasi Orbit", style: headerStyle)),
@@ -325,6 +375,19 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
       const DataColumn(label: Text("Discount %", style: headerStyle)),
       const DataColumn(label: Text("Total (LC)", style: headerStyle)),
     ];
+  }
+
+  // --- FUNGSI SYNC TABEL KE FOOTER ---
+  void _syncTotalBeforeDiscount() {
+    double totalAllRows = 0;
+    for (int i = 0; i < _rowCount; i++) {
+      // Mengambil data dari kolom "total_$i" di tabel
+      String val = _controllers["total_$i"]?.text ?? "0";
+      totalAllRows += double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+    }
+    // Update kotak "Total Before Discount" di footer
+    _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
+    _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
   }
 
   Widget _buildLogisticsTab() {
@@ -500,165 +563,175 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-  Widget _buildModernFooter() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(top: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: borderGrey),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    _buildSmallDropdownRowModern("Sales Employe", "f_employ", [
-                      "",
-                    ]),
-                    _buildModernFieldRow("Owner", "f_owner"),
-                    const SizedBox(height: 8),
-                    _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
-                  ],
-                ),
-              ),
-              const Spacer(),
+Widget _buildModernFooter() {
+  double grandTotal = _getGrandTotal();
+  _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
 
-              SizedBox(
-                width: 350,
-                child: Column(
-                  children: [
-                    _buildSummaryRowWithAutoValue(
-                      "Total Before Discount",
-                      "0.00",
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 140,
-                            child: Text(
-                              "Discount",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          _buildSmallInputBox("f_disc_pct"),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4),
-                            child: Text("%", style: TextStyle(fontSize: 12)),
-                          ),
-                          Expanded(
-                            child: _buildSummaryBox("0.00", isReadOnly: true),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 140,
-                            child: Text(
-                              "Freight",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_right_alt,
-                            size: 18,
-                            color: Colors.orangeAccent,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: _buildSummaryBox("0.00", isReadOnly: true),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 140,
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Checkbox(
-                                    value: _checkStates["cb_rounding"] ?? false,
-                                    onChanged: (v) => setState(
-                                      () => _checkStates["cb_rounding"] = v!,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                const Text(
-                                  "Rounding",
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: _buildSummaryBox(
-                              "IDR 0.00",
-                              isReadOnly: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    _buildSummaryRowWithAutoValue("Tax", "0.00"),
-                    const Divider(height: 20),
-                    _buildSummaryRowWithAutoValue(
-                      "Total",
-                      "IDR 0.00",
-                      isBold: true,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            _buildSAPActionButton("Add", isPrimary: true),
-            const SizedBox(width: 8),
-
-            _buildSAPActionButton("Delete", isDanger: true),
-
-            const Spacer(),
-            // Copy From: Biru
-            _buildSAPActionButton(
-              "Copy From",
-              customColor: Colors.blue.shade700,
-            ),
-            const SizedBox(width: 8),
-            // Copy To: Kuning (Gold)
-            _buildSAPActionButton(
-              "Copy To",
-              customColor: Colors.orange.shade600,
+  return Column(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(top: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderGrey),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-      ],
-    );
-  }
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- SISI KIRI ---
+            Expanded(
+              child: Column(
+                children: [
+                  _buildSmallDropdownRowModern("Sales Employee", "f_employ", [""]),
+                  _buildModernFieldRow("Owner", "f_owner"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
+                ],
+              ),
+            ),
+            
+            const SizedBox(width: 60), 
+
+            // --- SISI KANAN: RINCIAN PERHITUNGAN ---
+            SizedBox(
+              width: 350,
+              child: Column(
+                children: [
+                  // Before Discount (Read Only dari mesin hitung)
+                  _buildSummaryRowWithAutoValue("Total Before Discount", "f_before_disc", isReadOnly: false),
+
+                  // BARIS DISCOUNT (Persen & Nominal)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 140, child: Text("Discount", style: TextStyle(fontSize: 12))),
+                        
+                        // KOTAK PERSEN (isPercent: true agar tetap bulat misal 10)
+                        SizedBox(
+                          width: 60, 
+                          child: _buildSummaryBox("f_disc_pct", isPercent: true, defaultValue: "0")
+                        ),
+                        
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4), 
+                          child: Text("%", style: TextStyle(fontSize: 12))
+                        ),
+                        
+                        // KOTAK NOMINAL (Otomatis keganti pas Persen diisi)
+                        Expanded(child: _buildSummaryBox("f_disc_val")),
+                      ],
+                    ),
+                  ),
+
+                  // BARIS FREIGHT
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 140, child: Text("Freight", style: TextStyle(fontSize: 12))),
+                        const Icon(Icons.arrow_right_alt, size: 18, color: Colors.orangeAccent),
+                        const SizedBox(width: 4),
+                        Expanded(child: _buildSummaryBox("f_freight")),
+                      ],
+                    ),
+                  ),
+
+                  // BARIS ROUNDING (Sinkron dengan Checkbox & Auto .00)
+                Padding(
+  padding: const EdgeInsets.symmetric(vertical: 2),
+  child: Row(
+    children: [
+      SizedBox(
+        width: 140,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Checkbox(
+                value: _checkStates["cb_rounding"] ?? false,
+                onChanged: (v) {
+                  setState(() {
+                    _checkStates["cb_rounding"] = v!;
+                    final controller = _getCtrl("f_rounding");
+                    
+                    if (v) {
+                      // Pas dicheck: nek kosong/0, dadekno 0.00 ben rapi
+                      if (controller.text.isEmpty || controller.text == "0") {
+                        controller.text = "0.00";
+                        _fieldValues["f_rounding"] = "0.00";
+                      }
+                    } else {
+                      // Pas centang dicopot: balekno dadi 0.00 ben Grand Total gak keleru
+                      controller.text = "0.00";
+                      _fieldValues["f_rounding"] = "0.00";
+                    }
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Text("Rounding", style: TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
+      Expanded(
+        child: _buildSummaryBox(
+          "f_rounding",
+          isReadOnly: !(_checkStates["cb_rounding"] ?? false),
+        ),
+      ),
+    ],
+  ),
+),
+
+                  // BARIS TAX (Sesuai hitungan)
+                  _buildSummaryRowWithAutoValue("Tax", "f_tax"),
+
+                  const Divider(height: 20, thickness: 1),
+
+                  // BARIS TOTAL AKHIR (Bold & ReadOnly)
+                  _buildSummaryRowWithAutoValue(
+                    "Total",
+                    "f_total_final",
+                    isBold: true,
+                    isReadOnly: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      
+      const SizedBox(height: 16),
+
+      // --- TOMBOL AKSI (FOOTER BUTTONS) ---
+      Row(
+        children: [
+          _buildSAPActionButton("Add", isPrimary: true),
+          const SizedBox(width: 8),
+          _buildSAPActionButton("Delete", isDanger: true),
+          const Spacer(),
+          _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
+          const SizedBox(width: 8),
+          _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
+        ],
+      ),
+    ],
+  );
+}
+
 
   Widget _buildSAPActionButton(
     String label, {
@@ -730,72 +803,180 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   }
 
   Widget _buildSummaryRowWithAutoValue(
-    String label,
-    String value, {
-    bool isBold = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(label, style: const TextStyle(fontSize: 12)),
+  String label,
+  String key, {
+  String defaultValue = "0.00",
+  bool isBold = false,
+  bool isReadOnly = false, // Tambahkan ini
+}) {
+  final TextEditingController controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
+  
+  if (!_focusNodes.containsKey(key)) {
+    _focusNodes[key] = FocusNode();
+    _focusNodes[key]!.addListener(() {
+      if (!_focusNodes[key]!.hasFocus && !isReadOnly) {
+        String text = controller.text;
+        setState(() {
+          double? parsed = double.tryParse(text.replaceAll(',', ''));
+          controller.text = (parsed ?? 0.0).toStringAsFixed(2);
+          _fieldValues[key] = controller.text;
+        });
+      }
+    });
+  }
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        SizedBox(width: 140, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate))),
+        const SizedBox(width: 58),
+        Expanded(
+          child: Container(
+            height: 28,
+            decoration: BoxDecoration(
+              color: isReadOnly ? bgSlate : Colors.white,
+              border: Border.all(color: borderGrey),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: TextField(
+              controller: controller,
+              focusNode: _focusNodes[key],
+              readOnly: isReadOnly,
+              textAlign: TextAlign.right,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: TextStyle(fontSize: 12, fontWeight: isBold ? FontWeight.bold : FontWeight.w500),
+              decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6), border: InputBorder.none),
+              onChanged: (val) {
+                if (!isReadOnly) {
+                  _fieldValues[key] = val;
+                  // OBAT KURSOR LOMPAT: Kunci posisi kursor di akhir
+                  controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+                  setState(() {}); 
+                }
+              },
+            ),
           ),
-          const SizedBox(width: 58),
-          Expanded(
-            child: _buildSummaryBox(value, isReadOnly: true, isBold: isBold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSmallInputBox(String key) {
-    return Container(
-      width: 50,
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: TextField(
-        controller: _getCtrl(key),
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 11),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          isDense: true,
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
+ Widget _buildSmallInputBox(String key) {
+  final controller = _getCtrl(key);
+  final focusNode = _getFn(key);
 
-  Widget _buildSummaryBox(
-    String val, {
-    bool isBold = false,
-    bool isReadOnly = true,
-  }) {
-    return Container(
-      height: 24,
-      alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(4),
+  return Container(
+    width: 50,
+    height: 24,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: borderGrey),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: TextField(
+      controller: controller,
+      focusNode: focusNode,
+      textAlign: TextAlign.center,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: const TextStyle(fontSize: 11),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 6),
       ),
-      child: Text(
-        val,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
+      onChanged: (val) {
+        _fieldValues[key] = val;
+        if (key == "f_disc_pct") {
+          double pct = double.tryParse(val) ?? 0;
+          double beforeDisc = double.tryParse(
+            _fieldValues["f_before_disc"]?.replaceAll(RegExp(r'[^0-9.]'), '') ?? '0'
+          ) ?? 0;
+          double discAmount = beforeDisc * (pct / 100);
+          setState(() {
+            _fieldValues["f_disc_val"] = discAmount.toStringAsFixed(2);
+            _getCtrl("f_disc_val").text = discAmount.toStringAsFixed(2);
+          });
+        }
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: controller.text.length),
+        );
+      },
+    ),
+  );
+}
 
+ Widget _buildSummaryBox(
+  String key, {
+  String defaultValue = "0.00",
+  bool isBold = false,
+  bool isReadOnly = false,
+  bool isPercent = false,
+}) {
+  final TextEditingController controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
+  final focusNode = _getFn(key, isReadOnly: isReadOnly, defaultValue: defaultValue, isPercent: isPercent);
+
+  return Container(
+    height: 24,
+    alignment: Alignment.centerRight,
+    decoration: BoxDecoration(
+      color: isReadOnly ? bgSlate : Colors.white,
+      border: Border.all(color: borderGrey),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: TextField(
+      controller: controller,
+      focusNode: focusNode,
+      readOnly: isReadOnly,
+      textAlign: TextAlign.right,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: TextStyle(fontSize: 12, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, height: 1.1),
+      decoration: const InputDecoration(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        border: InputBorder.none,
+      ),
+      onChanged: (val) {
+        if (!isReadOnly) {
+          _fieldValues[key] = val;
+
+          // --- LOGIKA OTOMATIS: Persen (Kiri) -> Nominal (Kanan) ---
+          if (key == "f_disc_pct") {
+            // 1. Ambil nilai persen yang baru diketik
+            double pct = double.tryParse(val) ?? 0;
+            
+            // 2. Ambil nilai Total Before Discount
+            String beforeText = _getCtrl("f_before_disc").text.replaceAll(RegExp(r'[^0-9.]'), '');
+            double before = double.tryParse(beforeText) ?? 0;
+            
+            // 3. Hitung nominal diskonnya
+            double resultNominal = before * (pct / 100);
+            
+            // 4. Update kotak nominal (f_disc_val) secara instan
+            _getCtrl("f_disc_val").text = resultNominal.toStringAsFixed(2);
+            _fieldValues["f_disc_val"] = resultNominal.toStringAsFixed(2);
+          }
+          
+          // --- LOGIKA SEBALIKNYA: Nominal (Kanan) -> Persen (Kiri) ---
+          if (key == "f_disc_val") {
+             double nominal = double.tryParse(val) ?? 0;
+             String beforeText = _getCtrl("f_before_disc").text.replaceAll(RegExp(r'[^0-9.]'), '');
+             double before = double.tryParse(beforeText) ?? 1; // avoid div by zero
+             
+             double resultPct = (nominal / before) * 100;
+             
+             // Update kotak persen (tanpa desimal banyak)
+             _getCtrl("f_disc_pct").text = resultPct.toStringAsFixed(0);
+             _fieldValues["f_disc_pct"] = resultPct.toStringAsFixed(0);
+          }
+
+          controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+          setState(() {}); // Update Grand Total di bawah secara real-time
+        }
+      },
+    ),
+  );
+}
   Widget _buildModernFieldRow(
     String label,
     String key, {
@@ -960,18 +1141,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
-    return DataCell(
-      TextField(
-        controller: _getCtrl(key, initial: initial),
-        style: const TextStyle(fontSize: 11),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
-    );
-  }
+ 
 
   Widget _buildModernCheckbox(String label, String key) {
     return Row(
@@ -1023,7 +1193,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
         children: [
           SizedBox(
             width:
-                140, // Lebar label disesuaikan dengan field Sales Employe/Owner
+                140, 
             child: Text(label, style: const TextStyle(fontSize: 12)),
           ),
           Expanded(
