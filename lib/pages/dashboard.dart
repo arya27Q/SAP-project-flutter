@@ -45,7 +45,8 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 242, 244, 247),
+      // Mengubah sedikit warna bg agar kontras dengan card putih
+      backgroundColor: const Color(0xFFF8FAFC), 
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
         child: Column(
@@ -61,12 +62,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
             _buildSectionHeader("Critical Alerts & Approvals"),
             const SizedBox(height: 15),
-            _buildApprovalAlertGrid(), // FIXED OVERFLOW FOR MOBILE
+            _buildApprovalAlertGrid(), 
             const SizedBox(height: 30),
 
             _buildSectionHeader("Financials Summary"),
             const SizedBox(height: 15),
-            _buildFinancialGrid(), // FIXED OVERFLOW FOR MOBILE
+            _buildFinancialGrid(), 
             const SizedBox(height: 30),
 
             _buildSectionHeader("Strategic Intelligence Hub"),
@@ -110,7 +111,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- 1. SUBSIDIARY SYNC (DENGAN BORDER & SHADOW) ---
+  // --- 1. SUBSIDIARY SYNC ---
   Widget _buildBranchSyncStatusRow() {
     final List<Map<String, dynamic>> branchSyncData = [
       {"name": "PT. Dempo Laser Metalindo Surabaya", "status_id": 1},
@@ -120,21 +121,25 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     return SizedBox(
-      height: 75,
+      height: 85, // Ditambah sedikit biar shadow bawah ga kepotong
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: branchSyncData.length,
         itemBuilder: (context, index) {
           int sId = branchSyncData[index]['status_id'];
           return Container(
-            margin: const EdgeInsets.only(right: 12, bottom: 10),
+            margin: const EdgeInsets.only(right: 12, bottom: 15, top: 5),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+              border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 3))
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08), 
+                  blurRadius: 10, 
+                  offset: const Offset(0, 5)
+                )
               ],
             ),
             child: Row(
@@ -152,13 +157,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- 2. CRITICAL ALERTS (FIXED OVERFLOW MOBILE) ---
+  // --- 2. CRITICAL ALERTS ---
   Widget _buildApprovalAlertGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Jika layar kecil (mobile), gunakan 2 kolom atau kurangi rasio
         return GridView.count(
           shrinkWrap: true,
+          padding: const EdgeInsets.only(bottom: 10), // Ruang untuk shadow
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: constraints.maxWidth < 600 ? 2 : 3, 
           crossAxisSpacing: 15,
@@ -180,16 +185,19 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+          BoxShadow(
+            color: color.withOpacity(0.4), 
+            blurRadius: 12, 
+            offset: const Offset(0, 6)
+          )
         ],
       ),
       child: Row(
         children: [
           Icon(icon, color: Colors.white, size: 22),
           const SizedBox(width: 10),
-          Expanded( // Menghindari teks nabrak batas
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -204,12 +212,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- 3. FINANCIALS GRID (FIXED OVERFLOW MOBILE) ---
+  // --- 3. FINANCIALS GRID ---
   Widget _buildFinancialGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return GridView.count(
           shrinkWrap: true,
+          padding: const EdgeInsets.only(bottom: 10),
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: constraints.maxWidth < 600 ? 2 : 4,
           crossAxisSpacing: 16,
@@ -232,9 +241,12 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 5))
+          BoxShadow(
+            color: color.withOpacity(0.35), 
+            blurRadius: 15, 
+            offset: const Offset(0, 8)
+          )
         ],
       ),
       child: Column(
@@ -249,7 +261,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- 4. INVENTORY (DENGAN BORDER & SHADOW) ---
+  // --- 4. INVENTORY ---
   Widget _buildInventoryWarehouseGrid() {
     return Row(
       children: [
@@ -260,9 +272,8 @@ class _DashboardPageState extends State<DashboardPage> {
             decoration: BoxDecoration(
               color: Colors.red.shade700,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
               boxShadow: [
-                BoxShadow(color: Colors.red.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 5))
+                BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))
               ],
             ),
             child: Column(
@@ -285,9 +296,8 @@ class _DashboardPageState extends State<DashboardPage> {
             decoration: BoxDecoration(
               color: darkSlate, 
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 5))
+                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))
               ],
             ),
             child: Column(
@@ -318,7 +328,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- GRAFIK & LAINNYA (DENGAN BORDER & SHADOW) ---
+  // --- GRAFIK & LAINNYA ---
 
   Widget _buildYearlyComparisonChart() {
     return Container(
@@ -327,8 +337,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 10))
+        ],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text("Annual Revenue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -370,8 +381,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 8))
+        ],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
@@ -400,8 +412,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 8))
+        ],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text("A/R Aging", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -426,8 +439,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 8))
+        ],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Icon(icon, color: color, size: 16), const SizedBox(width: 5), Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
@@ -444,8 +458,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Colors.white, 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 10))
+        ],
       ),
       child: Column(children: [
         const Text("Resources", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -467,7 +482,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A), 
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))]
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))
+        ]
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text(">_ LOG_V6", style: TextStyle(color: Colors.tealAccent, fontFamily: 'monospace', fontSize: 9, fontWeight: FontWeight.bold)),
@@ -493,7 +510,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [darkSlate, const Color(0xFF334155)]), 
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 15, offset: const Offset(0, 8))]
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))
+        ]
       ),
       child: Row(children: [
         const Icon(Icons.hub_rounded, color: Colors.blueAccent, size: 30),

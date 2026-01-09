@@ -65,8 +65,8 @@ class _SignUpPageState extends State<SignUpPage> {
     String targetPT = companyMapping[selectedCompany!]!;
 
     try {
-      // 3. Kirim Data ke API Laravel menggunakan IP 192.168.0.102
-      var url = Uri.parse('http://192.168.0.102:8000/api/test-register');
+      // 3. Kirim Data ke API Laravel menggunakan IP 
+      var url = Uri.parse('http://192.168.0.101:8000/api/test-register');
       var response = await http.post(
         url,
         body: {
@@ -91,7 +91,7 @@ class _SignUpPageState extends State<SignUpPage> {
         _showErrorSnackBar("Gagal mendaftar. Email mungkin sudah digunakan.");
       }
     } catch (e) {
-      _showErrorSnackBar("Koneksi Error: Pastikan server menyala di 192.168.0.102");
+      _showErrorSnackBar("Koneksi Error: Pastikan server menyala");
     } finally {
       if (mounted) {
         setState(() {

@@ -53,8 +53,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           children: [
             _buildHeaderSection(),
             const SizedBox(height: 24),
-            _buildTabNavigation(),
-            _buildTabContentArea(),
+
+           _buildTabSection(),
 
             const SizedBox(height: 20),
             _buildActionArea(),
@@ -191,19 +191,14 @@ Widget _buildAccountFieldRow(
     padding: const EdgeInsets.only(bottom: 4),
     child: Row(
       children: [
-        // 1. Label Utama
         SizedBox(
           width: 140,
           child: Text(label, style: const TextStyle(fontSize: 11)),
         ),
-
-        // 2. Panah Kuning SAP
         Icon(Icons.play_arrow, size: 12, color: Colors.orange.shade400),
         const SizedBox(width: 4),
-
-        // 3. KOTAK PENDEK (Nomor Akun)
         Container(
-          width: 90, // Tak perpendek dadi 90 biar sesuai gambar
+          width: 90, 
           height: 20,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -224,13 +219,12 @@ Widget _buildAccountFieldRow(
         const Text("=", style: TextStyle(fontSize: 11, color: Colors.black54)),
         const SizedBox(width: 6),
 
-        // 4. TEXT DESKRIPSI (Sing Kepotong / Ellipsis)
         Expanded(
           child: Text(
             accName,
             style: const TextStyle(fontSize: 11, color: Colors.black87),
-            maxLines: 1, // Ben tetep sak baris
-            overflow: TextOverflow.ellipsis, // Iki sing nggawe "..." nek kepanjangan
+            maxLines: 1, 
+            overflow: TextOverflow.ellipsis, 
           ),
         ),
       ],
@@ -244,10 +238,9 @@ Widget _buildAccountFieldRow(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 32, // Membatasi lebar area klik agar tidak terlalu jauh dari teks
+          width: 32, 
           child: Radio<String>(
             value: label,
-            // Membuat ukuran radio lebih compact
             visualDensity: const VisualDensity(
               horizontal: VisualDensity.minimumDensity,
               vertical: VisualDensity.minimumDensity,
@@ -842,224 +835,272 @@ Widget _buildAccountFieldRow(
     );
   }
 
-  // --- SISA WIDGET BUILDER BAWAANMU (HEADER, GENERAL, CONTACTS, DLL) ---
-  Widget _buildHeaderSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderGrey),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                _buildModernNoFieldRow(
-                  "Code",
-                  "bp_series",
-                  ["Manual", "System"],
-                  "bp_code_val",
-                  initialNo: "VJS-481",
-                ),
-                _buildModernFieldRow(
-                  "Name",
-                  "bp_name",
-                  initial: "Dinamika Polimerindo, PT",
-                ),
-                _buildModernFieldRow("Foreign Name", "bp_f_name"),
-                _buildSmallDropdownRowModern("Group", "bp_group", [
-                  "General",
-                  "Suppliers",
-                  "Customers",
-                ]),
-                _buildSmallDropdownRowModern("Currency", "bp_curr", [
-                  "Indonesian Rupiah",
-                  "USD",
-                  "EUR",
-                ]),
-                _buildModernFieldRow("Federal Tax ID", "bp_tax_id"),
-              ],
-            ),
-          ),
-          const SizedBox(width: 60),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
-                  "All Currencies",
-                ]),
-                _buildSummaryRowWithArrow("Account Balance", ""),
-                _buildSummaryRowWithArrow("Goods Receipt POs", ""),
-                _buildSummaryRowWithArrow("Purchase Orders", ""),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTabNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        border: Border.all(color: borderGrey),
+ Widget _buildHeaderSection() {
+  return Container(
+    
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24), 
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16), 
+      border: Border.all(
+        color: Colors.white, 
+        width: 2.5, // Border lebih tebel
       ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        labelColor: primaryIndigo,
-        unselectedLabelColor: secondarySlate,
-        indicatorColor: primaryIndigo,
-        tabs: const [
-          Tab(text: "General"),
-          Tab(text: "Contact Persons"),
-          Tab(text: "Addresses"),
-          Tab(text: "Payment Terms"),
-          Tab(text: "Payment Run"),
-          Tab(text: "Accounting"),
-          Tab(text: "Properties"),
-          Tab(text: "Remarks"),
-          Tab(text: "Attachments"),
-        ],
-      ),
-    );
-  }
+    
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 15,
+          spreadRadius: 2,
+          offset: const Offset(0, 8), // Bayangan jatuh ke bawah
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              _buildModernNoFieldRow(
+                "Code",
+                "bp_series",
+                ["Manual", "System"],
+                "bp_code_val",
+                initialNo: "VJS-481",
+              ),
+              _buildModernFieldRow(
+                "Name",
+                "bp_name",
+                initial: "Dinamika Polimerindo, PT",
+              ),
+              _buildModernFieldRow("Foreign Name", "bp_f_name"),
+              _buildSmallDropdownRowModern("Group", "bp_group", [
+                "General",
+                "Suppliers",
+                "Customers",
+              ]),
+              _buildSmallDropdownRowModern("Currency", "bp_curr", [
+                "Indonesian Rupiah",
+                "USD",
+                "EUR",
+              ]),
+              _buildModernFieldRow("Federal Tax ID", "bp_tax_id"),
+            ],
+          ),
+        ),
+        const SizedBox(width: 60),
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: [
+              _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
+                "All Currencies",
+              ]),
+              _buildSummaryRowWithArrow("Account Balance", ""),
+              _buildSummaryRowWithArrow("Goods Receipt POs", ""),
+              _buildSummaryRowWithArrow("Purchase Orders", ""),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget _buildTabContentArea() {
-    return Container(
-      height: 400,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-      ),
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildGeneralTab(),
-          _buildContactPersonsTab(),
-          _buildAddressesTab(),
-          _buildPaymentTermTab(),
-          _buildPaymentRunTab(),
-          _buildAccountingTab(),
-          const Center(child: Text("BP Properties")),
-          const Center(child: Text("Internal Remarks")),
-          const Center(child: Text("Document Attachments")),
-        ],
-      ),
-    );
-  }
+  Widget _buildTabSection() {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 15,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Container(
+          color: primaryIndigo, 
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            dividerColor: Colors.transparent, 
+            labelColor: primaryIndigo,
+            unselectedLabelColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            indicatorPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            tabs: const [
+              Tab(text: "General"),
+              Tab(text: "Contact Persons"),
+              Tab(text: "Addresses"),
+              Tab(text: "Payment Terms"),
+              Tab(text: "Payment Run"),
+              Tab(text: "Accounting"),
+              Tab(text: "Properties"),
+              Tab(text: "Remarks"),
+              Tab(text: "Attachments"),
+            ],
+          ),
+        ),
+        
+        // AREA ISI (Garis biru tebal pemisah header & konten)
+        Container(
+          height: 3, 
+          color: primaryIndigo
+        ),
 
-  // --- SISI WIDGET FIELD BUILDER (MODERN FIELD, SEARCH, DLL) ---
-  Widget _buildModernNoFieldRow(
-    String label,
-    String dropdownKey,
-    List<String> series,
-    String textKey, {
-    String initialNo = "",
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+        SizedBox(
+          height: 500,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildGeneralTab(),
+              _buildContactPersonsTab(),
+              _buildAddressesTab(),
+              _buildPaymentTermTab(),
+              _buildPaymentRunTab(),
+              _buildAccountingTab(),
+              const Center(child: Text("BP Properties")),
+              const Center(child: Text("Internal Remarks")),
+              const Center(child: Text("Document Attachments")),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+ Widget _buildModernNoFieldRow(
+  String label,
+  String dropdownKey,
+  List<String> series,
+  String textKey, {
+  String initialNo = "",
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 130,
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 12, color: secondarySlate),
+          ),
+        ),
+        // 1. Dropdown Kiri (Manual / System)
+        Container(
+          width: 100,
+          height: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: bgSlate,
+            border: Border.all(color: borderGrey),
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(6),
             ),
           ),
-          Container(
-            width: 100,
-            height: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              border: Border.all(color: borderGrey),
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(6),
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues[dropdownKey] ?? series.first,
-                isDense: true,
-                style: const TextStyle(fontSize: 11),
-                onChanged: (v) =>
-                    setState(() => _dropdownValues[dropdownKey] = v!),
-                items: series
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-              ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _dropdownValues[dropdownKey] ?? series.first,
+              isDense: true,
+              // PERBAIKAN: Tambahkan warna hitam eksplisit agar teks terlihat
+              style: const TextStyle(fontSize: 11, color: Colors.black),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+              onChanged: (v) =>
+                  setState(() => _dropdownValues[dropdownKey] = v!),
+              items: series
+                  .map((e) => DropdownMenuItem(
+                        value: e, 
+                        child: Text(e, style: const TextStyle(color: Colors.black))
+                      ))
+                  .toList(),
             ),
           ),
-          Expanded(
-            child: Container(
-              height: 30,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(color: borderGrey),
-                  bottom: BorderSide(color: borderGrey),
-                ),
-              ),
-              child: TextField(
-                controller: _getCtrl(textKey, initial: initialNo),
-                style: const TextStyle(fontSize: 12),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            width: 100,
+        ),
+        // 2. TextField Tengah (VJS-481)
+        Expanded(
+          child: Container(
             height: 30,
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: borderGrey),
-              borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(6),
+              border: Border(
+                top: BorderSide(color: borderGrey),
+                bottom: BorderSide(color: borderGrey),
+                // Hilangkan border kiri/kanan agar menyatu dengan dropdown
               ),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues["bp_type_header"] ?? "Vendor",
+            child: TextField(
+              controller: _getCtrl(textKey, initial: initialNo),
+              // PERBAIKAN: Pastikan style teks input berwarna hitam
+              style: const TextStyle(fontSize: 12, color: Colors.black),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
                 isDense: true,
-                isExpanded: true,
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                onChanged: (v) =>
-                    setState(() => _dropdownValues["bp_type_header"] = v!),
-                items: ["Vendor", "Customer"]
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 24),
-                          child: Text(e),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 8,
+                ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        // 3. Dropdown Kanan (Vendor / Customer)
+        Container(
+          width: 100,
+          height: 30,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: borderGrey),
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(6),
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _dropdownValues["bp_type_header"] ?? "Vendor",
+              isDense: true,
+              isExpanded: true,
+              // PERBAIKAN: Warna teks hitam dan icon terlihat
+              style: const TextStyle(fontSize: 11, color: Colors.black),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+              onChanged: (v) =>
+                  setState(() => _dropdownValues["bp_type_header"] = v!),
+              items: ["Vendor", "Customer"]
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8), // Sesuaikan padding agar tidak terlalu ke kanan
+                        child: Text(e, style: const TextStyle(color: Colors.black)),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildSmallDropdownRowModern(
     String label,
@@ -1370,11 +1411,7 @@ Widget _buildAccountFieldRow(
               Expanded(
                 child: Column(
                   children: [
-                    _buildSmallDropdownRowModern(
-                      "Payment Terms",
-                      "paymentTerm",
-                      [""],
-                    ),
+                    _buildSmallDropdownRowModern("Payment Terms","paymentTerm",[""]),
                     _buildModernFieldRow("Interest on Arreas %", "Interest"),
                     const SizedBox(height: 20),
                     _buildSmallDropdownRowModern("Price List", "PriceList", [
@@ -1382,9 +1419,59 @@ Widget _buildAccountFieldRow(
                     ]),
                     _buildModernFieldRow("Total Discount %", "total disc"),
                     _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
+                    _buildSimpleFieldRow("Commitmen Limit", "commitmen Limit"),
+                    const SizedBox(height: 30),
+                    _buildSmallDropdownRowModern("Effective Discount Group","Effective Discount Group",[""]),
+                    _buildSmallDropdownRowModern("Effective Price","Effective Price",[""]),
+                    const SizedBox(height: 10),
+                    _buildModernFieldRow("Bank Country","bank country"),
+                    _buildModernFieldRow("Bank Name", "Bank Name"),
+                    _buildModernFieldRow("bank Code", "Bank code"),
+                    _buildModernFieldRow("Account","Account"),
+
+                   const SizedBox(height: 5), 
+                   Align(
+                   alignment: Alignment.centerLeft, 
+                    child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0), 
+                      child: Text(
+                      "Business Partner Bank",
+                       style:TextStyle(
+                        fontSize: 14,
+                        fontWeight: 
+                        FontWeight.bold,
+                        decoration: 
+                        TextDecoration.underline) 
+                       ),
+                    ),
+                   ),
+                   const SizedBox(height: 5),
+                    _buildModernFieldRow("BIC/SWIFT code", "BIC/SWIFT code"),
+                    _buildModernFieldRow("Account","Account"),
+                    _buildModernFieldRow("Bank Account Name", "Bank Account Name"),
+                    _buildModernFieldRow("Account","Account"),
+                    _buildModernFieldRow("Branch", "Branch"),
+                    _buildModernFieldRow("Ctrl Int ID","Control Int ID"),
+                    _buildModernFieldRow("IBAN","iban"),
+                    _buildModernFieldRow("Mandate ID","Mandate ID"),
+                    _buildSmallDropdownRowModern("Date Of Signature","Date OF Signature",[""]),
                   ],
                 ),
               ),
+              const SizedBox(width: 40),
+              Expanded(child: Column(
+                children: [
+                  _buildSmallDropdownRowModern("Credit Card Type","Credit Card Type", [""]),
+                  _buildModernFieldRow("Credit Card No","Credit Card No"),
+                  _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                  _buildModernFieldRow("ID number", "Id number"),
+                  _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                  _buildModernFieldRow("Average Delay", "Average Delay"),
+                  _buildSmallDropdownRowModern("Priority","priority", [""]),
+                  _buildModernFieldRow("Default IBAN"," Default IBAN"),
+                  _buildSmallDropdownRowModern("Hollidays", "Hollidays", [""]),
+                ],
+              ))
             ],
           ),
         ],
@@ -1623,66 +1710,56 @@ Widget _buildAccountFieldRow(
   }
 
   Widget _buildActionArea() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment
-            .spaceBetween, // Memisahkan tombol aksi (kiri) dan menu (kanan)
-        children: [
-          Row(
-            children: [
-              // Tombol Add / Update
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      primaryIndigo, // Menggunakan variabel warna class
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+  return Container(
+    // Tambahkan horizontal padding agar sejajar dengan box di atasnya (margin 16)
+    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+    child: Row(
+      // Menggunakan spaceBetween untuk mendorong satu grup ke kiri dan satu ke kanan
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+      children: [
+        // GRUP TOMBOL KIRI (Add / Update & Cancel)
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryIndigo, 
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  "Add / Update",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                elevation: 2,
               ),
-              const SizedBox(width: 12),
-              // Tombol Cancel warna Merah sesuai request
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 255, 0, 0),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              child: const Text(
+                "Add / Update",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          // Tombol Kuning "You Can Also" di sebelah kanan
-          _buildYouCanAlsoMenu(),
-        ],
-      ),
-    );
-  }
-
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton( 
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+              ),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        _buildYouCanAlsoMenu(), 
+      ],
+    ),
+  );
+}
   Widget _buildYouCanAlsoMenu() {
     return PopupMenuButton<String>(
       onSelected: (value) {
@@ -1694,7 +1771,7 @@ Widget _buildAccountFieldRow(
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 255, 204, 0),
           border: Border.all(color: borderGrey),
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

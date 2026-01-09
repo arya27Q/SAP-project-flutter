@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isError = false; 
   String _errorMessage = "";
 
-  // Daftar Company sesuai UI kamu
+  
   final List<String> companies = [
     "PT. Dempo Laser Metalindo Surabaya",
     "PT. Duta Laserindo Metal",
@@ -70,8 +70,8 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Menggunakan IP Laravel kamu: 192.168.0.107
-      var url = Uri.parse('http://192.168.0.102:8000/api/test-login');
+      // Menggunakan IP Laravel : 192.168.0.107
+      var url = Uri.parse('http://192.168.0.101:8000/api/test-login');
       var response = await http.post(
         url,
         body: {
@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
         _handleLoginError("Email/Password salah atau PT tidak sesuai");
       }
     } catch (e) {
-      _handleLoginError("Gagal terhubung ke Server (192.168.0.102)");
+      _handleLoginError("Gagal terhubung ke Server ");
     }
   }
 
