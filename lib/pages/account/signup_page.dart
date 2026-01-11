@@ -55,7 +55,6 @@ class _SignUpPageState extends State<SignUpPage> {
       _isLoading = true;
     });
 
-    // 2. Mapping Nama PT ke ID Koneksi Laravel agar masuk ke database yang benar
     Map<String, String> companyMapping = {
       "PT. Dempo Laser Metalindo Surabaya": "pt1",
       "PT. Duta Laserindo Metal": "pt2",
@@ -65,7 +64,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String targetPT = companyMapping[selectedCompany!]!;
 
     try {
-      // 3. Kirim Data ke API Laravel menggunakan IP 
+    
       var url = Uri.parse('http://192.168.0.101:8000/api/test-register');
       var response = await http.post(
         url,
@@ -73,7 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
-          'target_pt': targetPT, // Mengirim identitas database tujuan
+          'target_pt': targetPT, 
         },
       ).timeout(const Duration(seconds: 10));
 

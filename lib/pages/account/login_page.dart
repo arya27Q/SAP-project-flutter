@@ -54,8 +54,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // --- LOGIC MULTI-DATABASE MAPPING ---
-    // Mengubah nama tampilan PT menjadi ID Koneksi di Laravel
+  
     Map<String, String> companyMapping = {
       "PT. Dempo Laser Metalindo Surabaya": "pt1",
       "PT. Duta Laserindo Metal": "pt2",
@@ -70,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Menggunakan IP Laravel : 192.168.0.107
       var url = Uri.parse('http://192.168.0.101:8000/api/test-login');
       var response = await http.post(
         url,

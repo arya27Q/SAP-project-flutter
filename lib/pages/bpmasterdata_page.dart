@@ -1023,7 +1023,6 @@ Widget _buildAccountFieldRow(
             child: DropdownButton<String>(
               value: _dropdownValues[dropdownKey] ?? series.first,
               isDense: true,
-              // PERBAIKAN: Tambahkan warna hitam eksplisit agar teks terlihat
               style: const TextStyle(fontSize: 11, color: Colors.black),
               icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
               onChanged: (v) =>
@@ -1046,12 +1045,10 @@ Widget _buildAccountFieldRow(
               border: Border(
                 top: BorderSide(color: borderGrey),
                 bottom: BorderSide(color: borderGrey),
-                // Hilangkan border kiri/kanan agar menyatu dengan dropdown
               ),
             ),
             child: TextField(
               controller: _getCtrl(textKey, initial: initialNo),
-              // PERBAIKAN: Pastikan style teks input berwarna hitam
               style: const TextStyle(fontSize: 12, color: Colors.black),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -1064,7 +1061,6 @@ Widget _buildAccountFieldRow(
             ),
           ),
         ),
-        // 3. Dropdown Kanan (Vendor / Customer)
         Container(
           width: 100,
           height: 30,
@@ -1162,10 +1158,9 @@ Widget _buildAccountFieldRow(
     String key, {
     String value = "0.00",
   }) {
-    // FIX: Gunakan _getCtrl agar controller disimpan di Map dan tidak memory leak
+ 
     final TextEditingController _controller = _getCtrl(key, initial: _fieldValues[key] ?? value);
     
-    // FIX: Gunakan cache untuk FocusNode agar listener tidak menumpuk (double listener)
     if (!_focusNodes.containsKey(key)) {
       _focusNodes[key] = FocusNode();
       _focusNodes[key]!.addListener(() {
@@ -1178,7 +1173,7 @@ Widget _buildAccountFieldRow(
             _controller.text = "0.00";
           }
           _fieldValues[key] = _controller.text;
-          // Trigger rebuild saat lost focus untuk update tampilan angka
+        
           if (mounted) setState(() {});
         }
       });
@@ -1425,8 +1420,6 @@ Widget _buildAccountFieldRow(
                       Expanded(
                         child: _buildSmallDropdownRowModern("Payment Terms", "paymentTerm", [""]),
                       ),
-                      const SizedBox(width: 4),
-                      _buildSmallIconButton(Icons.settings, onTap: () => _showPaymentTermsSetup()),
                     ],
                   ),
                   _buildModernFieldRow("Interest on Arreas %", "Interest"),

@@ -20,7 +20,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   final Color borderGrey = const Color(0xFFE2E8F0);
   final ScrollController _horizontalScroll = ScrollController();
   
-  // Cache Controller & Node agar tidak dibuat ulang terus di build()
+  
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};

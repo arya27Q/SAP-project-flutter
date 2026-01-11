@@ -18,9 +18,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-  final ScrollController _horizontalScroll = ScrollController();
   
-  // Cache Controller & Node agar tidak dibuat ulang terus di build()
+ // controller 
+  final ScrollController _horizontalScroll = ScrollController();
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
@@ -311,7 +311,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             onChanged: (val) {
               _fieldValues[key] = val;
               if (isNumeric) {
-                 // Optimization: Sync total without rebuilding EVERYTHING if possible
                  _syncTotalBeforeDiscount();
               }
             },
