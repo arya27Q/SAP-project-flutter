@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'pages/purchasing/purchase_quotation_page.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 import 'pages/account/login_page.dart';
@@ -9,8 +8,10 @@ import 'pages/dashboard.dart';
 import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
+import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'pages/bpmasterdata_page.dart';
 import 'pages/purchasing/purchase_request_page.dart';
+import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
 
 class MainLayout extends StatefulWidget {
@@ -149,10 +150,11 @@ class _MainLayoutState extends State<MainLayout> {
       case "Delivery":
         return const DeliveryPage(key: ValueKey("Delivery"));
 
-      case "Business Partner Master Data":
-        return const BpMasterDataPage(
-          key: ValueKey("Business Partner Master Data"),
-        );
+      case "A/R Down Payment Invoice":
+        return const ArDownPaymentInvoicePage(key: ValueKey("A/R Down Payment Invoice"));
+
+      case "Bp Master Data":
+        return const BpMasterDataPage(key: ValueKey("Bp Master Data"));
 
       case "Purchase Request":
         return const PurchaseRequestPage(key: ValueKey("Purchase Request"));

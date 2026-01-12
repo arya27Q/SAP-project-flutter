@@ -70,7 +70,7 @@ class SidebarWidget extends StatelessWidget {
                   _buildSubMenu("Sales Order", Icons.list_alt_rounded),
                   _buildSubMenu("Delivery", Icons.local_shipping_outlined),
                   _buildSubMenu("Return", Icons.assignment_return_outlined),
-                  _buildSubMenu("A/R Down Payment", Icons.payments_outlined),
+                  _buildSubMenu("A/R Down Payment Invoice", Icons.payments_outlined),
                   _buildSubMenu("A/R Invoice", Icons.receipt_long_rounded),
                   _buildSubMenu("A/R Credit Memo", Icons.credit_card_off_rounded),
                   _buildSubMenu("Cancel & Read Off", Icons.cancel_presentation_rounded),
