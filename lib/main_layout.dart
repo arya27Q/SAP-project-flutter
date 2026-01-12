@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/purchasing/purchase_quotation_page.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 import 'pages/account/login_page.dart';
@@ -154,12 +155,13 @@ class _MainLayoutState extends State<MainLayout> {
         );
 
       case "Purchase Request":
-        return const PurchaseRequestPage(key: ValueKey("Purchase Request")
-        );
+        return const PurchaseRequestPage(key: ValueKey("Purchase Request"));
+
+      case "Purchase Quotation":
+        return const PurchaseQuotationPage(key: ValueKey("Purchase Quotation"));
 
       case "Purchase Order":
-        return const PurchaseOrderPage(key: ValueKey("Purchase Order")
-        );
+        return const PurchaseOrderPage(key: ValueKey("Purchase Order"));
 
       default:
         return Center(
