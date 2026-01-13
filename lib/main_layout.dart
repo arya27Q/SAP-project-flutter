@@ -10,6 +10,8 @@ import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
 import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'pages/sales_AR/ar_invoice_page.dart';
+import 'pages/sales_AR/ar_credit_memo_page.dart';
+import 'pages/sales_AR/return_page.dart';
 import 'pages/Business_Partner_Master_Data.dart';
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
@@ -157,10 +159,16 @@ class _MainLayoutState extends State<MainLayout> {
       case "A/R Invoice":
         return const ArInvoicePage(key: ValueKey("A/R Invoice"));
 
+      case "A/R Credit Memo":
+        return const ArCreditMemoPage(key: ValueKey("A/R Credit Memo"));
+
       case "Business Partner Master Data":
         return const BpMasterDataPage(
           key: ValueKey("Business Partner Master Data"),
         );
+
+      case "Return":
+        return const ReturnPage(key: ValueKey("Return"));
 
       case "Purchase Request":
         return const PurchaseRequestPage(key: ValueKey("Purchase Request"));

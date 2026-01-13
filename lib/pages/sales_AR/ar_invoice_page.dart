@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import '../../constants.dart'; 
+import 'package:file_picker/file_picker.dart';
 class ArInvoicePage extends StatefulWidget {
   const ArInvoicePage({super.key});
 
@@ -18,75 +19,88 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-
   final ScrollController _horizontalScroll = ScrollController();
+
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
+  final Map<String, String?> _formValues = {};
 
-  // --- HELPER FORMAT RUPIAH (INDONESIA: Titik Ribuan, Koma Desimal) ---
-
-  // Convert double ke String (250000.0 -> "250.000,00")
-  String _formatToIdrStyle(double value, {bool isPercent = false}) {
-    if (isPercent) return value.toStringAsFixed(0);
-
-    // Ambil 2 desimal
-    String str = value.toStringAsFixed(2);
-    List<String> parts = str.split('.');
-    String integerPart = parts[0];
-    String decimalPart = parts.length > 1 ? parts[1] : "00";
-
-    // Regex untuk menambah titik setiap 3 digit dari belakang
-    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    String Function(Match) mathFunc = (Match match) => '${match[1]}.';
-    String formattedInt = integerPart.replaceAllMapped(reg, mathFunc);
-
-    return "$formattedInt,$decimalPart";
-  }
-
-  // Convert String Rupiah ke double ("250.000,00" -> 250000.0)
-  double _parseIdrStyle(String value) {
-    if (value.isEmpty) return 0.0;
-    // Hapus titik ribuan, ganti koma desimal jadi titik
-    String clean = value.replaceAll('.', '').replaceAll(',', '.');
-    return double.tryParse(clean) ?? 0.0;
+  String formatPrice(String value) {
+    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    double parsed = double.tryParse(cleanText) ?? 0.0;
+    return parsed.toStringAsFixed(2);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
+    // Memastikan controller selalu menggunakan data terbaru dari state agar tidak reset
     return _controllers.putIfAbsent(
       key,
-      () => TextEditingController(text: initial),
+      () => TextEditingController(text: _fieldValues[key] ?? initial),
     );
   }
 
-  // Focus Node untuk Auto-Format saat selesai mengetik
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0,00",
+    String defaultValue = "0.00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        // SAAT HILANG FOKUS (SELESAI KETIK)
-        if (!fn.hasFocus) {
+        if (!fn.hasFocus && !isReadOnly) {
           final controller = _getCtrl(key);
-          // 1. Ambil angka murni dari input user
-          double val = _parseIdrStyle(controller.text);
 
-          if (mounted) {
-            setState(() {
-              if (val != 0 || controller.text.isNotEmpty) {
-                // 2. Ubah jadi format Rupiah (ex: 100.000,00)
-                controller.text = _formatToIdrStyle(val, isPercent: isPercent);
-              } else {
-                controller.text = defaultValue;
-              }
-              _fieldValues[key] = controller.text;
-            });
+          // 1. Jika field benar-benar kosong, jangan paksa 0.00 (biarkan kosong)
+          if (controller.text.trim().isEmpty) {
+            _fieldValues[key] = "";
+            return;
+          }
+
+          // 2. Cek apakah ini kolom angka (qty, price, total, disc, stock, dll)
+          bool isNumericField =
+              key.contains("qty") ||
+              key.contains("stock") ||
+              key.contains("price") ||
+              key.contains("total") ||
+              key.contains("disc") ||
+              key.contains("p_service") ||
+              key.contains("p_ref") ||
+              key.contains("f_before") ||
+              key.contains("f_wtaxamount") ||
+              key.contains("f_tax") ||
+              key.contains("f_rounding");
+
+          if (isNumericField) {
+            String cleanText = controller.text.replaceAll(
+              RegExp(r'[^0-9.]'),
+              '',
+            );
+            double? parsed = double.tryParse(cleanText);
+
+            if (mounted) {
+              setState(() {
+                if (parsed != null) {
+                  controller.text = isPercent
+                      ? parsed.toStringAsFixed(0)
+                      : parsed.toStringAsFixed(2);
+                } else {
+                  // Jika yang diketik bukan angka sama sekali, baru kembalikan ke default
+                  controller.text = defaultValue;
+                }
+                _fieldValues[key] = controller.text;
+              });
+            }
+          } else {
+            // 3. Jika ini kolom teks (Item No, Description, dll), simpan apa adanya
+            if (mounted) {
+              setState(() {
+                _fieldValues[key] = controller.text;
+              });
+            }
           }
         }
       });
@@ -98,15 +112,15 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   double _getGrandTotal() {
     double parse(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return _parseIdrStyle(val);
+      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
     }
 
     double before = parse("f_before_disc");
-    double dpm = parse("f_dpm_val");
+    double discVal = parse("f_disc_val");
+    double wtaxamount = parse("f_wtaxamount");
     double tax = parse("f_tax");
     double rounding = parse("f_rounding");
-
-    return before - dpm + tax + rounding;
+    return (before - discVal) + wtaxamount + rounding + tax;
   }
 
   @override
@@ -122,26 +136,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     _tabController.dispose();
     _horizontalScroll.dispose();
     super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context, String key) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      String day = picked.day.toString().padLeft(2, '0');
-      String month = picked.month.toString().padLeft(2, '0');
-      String year = picked.year.toString();
-      String formattedDate = "$day/$month/$year";
-
-      setState(() {
-        _getCtrl(key).text = formattedDate;
-        _fieldValues[key] = formattedDate;
-      });
-    }
   }
 
   @override
@@ -163,152 +157,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModernHeader() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white, width: 3.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 18,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 6,
-            child: Column(
-              children: [
-                _buildHeaderField("Customer", "h_cust"),
-                const SizedBox(height: 8),
-                _buildSearchableHeaderRow("Name", "h_name"),
-                _buildSmallDropdownRowModern("Contact Person", "h_cont", [""]),
-                _buildHeaderField("Customer Ref. No.", "h_ref"),
-                const SizedBox(height: 8),
-
-                // Local Currency (Sesuai Gambar: Label -> Dropdown -> Input)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 100,
-                        child: Text(
-                          "Local Currency",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: secondarySlate,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 28),
-                      // Dropdown IDR
-                      Container(
-                        width: 80,
-                        height: 32,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: borderGrey),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _dropdownValues["h_curr"] ?? "IDR",
-                            isDense: true,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black,
-                            ),
-                            onChanged: (v) =>
-                                setState(() => _dropdownValues["h_curr"] = v!),
-                            items: ["IDR", "USD", "SGD"]
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                      // Input Rate
-                      Expanded(
-                        child: Container(
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: bgSlate,
-                            border: Border.all(color: borderGrey),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: TextField(
-                            controller: _getCtrl(
-                              "h_curr_rate",
-                              initial: "16.675,0000",
-                            ), // Format Indo
-                            style: const TextStyle(fontSize: 12),
-                            textAlign: TextAlign.right,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          if (showSidePanel)
+            Positioned(
+              top: 0,
+              right: 0,
+              bottom: 0,
+              child: RepaintBoundary(child: _buildFloatingSidePanel()),
             ),
-          ),
-          const SizedBox(width: 40),
-          Expanded(
-            flex: 4,
-            child: Column(
-              children: [
-                _buildModernNoFieldRow(
-                  "No.",
-                  "h_no_series",
-                  [""],
-                  "h_no_val",
-                  initialNo: "",
-                ),
-                const SizedBox(height: 8),
-                _buildHeaderField(
-                  "Status",
-                  "h_status",
-                  initial: "Open",
-                  isReadOnly: true,
-                ),
-                const SizedBox(height: 8),
-                _buildHeaderDate("Posting Date", "h_post_date", ""),
-                const SizedBox(height: 8),
-                _buildHeaderDate("Delivery Date", "h_del_date", ""),
-                const SizedBox(height: 8),
-                _buildHeaderDate("Document Date", "h_doc_date", ""),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -435,27 +290,29 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               child: SingleChildScrollView(
                 controller: _horizontalScroll,
                 scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 45,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFF257575),
-                  ),
-                  border: const TableBorder(
-                    verticalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                child: IntrinsicWidth(
+                  child: DataTable(
+                    columnSpacing: 45,
+                    horizontalMargin: 15,
+                    headingRowHeight: 40,
+                    headingRowColor: WidgetStateProperty.all(
+                      AppColors.darkIndigo,
                     ),
-                    horizontalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                    border: const TableBorder(
+                      verticalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
+                      horizontalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
                     ),
-                  ),
-                  columns: _buildStaticColumns(),
-                  rows: List.generate(
-                    _rowCount,
-                    (index) => _buildDataRow(index),
+                    columns: _buildStaticColumns(),
+                    rows: List.generate(
+                      _rowCount,
+                      (index) => _buildDataRow(index),
+                    ),
                   ),
                 ),
               ),
@@ -466,37 +323,29 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     );
   }
 
-  // --- DATA ROW SESUAI GAMBAR ---
   DataRow _buildDataRow(int index) {
-    // Format Item No: AR-DownPayment_IN001-0001
-    String autoItemNo =
-        "AR-DP_IN001-${(index + 1).toString().padLeft(4, '0')}";
-
     return DataRow(
       cells: [
-        DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
-        _buildModernTableCell("item_no_$index", initial: autoItemNo),
-        _buildModernTableCell("desc_$index"), 
-        _buildModernTableCell("details_$index"), 
-        _buildModernTableCell("qty_$index", initial: "0"), 
-        _buildModernTableCell("uom_$index"), 
-        _buildModernTableCell("whse_$index"), 
-        _buildModernTableCell(
-          "price_$index",
-          initial: "0,00",
-        ), 
-        _buildModernTableCell(
-          "disc_$index",
-          initial: "0",
-        ), 
-        _buildModernTableCell("tax_code_$index"), 
-        _buildModernTableCell("wtax_liable_$index"), 
-        _buildModernTableCell("material_$index"), 
-        _buildModernTableCell("material_from_$index"), 
-        _buildModernTableCell("project_line_$index"), 
-        _buildModernTableCell("optional_$index"), 
-        _buildModernTableCell("ref_item_$index"), 
-        
+        DataCell(
+          Center(
+            child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
+          ),
+        ),
+        _buildSearchableCell("item_no_$index"),
+        _buildModernTableCell("desc_$index"),
+        _buildModernTableCell("details_$index"),
+        _buildModernTableCell("qty_$index", initial: "0"),
+        _buildModernTableCell("uom_$index"),
+        _buildModernTableCell("whse_$index"),
+        _buildModernTableCell("price_$index", initial: "0,00"),
+        _buildModernTableCell("disc_$index", initial: "0"),
+        _buildModernTableCell("tax_code_$index"),
+        _buildModernTableCell("wtax_liable_$index"),
+        _buildModernTableCell("material_$index"),
+        _buildModernTableCell("material_from_$index"),
+        _buildModernTableCell("project_line_$index"),
+        _buildModernTableCell("optional_$index"),
+        _buildModernTableCell("ref_item_$index"),
       ],
     );
   }
@@ -504,6 +353,14 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   Widget _buildAddRowButtons() {
     return Row(
       children: [
+        ElevatedButton(
+          onPressed: () => setState(() => showSidePanel = true),
+          style: ElevatedButton.styleFrom(backgroundColor: primaryIndigo),
+          child: const Text(
+            "Add Item SO",
+            style: TextStyle(color: Colors.white, fontSize: 11),
+          ),
+        ),
         IconButton(
           onPressed: () => setState(() => _rowCount++),
           icon: const Icon(Icons.add_box, color: Colors.green),
@@ -522,36 +379,44 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     bool isNumeric =
         key.contains("qty") ||
         key.contains("stock") ||
+        key.contains("price") ||
         key.contains("total") ||
         key.contains("disc") ||
-        key.contains("price");
+        key.contains("p_service") ||
+        key.contains("p_ref");
 
     final focusNode = _getFn(
       key,
-      defaultValue: initial.isEmpty ? "0,00" : initial, // Default 0,00
+      defaultValue: isNumeric ? "0.00" : "",
     );
 
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 120,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            textAlign: isNumeric ? TextAlign.right : TextAlign.left,
-            style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
+        child: IntrinsicWidth(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 80),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
+              ),
+              onChanged: (val) {
+                // Simpan perubahan secara real-time ke fieldValues
+                _fieldValues[key] = val;
+                if (isNumeric) {
+                  _syncTotalBeforeDiscount();
+                }
+              },
             ),
-            onChanged: (val) {
-              _fieldValues[key] = val;
-              if (isNumeric) {
-                _syncTotalBeforeDiscount();
-              }
-            },
           ),
         ),
       ),
@@ -564,37 +429,80 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
+    DataColumn centeredHeader(String label) {
+      return DataColumn(
+        label: Expanded(
+          child: Center(child: Text(label, style: headerStyle)),
+        ),
+      );
+    }
+
     return [
-      const DataColumn(label: Text("#", style: headerStyle)),
-      const DataColumn(label: Text("Item No.", style: headerStyle)),
-      const DataColumn(label: Text("Item Description", style: headerStyle)),
-      const DataColumn(label: Text("Item Details", style: headerStyle)),
-      const DataColumn(label: Text("Quantity", style: headerStyle)),
-      const DataColumn(label: Text("UoM Name", style: headerStyle)),
-      const DataColumn(label: Text("Whse", style: headerStyle)),
-      const DataColumn(label: Text("Unit Price", style: headerStyle)),
-      const DataColumn(label: Text("Discount %", style: headerStyle)),
-      const DataColumn(label: Text("Tax Code", style: headerStyle)),
-      const DataColumn(label: Text("WTax Liable", style: headerStyle)),
-      const DataColumn(label: Text("Material", style: headerStyle)),
-      const DataColumn(label: Text("Material From", style: headerStyle)),
-      const DataColumn(label: Text("Project Line", style: headerStyle)),
-      const DataColumn(label: Text("Optional", style: headerStyle)),
-      const DataColumn(label: Text("Ref Item", style: headerStyle)),
+      centeredHeader("#"),
+      centeredHeader("Item No."),
+      centeredHeader("Item Description"),
+      centeredHeader("Item Details"),
+      centeredHeader("Quantity"),
+      centeredHeader("UoM Name"),
+      centeredHeader("Whse"),
+      centeredHeader("Unit Price"),
+      centeredHeader("Discount %"),
+      centeredHeader("Tax Code"),
+      centeredHeader("WTax Liable"),
+      centeredHeader("Material"),
+      centeredHeader("Material From"),
+      centeredHeader("Project Line"),
+      centeredHeader("Optional"),
+      centeredHeader("Ref Item"),
     ];
+  }
+   DataCell _buildSearchableCell(String key) {
+    return DataCell(
+      InkWell(
+        onTap: () {
+          List<String> dummyData = [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D",
+          ];
+          _showSearchDialog("Select Item", key, dummyData);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Container(
+            width: 120,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(Icons.search, size: 14, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      // Total = Price * Qty (Simplified logic for now, using Total column directly for sum)
-      String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows += _parseIdrStyle(val);
+      // Pastikan mengambil dari fieldValues agar hitungan sinkron dengan ketikan terakhir
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+      totalAllRows +=
+          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
     }
     setState(() {
-      String formattedTotal = _formatToIdrStyle(totalAllRows);
-      _getCtrl("f_before_disc").text = formattedTotal;
-      _fieldValues["f_before_disc"] = formattedTotal;
+      _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
+      _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
     });
   }
 
@@ -711,10 +619,84 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     ),
   );
 
+  Widget _buildModernHeader() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 18,
+          spreadRadius: 2,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 6,
+          child: Column(
+            children: [
+              _buildModernFieldRow("Customer", "h_cust"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Name", "h_name"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Contact Person", "h_cont"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
+                "IDR",
+                "USD",
+                "EUR",
+              ]),
+            ],
+          ),
+        ),
+        const SizedBox(width: 60),
+        Expanded(
+          flex: 4,
+          child: Column(
+            children: [
+              _buildModernNoFieldRow(
+                "No.",
+                "h_no_series",
+                ["2025-COM", "2024-REG"],
+                "h_no_val",
+                initialNo: "256100727",
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "Posting Date",
+                "h_post",
+                initial: "28/Dec/2025",
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Delivery Date", "h_deliv"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "Document Date",
+                "h_doc",
+                initial: "28/Dec/2025",
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    String totalStr = _formatToIdrStyle(grandTotal);
-    _getCtrl("f_total_final").text = "IDR $totalStr";
+    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
 
     return Column(
       children: [
@@ -742,125 +724,32 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 child: Column(
                   children: [
                     _buildSmallDropdownRowModern("Sales Employee", "f_employ", [
-                      "-No Sales Employee-",
+                      "",
                     ]),
-                    const SizedBox(height: 8),
-                    _buildHeaderField("Owner", "f_owner"),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
+                    _buildModernFieldRow("Owner", "f_owner"),
+                    const SizedBox(height: 12),
                     _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
                   ],
                 ),
               ),
               const SizedBox(width: 60),
               SizedBox(
-                width: 400,
+                width: 450,
                 child: Column(
                   children: [
                     _buildSummaryRowWithAutoValue(
                       "Total Before Discount",
                       "f_before_disc",
-                      isReadOnly: false,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 140,
-                            child: Text(
-                              "DPM",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 50,
-                            height: 24,
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: borderGrey),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: TextField(
-                              controller: _getCtrl("f_dpm_pct", initial: "30"),
-                              focusNode: _getFn("f_dpm_pct", isPercent: true),
-                              textAlign: TextAlign.right,
-                              style: const TextStyle(fontSize: 11),
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 4,
-                                ),
-                              ),
-                              onChanged: (val) {
-                                double pct = double.tryParse(val) ?? 0;
-                                double before = _parseIdrStyle(
-                                  _getCtrl("f_before_disc").text,
-                                );
-                                double dpmVal = (before * pct / 100);
-                                String newVal = _formatToIdrStyle(dpmVal);
-                                _getCtrl("f_dpm_val").text = newVal;
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                          const Text("%", style: TextStyle(fontSize: 12)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildSummaryBox(
-                              "f_dpm_val",
-                              isReadOnly: false,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Checkbox(
-                              value: _checkStates["cb_round"] ?? false,
-                              onChanged: (v) =>
-                                  setState(() => _checkStates["cb_round"] = v!),
-                            ),
-                          ),
-                          const Text(
-                            "Rounding",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                          const Spacer(),
-                          SizedBox(
-                            width: 100,
-                            child: _buildSummaryBox(
-                              "f_round",
-                              isReadOnly: false,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    _buildSummaryRowWithAutoValue(
-                      "Tax",
-                      "f_tax",
-                      isReadOnly: false,
-                    ),
-                    _buildSummaryRowWithAutoValue(
-                      "WTax Amount",
-                      "f_wtax",
-                      isReadOnly: false,
-                    ),
+                    const SizedBox(height: 2),
+                    _buildDiscountRow(),
+                    const SizedBox(height: 2),
+                    _buildSummaryRowWithAutoValue("Tax", "f_tax"),
+                     const SizedBox(height: 2),
+                    _buildRoundingRow(),
+                      const SizedBox(height: 2),
+                    _buildSummaryRowWithAutoValue("Wtax Amount", "f_wtaxamount"),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -871,16 +760,18 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                       isBold: true,
                       isReadOnly: true,
                     ),
-                    _buildSummaryRowWithAutoValue(
+                     _buildSummaryRowWithAutoValue(
                       "Applied Amount",
-                      "f_applied",
-                      isReadOnly: false,
-                    ),
-                    _buildSummaryRowWithAutoValue(
-                      "Balance Due",
-                      "f_balance",
+                      "f_Applied Amnount",
+                      isBold: true,
                       isReadOnly: true,
-                    ),
+                     ),
+                      _buildSummaryRowWithAutoValue(
+                      "Balance Due",
+                      "f_Balance Due",
+                      isBold: true,
+                      isReadOnly: true,
+                     ),
                   ],
                 ),
               ),
@@ -896,176 +787,97 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     );
   }
 
-  Widget _buildHeaderField(
-    String label,
-    String key, {
-    String initial = "",
-    bool isReadOnly = false,
-  }) {
-    return Row(
+  Widget _buildDiscountRow() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
       children: [
+        const SizedBox(
+          width: 140,
+          child: Text("DPM", style: TextStyle(fontSize: 12)),
+        ),
         SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
+          width: 40,
+          child: _buildSummaryBox(
+            "f_disc_pct",
+            isPercent: true,
+            defaultValue: "0",
           ),
         ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: Container(
-            height: 32,
-            decoration: BoxDecoration(
-              color: isReadOnly ? bgSlate : bgSlate,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: TextField(
-              controller: _getCtrl(key, initial: initial),
-              readOnly: isReadOnly,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text("%", style: TextStyle(fontSize: 12)),
+        ),
+        Expanded(child: _buildSummaryBox("f_disc_val")),
+      ],
+    ),
+  );
+
+  Widget _buildRoundingRow() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  value: _checkStates["cb_rounding"] ?? false,
+                  onChanged: (v) =>
+                      setState(() => _checkStates["cb_rounding"] = v!),
                 ),
               ),
-            ),
+              const SizedBox(width: 8),
+              const Text(
+                "Rounding",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 58),
+        Expanded(
+          child: _buildSummaryBox(
+            "f_rounding",
+            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
 
-  Widget _buildSearchableHeaderRow(String label, String key) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: secondarySlate,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 28),
-          Expanded(
-            child: InkWell(
-              onTap: () =>
-                  _showSearchDialog(label, key, ["Customer A", "Customer B"]),
-              child: Container(
-                height: 32,
-                decoration: BoxDecoration(
-                  color: bgSlate,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: borderGrey),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          _controllers[key]?.text ?? "",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(Icons.search, size: 16, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderDate(String label, String key, String initial) {
-    return Row(
+  Widget _buildActionButtons() => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Row(
       children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectDate(context, key),
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: IgnorePointer(
-                child: TextField(
-                  controller: _getCtrl(key, initial: initial),
-                  style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    suffixIcon: Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        _buildSAPActionButton("Add", isPrimary: true),
+        const SizedBox(width: 8),
+        _buildSAPActionButton("Delete", isDanger: true),
+        const Spacer(),
+        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
+        const SizedBox(width: 8),
+        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
       ],
-    );
-  }
+    ),
+  );
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
     String key, {
-    String defaultValue = "0,00",
+    String defaultValue = "0.00",
     bool isBold = false,
     bool isReadOnly = false,
   }) {
     final controller = _getCtrl(
       key,
       initial: _fieldValues[key] ?? defaultValue,
-    );
-    final focusNode = _getFn(
-      key,
-      isReadOnly: isReadOnly,
-      defaultValue: defaultValue,
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -1078,7 +890,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               style: TextStyle(fontSize: 12, color: secondarySlate),
             ),
           ),
-          const SizedBox(width: 25),
+          const SizedBox(width: 58),
           Expanded(
             child: Container(
               height: 28,
@@ -1089,7 +901,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               ),
               child: TextField(
                 controller: controller,
-                focusNode: focusNode,
                 readOnly: isReadOnly,
                 textAlign: TextAlign.right,
                 style: TextStyle(
@@ -1117,19 +928,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
 
   Widget _buildSummaryBox(
     String key, {
-    String defaultValue = "0,00",
+    String defaultValue = "0.00",
     bool isReadOnly = false,
     bool isPercent = false,
   }) {
     final controller = _getCtrl(
       key,
       initial: _fieldValues[key] ?? defaultValue,
-    );
-    final focusNode = _getFn(
-      key,
-      isReadOnly: isReadOnly,
-      defaultValue: defaultValue,
-      isPercent: isPercent,
     );
     return Container(
       height: 24,
@@ -1140,7 +945,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       ),
       child: TextField(
         controller: controller,
-        focusNode: focusNode,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
         style: const TextStyle(fontSize: 12),
@@ -1150,7 +954,24 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           contentPadding: EdgeInsets.symmetric(horizontal: 8),
         ),
         onChanged: (val) {
-          if (!isReadOnly) setState(() => _fieldValues[key] = val);
+          if (!isReadOnly) {
+            setState(() {
+              _fieldValues[key] = val;
+              if (key == "f_disc_pct") {
+                double pct = double.tryParse(val) ?? 0;
+                double before =
+                    double.tryParse(
+                      _getCtrl(
+                        "f_before_disc",
+                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
+                    ) ??
+                    0;
+                _getCtrl("f_disc_val").text = (before * pct / 100)
+                    .toStringAsFixed(2);
+                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
+              }
+            });
+          }
         },
       ),
     );
@@ -1164,9 +985,10 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   }) => Padding(
     padding: EdgeInsets.zero,
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100,
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
@@ -1176,7 +998,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
         Expanded(
           child: Container(
             height: isTextArea ? 80 : 32,
@@ -1196,6 +1017,9 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
               ),
             ),
           ),
@@ -1216,7 +1040,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100,
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
@@ -1226,7 +1050,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
         Expanded(
           child: Container(
             height: 32,
@@ -1237,7 +1060,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             child: Row(
               children: [
                 Container(
-                  width: 80,
+                  width: 110,
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
@@ -1284,6 +1107,9 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                             vertical: 8,
                           ),
                         ),
+                        onChanged: (val) {
+                          _fieldValues[textKey] = val;
+                        },
                       ),
                     ),
                   ),
@@ -1341,12 +1167,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: EdgeInsets.zero,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100,
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
@@ -1356,8 +1182,70 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
         Expanded(child: _buildSmallDropdown(key, items)),
+      ],
+    ),
+  );
+
+  Widget _buildChooseFromListField(
+    String label,
+    String key,
+    List<String> data,
+  ) => Padding(
+    padding: EdgeInsets.zero,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: InkWell(
+            onTap: () => _showSearchDialog(label, key, data),
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _getCtrl(key).text.isEmpty
+                              ? (data.isNotEmpty ? data.first : "")
+                              : _getCtrl(key).text,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 10),
+                    child: Icon(Icons.search, size: 16, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     ),
   );
@@ -1391,7 +1279,10 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     itemBuilder: (context, i) => ListTile(
                       title: Text(filteredList[i]),
                       onTap: () {
-                        setState(() => _getCtrl(key).text = filteredList[i]);
+                        setState(() {
+                          _getCtrl(key).text = filteredList[i];
+                          _fieldValues[key] = filteredList[i];
+                        });
                         Navigator.pop(c);
                       },
                     ),
@@ -1404,6 +1295,72 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       ),
     );
   }
+
+  Widget _buildFileUploadRow(String label, String key) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: InkWell(
+            onTap: () async {
+              FilePickerResult? res = await FilePicker.platform.pickFiles();
+              if (res != null) {
+                setState(() => _formValues[key] = res.files.first.name);
+              }
+            },
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _formValues[key] ?? "No file selected",
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Icon(
+                      Icons.upload_file,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildSAPActionButton(
     String label, {
@@ -1428,22 +1385,157 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     );
   }
 
-  Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
+  Widget _buildFloatingSidePanel() => Container(
+    width: 380,
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+      ],
+    ),
+    child: Column(
       children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton(
-          "Cancel",
-          customColor: const Color.fromARGB(255, 255, 0, 0),
+        AppBar(
+          backgroundColor: primaryIndigo,
+          title: const Text(
+            "Sales Order",
+            style: TextStyle(fontSize: 14, color: Colors.white),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () => setState(() => showSidePanel = false),
+              icon: const Icon(Icons.close),
+              color: Colors.white,
+            ),
+          ],
         ),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+              const SizedBox(height: 12),
+              _buildFileUploadRow("File 1", "cfg_f1"),
+              const SizedBox(height: 8),
+              _buildFileUploadRow("File 2", "cfg_f2"),
+              const SizedBox(height: 8),
+              _buildFileUploadRow("File 3", "cfg_f3"),
+              const SizedBox(height: 8),
+              _buildFileUploadRow("File 4", "cfg_f4"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Create By", "cfg_by"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
+                "No",
+                "Yes",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
+                "No",
+                "Yes",
+                "N/A",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Punching", "cfg_punch", [
+                "No",
+                "Yes",
+                "N/A",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Bending", "cfg_bend", [
+                "No",
+                "Yes",
+                "N/A",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Assy", "cfg_assy", [
+                "No",
+                "Yes",
+                "N/A",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
+                "No",
+                "Yes",
+                "N/A",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "Internal Memo",
+                "cfg_memo",
+                isTextArea: true,
+              ),
+              const Divider(height: 45, thickness: 3),
+              _buildModernFieldRow("Production\nDue date", "cfg_prod_date"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("AP Tax Date", "cfg_tax_date"),
+              const SizedBox(height: 12),
+              _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
+                "010",
+                "020",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Area", "cfg_area"),
+              const SizedBox(height: 12),
+              _buildChooseFromListField("Kategori SO", "cfg_cat", [
+                "SO Resmi",
+                "SO Sample",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Customer Name", "cfg_cust_name"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "alasan rubah duedate",
+                "cfg_duedate",
+                isTextArea: true,
+              ),
+              const SizedBox(height: 12),
+              _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
+                "Lengkap",
+                "Tidak Lengkap",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "PIC Engineering",
+                "cfg_pic",
+                isTextArea: true,
+              ),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
+                "",
+              ]),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () => setState(() => showSidePanel = false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "APPLY",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
       ],
     ),
   );
-
 }

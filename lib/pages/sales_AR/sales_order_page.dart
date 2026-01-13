@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-
+import '../../constants.dart';
 class SalesOrderPage extends StatefulWidget {
   const SalesOrderPage({super.key});
 
@@ -9,7 +9,7 @@ class SalesOrderPage extends StatefulWidget {
 }
 
 class _SalesOrderPageState extends State<SalesOrderPage>
-    with SingleTickerProviderStateMixin {
+   with SingleTickerProviderStateMixin {
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
@@ -18,9 +18,8 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-
-  // controller
   final ScrollController _horizontalScroll = ScrollController();
+
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
@@ -35,9 +34,10 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
+    // Memastikan controller selalu menggunakan data terbaru dari state agar tidak reset
     return _controllers.putIfAbsent(
       key,
-      () => TextEditingController(text: initial),
+      () => TextEditingController(text: _fieldValues[key] ?? initial),
     );
   }
 
@@ -52,19 +52,54 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       fn.addListener(() {
         if (!fn.hasFocus && !isReadOnly) {
           final controller = _getCtrl(key);
-          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
-          double? parsed = double.tryParse(cleanText);
-          if (mounted) {
-            setState(() {
-              if (parsed != null) {
-                controller.text = isPercent
-                    ? parsed.toStringAsFixed(0)
-                    : parsed.toStringAsFixed(2);
-              } else {
-                controller.text = defaultValue;
-              }
-              _fieldValues[key] = controller.text;
-            });
+
+          // 1. Jika field benar-benar kosong, jangan paksa 0.00 (biarkan kosong)
+          if (controller.text.trim().isEmpty) {
+            _fieldValues[key] = "";
+            return;
+          }
+
+          // 2. Cek apakah ini kolom angka (qty, price, total, disc, stock, dll)
+          bool isNumericField =
+              key.contains("qty") ||
+              key.contains("stock") ||
+              key.contains("price") ||
+              key.contains("total") ||
+              key.contains("disc") ||
+              key.contains("p_service") ||
+              key.contains("p_ref") ||
+              key.contains("f_before") ||
+              key.contains("f_freight") ||
+              key.contains("f_tax") ||
+              key.contains("f_rounding");
+
+          if (isNumericField) {
+            String cleanText = controller.text.replaceAll(
+              RegExp(r'[^0-9.]'),
+              '',
+            );
+            double? parsed = double.tryParse(cleanText);
+
+            if (mounted) {
+              setState(() {
+                if (parsed != null) {
+                  controller.text = isPercent
+                      ? parsed.toStringAsFixed(0)
+                      : parsed.toStringAsFixed(2);
+                } else {
+                  // Jika yang diketik bukan angka sama sekali, baru kembalikan ke default
+                  controller.text = defaultValue;
+                }
+                _fieldValues[key] = controller.text;
+              });
+            }
+          } else {
+            // 3. Jika ini kolom teks (Item No, Description, dll), simpan apa adanya
+            if (mounted) {
+              setState(() {
+                _fieldValues[key] = controller.text;
+              });
+            }
           }
         }
       });
@@ -254,27 +289,29 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               child: SingleChildScrollView(
                 controller: _horizontalScroll,
                 scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 45,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFF257575),
-                  ),
-                  border: const TableBorder(
-                    verticalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                child: IntrinsicWidth(
+                  child: DataTable(
+                    columnSpacing: 45,
+                    horizontalMargin: 15,
+                    headingRowHeight: 40,
+                    headingRowColor: WidgetStateProperty.all(
+                      AppColors.darkIndigo,
                     ),
-                    horizontalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                    border: const TableBorder(
+                      verticalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
+                      horizontalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
                     ),
-                  ),
-                  columns: _buildStaticColumns(),
-                  rows: List.generate(
-                    _rowCount,
-                    (index) => _buildDataRow(index),
+                    columns: _buildStaticColumns(),
+                    rows: List.generate(
+                      _rowCount,
+                      (index) => _buildDataRow(index),
+                    ),
                   ),
                 ),
               ),
@@ -288,8 +325,12 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   DataRow _buildDataRow(int index) {
     return DataRow(
       cells: [
-        DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
-        _buildModernTableCell("item_no_$index"),
+        DataCell(
+          Center(
+            child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
+          ),
+        ),
+        _buildSearchableCell("item_no_$index"),
         _buildModernTableCell("jenis_brg_$index"),
         _buildModernTableCell("desc_$index"),
         _buildModernTableCell("jenis_item_$index"),
@@ -335,38 +376,49 @@ class _SalesOrderPageState extends State<SalesOrderPage>
 
   DataCell _buildModernTableCell(String key, {String initial = ""}) {
     final controller = _getCtrl(key, initial: initial);
+
     bool isNumeric =
         key.contains("qty") ||
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
-        key.contains("disc");
+        key.contains("disc") ||
+        key.contains("p_service") ||
+        key.contains("p_ref");
+
     final focusNode = _getFn(
       key,
-      defaultValue: initial.isEmpty ? "0.00" : initial,
+      // Jika kolom teks (bukan angka), defaultValue biarkan kosong agar tidak jadi 0.00
+      defaultValue: isNumeric ? "0.00" : "",
     );
 
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 120,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            textAlign: isNumeric ? TextAlign.right : TextAlign.left,
-            style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
+        child: IntrinsicWidth(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 80),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
+              ),
+              onChanged: (val) {
+                // Simpan perubahan secara real-time ke fieldValues
+                _fieldValues[key] = val;
+                if (isNumeric) {
+                  _syncTotalBeforeDiscount();
+                }
+              },
             ),
-            onChanged: (val) {
-              _fieldValues[key] = val;
-              if (isNumeric) {
-                _syncTotalBeforeDiscount();
-              }
-            },
           ),
         ),
       ),
@@ -379,34 +431,78 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
+    DataColumn centeredHeader(String label) {
+      return DataColumn(
+        label: Expanded(
+          child: Center(child: Text(label, style: headerStyle)),
+        ),
+      );
+    }
+
     return [
-      const DataColumn(label: Text("#", style: headerStyle)),
-      const DataColumn(label: Text("Item No.", style: headerStyle)),
-      const DataColumn(
-        label: Text("Jenis Barang dan Jasa", style: headerStyle),
-      ),
-      const DataColumn(label: Text("Item Description", style: headerStyle)),
-      const DataColumn(label: Text("Jenis Item", style: headerStyle)),
-      const DataColumn(label: Text("Klasifikasi Orbit", style: headerStyle)),
-      const DataColumn(label: Text("Item Details", style: headerStyle)),
-      const DataColumn(label: Text("Quantity", style: headerStyle)),
-      const DataColumn(label: Text("Quantity Stock", style: headerStyle)),
-      const DataColumn(label: Text("Unit Price", style: headerStyle)),
-      const DataColumn(label: Text("Price Service", style: headerStyle)),
-      const DataColumn(label: Text("Price Reference", style: headerStyle)),
-      const DataColumn(label: Text("UoM Name", style: headerStyle)),
-      const DataColumn(label: Text("Free Text", style: headerStyle)),
-      const DataColumn(label: Text("Project Line", style: headerStyle)),
-      const DataColumn(label: Text("LineID", style: headerStyle)),
-      const DataColumn(label: Text("Discount %", style: headerStyle)),
-      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
+      centeredHeader("#"),
+      centeredHeader("Item No."),
+      centeredHeader("Jenis Barang dan Jasa"),
+      centeredHeader("Item Description"),
+      centeredHeader("Jenis Item"),
+      centeredHeader("Klasifikasi Orbit"),
+      centeredHeader("Item Details"),
+      centeredHeader("Quantity"),
+      centeredHeader("Quantity Stock"),
+      centeredHeader("Unit Price"),
+      centeredHeader("Price Service"),
+      centeredHeader("Price Reference"),
+      centeredHeader("UoM Name"),
+      centeredHeader("Free Text"),
+      centeredHeader("Project Line"),
+      centeredHeader("LineID"),
+      centeredHeader("Discount %"),
+      centeredHeader("Total (LC)"),
     ];
   }
+
+  DataCell _buildSearchableCell(String key) {
+    return DataCell(
+      InkWell(
+        onTap: () {
+          List<String> dummyData = [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D",
+          ];
+          _showSearchDialog("Select Item", key, dummyData);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Container(
+            width: 120,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(Icons.search, size: 14, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      String val = _controllers["total_$i"]?.text ?? "0";
+      // Pastikan mengambil dari fieldValues agar hitungan sinkron dengan ketikan terakhir
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
       totalAllRows +=
           double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
     }
@@ -645,20 +741,20 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               ),
               const SizedBox(width: 60),
               SizedBox(
-                width: 350,
+                width: 450,
                 child: Column(
                   children: [
                     _buildSummaryRowWithAutoValue(
                       "Total Before Discount",
                       "f_before_disc",
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     _buildDiscountRow(),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue("Freight", "f_freight"),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     _buildRoundingRow(),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue("Tax", "f_tax"),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
@@ -694,7 +790,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           child: Text("Discount", style: TextStyle(fontSize: 12)),
         ),
         SizedBox(
-          width: 60,
+          width: 40,
           child: _buildSummaryBox(
             "f_disc_pct",
             isPercent: true,
@@ -852,7 +948,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           contentPadding: EdgeInsets.symmetric(horizontal: 8),
         ),
         onChanged: (val) {
-          if (!isReadOnly)
+          if (!isReadOnly) {
             setState(() {
               _fieldValues[key] = val;
               if (key == "f_disc_pct") {
@@ -866,8 +962,10 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                     0;
                 _getCtrl("f_disc_val").text = (before * pct / 100)
                     .toStringAsFixed(2);
+                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
               }
             });
+          }
         },
       ),
     );
@@ -913,6 +1011,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
               ),
             ),
           ),
@@ -1000,6 +1101,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                             vertical: 8,
                           ),
                         ),
+                        onChanged: (val) {
+                          _fieldValues[textKey] = val;
+                        },
                       ),
                     ),
                   ),
@@ -1169,7 +1273,10 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                     itemBuilder: (context, i) => ListTile(
                       title: Text(filteredList[i]),
                       onTap: () {
-                        setState(() => _getCtrl(key).text = filteredList[i]);
+                        setState(() {
+                          _getCtrl(key).text = filteredList[i];
+                          _fieldValues[key] = filteredList[i];
+                        });
                         Navigator.pop(c);
                       },
                     ),
@@ -1203,8 +1310,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           child: InkWell(
             onTap: () async {
               FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null)
+              if (res != null) {
                 setState(() => _formValues[key] = res.files.first.name);
+              }
             },
             child: Container(
               height: 32,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants.dart';
 
 class PurchaseOrderPage extends StatefulWidget {
   const PurchaseOrderPage({super.key});
@@ -37,18 +38,17 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     );
   }
 
-  // Logic FocusNode untuk Auto Decimal 0.00
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
     String defaultValue = "0.00",
     bool isPercent = false,
+    bool isNumeric = true,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        if (!fn.hasFocus) {
-          // Saat user selesai mengetik (kehilangan fokus)
+        if (!fn.hasFocus && isNumeric) {
           final controller = _getCtrl(key);
           String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
           double? parsed = double.tryParse(cleanText);
@@ -71,7 +71,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     return _focusNodes[key]!;
   }
 
-  // Logic Hitung Grand Total
   double _getGrandTotal() {
     double parse(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
@@ -79,11 +78,10 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     }
 
     double before = parse("f_before_disc");
-    double discount = parse("f_discount_val"); // Nominal diskon (bukan persen)
+    double discount = parse("f_discount_val");
     double freight = parse("f_freight");
     double tax = parse("f_tax");
-    double rounding = parse("f_rounding"); // Jika ada
-
+    double rounding = parse("f_rounding");
     return (before - discount) + freight + tax + rounding;
   }
 
@@ -102,7 +100,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     super.dispose();
   }
 
-  // --- FUNGSI DATE PICKER ---
   Future<void> _selectDate(BuildContext context, String key) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -143,8 +140,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     );
   }
 
-  
- Widget _buildModernHeader() {
+  Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(24),
@@ -164,7 +160,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SISI KIRI (REQUESTER INFO)
           Expanded(
             flex: 6,
             child: Column(
@@ -172,14 +167,13 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                 _buildHeaderField("Vendor", "vendor", initial: ""),
                 const SizedBox(height: 12),
                 _buildSearchableHeaderRow("Name", "h_name"),
-                 const SizedBox(height: 4),
+                const SizedBox(height: 4),
                 _buildSmallDropdownRowModern("Contact Person", "C_person", [
                   "",
                 ]),
-                 const SizedBox(height: 4),
+                const SizedBox(height: 4),
                 _buildHeaderField("Department", "h_dept", initial: ""),
                 const SizedBox(height: 15),
-
                 Row(
                   children: [
                     SizedBox(
@@ -203,7 +197,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   ],
                 ),
                 const SizedBox(height: 17),
-
                 _buildHeaderField(
                   "E-Mail Address",
                   "h_email",
@@ -213,10 +206,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
               ],
             ),
           ),
-
           const SizedBox(width: 40),
-
-          // SISI KANAN (DATES & STATUS)
           Expanded(
             flex: 4,
             child: Column(
@@ -284,7 +274,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   ],
                 ),
                 const SizedBox(height: 12),
-
                 _buildHeaderField(
                   "Status",
                   "h_status",
@@ -292,7 +281,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   isReadOnly: true,
                 ),
                 const SizedBox(height: 12),
-
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
                 const SizedBox(height: 12),
                 _buildHeaderDate("Valid Until", "h_valid_date", ""),
@@ -308,7 +296,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     );
   }
 
-  
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -595,7 +582,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   horizontalMargin: 15,
                   headingRowHeight: 40,
                   headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFF257575),
+                    AppColors.darkIndigo,
                   ),
                   border: const TableBorder(
                     verticalInside: BorderSide(
@@ -627,32 +614,45 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
+
+    DataColumn centeredColumn(String label) {
+      return DataColumn(
+        label: Expanded(
+          child: Text(label, style: headerStyle, textAlign: TextAlign.center),
+        ),
+      );
+    }
+
     return [
-      const DataColumn(label: Text("#", style: headerStyle)),
-      const DataColumn(label: Text("Description", style: headerStyle)),
-      const DataColumn(label: Text("Required Date", style: headerStyle)),
-      const DataColumn(label: Text("Qty Service", style: headerStyle)),
-      const DataColumn(label: Text("Uom", style: headerStyle)),
-      const DataColumn(label: Text("Price Service", style: headerStyle)),
-      const DataColumn(label: Text("Info Price", style: headerStyle)),
-      const DataColumn(label: Text("Discount %", style: headerStyle)),
-      const DataColumn(label: Text("Tax Code", style: headerStyle)),
-      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
-      const DataColumn(label: Text("Divisi", style: headerStyle)),
-      const DataColumn(label: Text("Kategori", style: headerStyle)),
+      centeredColumn("#"),
+      centeredColumn("Description"),
+      centeredColumn("Required Date"),
+      centeredColumn("Qty Service"),
+      centeredColumn("Uom"),
+      centeredColumn("Price Service"),
+      centeredColumn("Unit Price"),
+      centeredColumn("Discount %"),
+      centeredColumn("Tax Code"),
+      centeredColumn("Total (LC)"),
+      centeredColumn("Divisi"),
+      centeredColumn("Kategori"),
     ];
   }
 
   DataRow _buildDataRow(int index) {
     return DataRow(
       cells: [
-        DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
+        DataCell(
+          Center(
+            child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
+          ),
+        ),
         _buildModernTableCell("desc_$index"),
         _buildModernTableCell("req_date_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
         _buildSearchableCell("uom_$index"),
-        _buildModernTableCell("price_$index", initial: "0.00"),
-        _buildModernTableCell("info_price_$index", initial: "0.00"),
+        _buildSearchableCell("price_$index"),
+        _buildSearchableCell("unit_price_$index"),
         _buildModernTableCell("disc_$index", initial: "0.00"),
         _buildDropdownCell("tax_$index", ["VATin11", "VATin12", "Exempt"]),
         _buildModernTableCell("total_$index", initial: "0.00"),
@@ -689,32 +689,40 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("info_price");
+
     final focusNode = _getFn(
       key,
       defaultValue: initial.isEmpty ? "0.00" : initial,
+      isNumeric: isNumeric,
     );
 
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 120,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            textAlign: isNumeric ? TextAlign.right : TextAlign.left,
-            style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
+        child: IntrinsicWidth(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 100),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
+              ),
+              onChanged: (val) {
+                _fieldValues[key] = val;
+                if (isNumeric) {
+                  _syncTotalBeforeDiscount();
+                }
+                setState(() {});
+              },
             ),
-            onChanged: (val) {
-              _fieldValues[key] = val;
-              if (isNumeric) {
-                _syncTotalBeforeDiscount();
-              }
-            },
           ),
         ),
       ),
@@ -735,20 +743,23 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Container(
-            width: 120,
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
-                    style: const TextStyle(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
+          child: IntrinsicWidth(
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 100),
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
-                ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
-              ],
+                  const SizedBox(width: 8),
+                  const Icon(Icons.search, size: 14, color: Colors.grey),
+                ],
+              ),
             ),
           ),
         ),
@@ -760,26 +771,29 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 140,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dropdownValues[key],
-              hint: const Text("", style: TextStyle(fontSize: 12)),
-              isDense: true,
-              style: const TextStyle(fontSize: 12, color: Colors.black),
-              icon: const Icon(Icons.arrow_drop_down, size: 18),
-              onChanged: (newValue) {
-                setState(() {
-                  _dropdownValues[key] = newValue!;
-                });
-              },
-              items: items.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+        child: IntrinsicWidth(
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 120),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[key],
+                hint: const Text("", style: TextStyle(fontSize: 12)),
+                isDense: true,
+                isExpanded: false,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, size: 18),
+                onChanged: (newValue) {
+                  setState(() {
+                    _dropdownValues[key] = newValue!;
+                  });
+                },
+                items: items.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -800,11 +814,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // FOOTER TERBARU (Sesuai Gambar Referensi)
-  // Buyer, Owner (Dropdown) di Kiri. Remarks di Bawahnya.
-  // Kanan: Total, Discount (%), Freight (Arrow), Rounding (Checkbox), Tax, Total Payment
-  // ---------------------------------------------------------------------------
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -831,7 +840,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Sisi Kiri (Buyer, Owner, Remarks)
               Expanded(
                 child: Column(
                   children: [
@@ -853,10 +861,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   ],
                 ),
               ),
-
               const SizedBox(width: 60),
-
-              // Sisi Kanan (Totals)
               SizedBox(
                 width: 400,
                 child: Column(
@@ -866,8 +871,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                       "f_before_disc",
                       isReadOnly: false,
                     ),
-
-                    // Discount Row (Label + Input % + Input Value)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -915,8 +918,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                         ],
                       ),
                     ),
-
-                    // Freight with Yellow Arrow
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -941,13 +942,11 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                               ],
                             ),
                           ),
-                          const SizedBox(width: 25), // Adjusted spacer
+                          const SizedBox(width: 25),
                           Expanded(child: _buildSummaryBox("f_freight")),
                         ],
                       ),
                     ),
-
-                    // Rounding Row (Checkbox + Value)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -970,18 +969,16 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                               color: Color(0xFF64748B),
                             ),
                           ),
-                          const SizedBox(width: 80), // Spacer agar sejajar
+                          const SizedBox(width: 80),
                           Expanded(child: _buildSummaryBox("f_rounding")),
                         ],
                       ),
                     ),
-
                     _buildSummaryRowWithAutoValue(
                       "Tax",
                       "f_tax",
                       isReadOnly: false,
                     ),
-
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -998,8 +995,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             ],
           ),
         ),
-
-        // Buttons Footer
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: _buildActionButtons(),
@@ -1068,7 +1063,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
               style: TextStyle(fontSize: 12, color: secondarySlate),
             ),
           ),
-          const SizedBox(width: 25), // Adjusted to align with freight box
+          const SizedBox(width: 25),
           Expanded(
             child: Container(
               height: 28,
@@ -1141,10 +1136,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
           contentPadding: EdgeInsets.symmetric(horizontal: 8),
         ),
         onChanged: (val) {
-          if (!isReadOnly)
-            setState(() {
-              _fieldValues[key] = val;
-            });
+          if (!isReadOnly) setState(() => _fieldValues[key] = val);
         },
       ),
     );

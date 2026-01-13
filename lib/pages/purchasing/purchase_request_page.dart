@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants.dart';
 
 class PurchaseRequestPage extends StatefulWidget {
   const PurchaseRequestPage({super.key});
@@ -42,11 +43,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     bool isReadOnly = false,
     String defaultValue = "0.00",
     bool isPercent = false,
+    bool isNumeric = true, // Tambah flag numeric
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        if (!fn.hasFocus) {
+        if (!fn.hasFocus && isNumeric) {
+          // Hanya proses jika numeric
           final controller = _getCtrl(key);
           String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
           double? parsed = double.tryParse(cleanText);
@@ -656,7 +659,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   horizontalMargin: 15,
                   headingRowHeight: 40,
                   headingRowColor: WidgetStateProperty.all(
-                    const Color(0xFF257575),
+                    AppColors.darkIndigo,
                   ),
                   border: const TableBorder(
                     verticalInside: BorderSide(
@@ -688,27 +691,40 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
+
+    // Header ke tengah otomatis
+    DataColumn centeredColumn(String label) {
+      return DataColumn(
+        label: Expanded(
+          child: Text(label, style: headerStyle, textAlign: TextAlign.center),
+        ),
+      );
+    }
+
     return [
-      const DataColumn(label: Text("#", style: headerStyle)),
-      const DataColumn(label: Text("Description", style: headerStyle)),
-      const DataColumn(label: Text("Required Date", style: headerStyle)),
-      const DataColumn(label: Text("Qty Service", style: headerStyle)),
-      const DataColumn(label: Text("Uom", style: headerStyle)),
-      const DataColumn(label: Text("Price Service", style: headerStyle)),
-      const DataColumn(label: Text("Info Price", style: headerStyle)),
-      const DataColumn(label: Text("Discount %", style: headerStyle)),
-      const DataColumn(label: Text("Tax Code", style: headerStyle)),
-      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
-      const DataColumn(label: Text("Divisi", style: headerStyle)),
-      const DataColumn(label: Text("Kategori", style: headerStyle)),
+      centeredColumn("#"),
+      centeredColumn("Description"),
+      centeredColumn("Required Date"),
+      centeredColumn("Qty Service"),
+      centeredColumn("Uom"),
+      centeredColumn("Price Service"),
+      centeredColumn("Info Price"),
+      centeredColumn("Discount %"),
+      centeredColumn("Tax Code"),
+      centeredColumn("Total (LC)"),
+      centeredColumn("Divisi"),
+      centeredColumn("Kategori"),
     ];
   }
 
-  // TABLE ROWS
   DataRow _buildDataRow(int index) {
     return DataRow(
       cells: [
-        DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
+        DataCell(
+          Center(
+            child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
+          ),
+        ),
         _buildModernTableCell("desc_$index"),
         _buildModernTableCell("req_date_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
@@ -751,32 +767,41 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("info_price");
+
+    // Perbaikan: isNumeric dikirim agar tidak meriset teks biasa jadi 0.00
     final focusNode = _getFn(
       key,
       defaultValue: initial.isEmpty ? "0.00" : initial,
+      isNumeric: isNumeric,
     );
 
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 120,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            textAlign: isNumeric ? TextAlign.right : TextAlign.left,
-            style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
+        child: IntrinsicWidth(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 100),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
+              ),
+              onChanged: (val) {
+                _fieldValues[key] = val;
+                if (isNumeric) {
+                  _syncTotalBeforeDiscount();
+                }
+                setState(() {}); // Memperbarui lebar secara real-time
+              },
             ),
-            onChanged: (val) {
-              _fieldValues[key] = val;
-              if (isNumeric) {
-                _syncTotalBeforeDiscount();
-              }
-            },
           ),
         ),
       ),
@@ -797,20 +822,23 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Container(
-            width: 120,
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
-                    style: const TextStyle(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
+          child: IntrinsicWidth(
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 100),
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
-                ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
-              ],
+                  const SizedBox(width: 8),
+                  const Icon(Icons.search, size: 14, color: Colors.grey),
+                ],
+              ),
             ),
           ),
         ),
@@ -822,26 +850,29 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          width: 140,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dropdownValues[key],
-              hint: const Text("", style: TextStyle(fontSize: 12)),
-              isDense: true,
-              style: const TextStyle(fontSize: 12, color: Colors.black),
-              icon: const Icon(Icons.arrow_drop_down, size: 18),
-              onChanged: (newValue) {
-                setState(() {
-                  _dropdownValues[key] = newValue!;
-                });
-              },
-              items: items.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+        child: IntrinsicWidth(
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 120),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[key],
+                hint: const Text("", style: TextStyle(fontSize: 12)),
+                isDense: true,
+                isExpanded: false,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, size: 18),
+                onChanged: (newValue) {
+                  setState(() {
+                    _dropdownValues[key] = newValue!;
+                  });
+                },
+                items: items.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -888,7 +919,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Sisi Kiri (Owner & Remarks)
               Expanded(
                 child: Column(
                   children: [
