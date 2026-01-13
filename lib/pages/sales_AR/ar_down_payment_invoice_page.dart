@@ -26,10 +26,32 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
-  String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
-    double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+  // --- HELPER FORMAT RUPIAH (INDONESIA: Titik Ribuan, Koma Desimal) ---
+
+  // Convert double ke String (250000.0 -> "250.000,00")
+  String _formatToIdrStyle(double value, {bool isPercent = false}) {
+    if (isPercent) return value.toStringAsFixed(0);
+
+    // Ambil 2 desimal
+    String str = value.toStringAsFixed(2);
+    List<String> parts = str.split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts.length > 1 ? parts[1] : "00";
+
+    // Regex untuk menambah titik setiap 3 digit dari belakang
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    String Function(Match) mathFunc = (Match match) => '${match[1]}.';
+    String formattedInt = integerPart.replaceAllMapped(reg, mathFunc);
+
+    return "$formattedInt,$decimalPart";
+  }
+
+  // Convert String Rupiah ke double ("250.000,00" -> 250000.0)
+  double _parseIdrStyle(String value) {
+    if (value.isEmpty) return 0.0;
+    // Hapus titik ribuan, ganti koma desimal jadi titik
+    String clean = value.replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(clean) ?? 0.0;
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -39,25 +61,27 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     );
   }
 
+  // Focus Node untuk Auto-Format saat selesai mengetik
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
+        // SAAT HILANG FOKUS (SELESAI KETIK)
         if (!fn.hasFocus) {
           final controller = _getCtrl(key);
-          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
-          double? parsed = double.tryParse(cleanText);
+          // 1. Ambil angka murni dari input user
+          double val = _parseIdrStyle(controller.text);
+
           if (mounted) {
             setState(() {
-              if (parsed != null) {
-                controller.text = isPercent
-                    ? parsed.toStringAsFixed(0)
-                    : parsed.toStringAsFixed(2);
+              if (val != 0 || controller.text.isNotEmpty) {
+                // 2. Ubah jadi format Rupiah (ex: 100.000,00)
+                controller.text = _formatToIdrStyle(val, isPercent: isPercent);
               } else {
                 controller.text = defaultValue;
               }
@@ -74,16 +98,14 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   double _getGrandTotal() {
     double parse(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+      return _parseIdrStyle(val);
     }
 
-    // Logic hitung sederhana sesuai field yang ada
     double before = parse("f_before_disc");
     double dpm = parse("f_dpm_val");
     double tax = parse("f_tax");
-    double rounding = parse("f_rounding"); // Sesuaikan key
+    double rounding = parse("f_rounding");
 
-    // Total = Total Before Disc - DPM + Tax + Rounding
     return before - dpm + tax + rounding;
   }
 
@@ -102,7 +124,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     super.dispose();
   }
 
-  // --- FUNGSI DATE PICKER ---
   Future<void> _selectDate(BuildContext context, String key) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -167,7 +188,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SISI KIRI
           Expanded(
             flex: 6,
             child: Column(
@@ -179,69 +199,56 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                 _buildHeaderField("Customer Ref. No.", "h_ref"),
                 const SizedBox(height: 8),
 
+                // Local Currency (Sesuai Gambar: Label -> Dropdown -> Input)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
-                      Container(
+                      SizedBox(
                         width: 100,
-                        height: 32,
-                        padding: const EdgeInsets.symmetric(horizontal: 0),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value:
-                                _dropdownValues["h_curr_type"] ?? "BP Currency",
-                            isDense: true,
-                            isExpanded: true,
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: secondarySlate,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            onChanged: (v) => setState(
-                              () => _dropdownValues["h_curr_type"] = v!,
-                            ),
-                            items:
-                                [
-                                      "BP Currency",
-                                      "Local Currency",
-                                      "System Currency",
-                                    ]
-                                    .map(
-                                      (e) => DropdownMenuItem(
-                                        value: e,
-                                        child: Text(e),
-                                      ),
-                                    )
-                                    .toList(),
+                        child: Text(
+                          "Local Currency",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: secondarySlate,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                       const SizedBox(width: 28),
+                      // Dropdown IDR
                       Container(
-                        width: 60,
+                        width: 80,
                         height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color: bgSlate,
+                          color: Colors.white,
                           border: Border.all(color: borderGrey),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Center(
-                          child: Text(
-                            "IDR",
-                            style: TextStyle(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _dropdownValues["h_curr"] ?? "IDR",
+                            isDense: true,
+                            style: const TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
+                            onChanged: (v) =>
+                                setState(() => _dropdownValues["h_curr"] = v!),
+                            items: ["IDR", "USD", "SGD"]
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
                       ),
+                      // Input Rate
                       Expanded(
                         child: Container(
                           height: 32,
@@ -251,7 +258,10 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: TextField(
-                            controller: _getCtrl("h_curr_rate", initial: ""),
+                            controller: _getCtrl(
+                              "h_curr_rate",
+                              initial: "16.675,0000",
+                            ), // Format Indo
                             style: const TextStyle(fontSize: 12),
                             textAlign: TextAlign.right,
                             decoration: const InputDecoration(
@@ -271,7 +281,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               ],
             ),
           ),
-
           const SizedBox(width: 40),
           Expanded(
             flex: 4,
@@ -457,27 +466,37 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     );
   }
 
+  // --- DATA ROW SESUAI GAMBAR ---
   DataRow _buildDataRow(int index) {
+    // Format Item No: AR-DownPayment_IN001-0001
+    String autoItemNo =
+        "AR-DP_IN001-${(index + 1).toString().padLeft(4, '0')}";
+
     return DataRow(
       cells: [
         DataCell(Text("${index + 1}", style: const TextStyle(fontSize: 12))),
-        _buildModernTableCell("item_no_$index"),
-        _buildModernTableCell("jenis_brg_$index"),
-        _buildModernTableCell("desc_$index"),
-        _buildModernTableCell("jenis_item_$index"),
-        _buildModernTableCell("orbit_$index"),
-        _buildModernTableCell("details_$index"),
-        _buildModernTableCell("qty_$index", initial: "0"),
-        _buildModernTableCell("stock_$index", initial: "0"),
-        _buildModernTableCell("price_$index", initial: "0.00"),
-        _buildModernTableCell("p_service_$index", initial: "0.00"),
-        _buildModernTableCell("p_ref_$index", initial: "0.00"),
-        _buildModernTableCell("uom_$index"),
-        _buildModernTableCell("free_text_$index"),
-        _buildModernTableCell("proj_$index"),
-        _buildModernTableCell("line_$index"),
-        _buildModernTableCell("disc_$index", initial: "0.00"),
-        _buildModernTableCell("total_$index", initial: "0.00"),
+        _buildModernTableCell("item_no_$index", initial: autoItemNo),
+        _buildModernTableCell("desc_$index"), 
+        _buildModernTableCell("details_$index"), 
+        _buildModernTableCell("qty_$index", initial: "0"), 
+        _buildModernTableCell("uom_$index"), 
+        _buildModernTableCell("whse_$index"), 
+        _buildModernTableCell(
+          "price_$index",
+          initial: "0,00",
+        ), 
+        _buildModernTableCell(
+          "disc_$index",
+          initial: "0",
+        ), 
+        _buildModernTableCell("tax_code_$index"), 
+        _buildModernTableCell("wtax_liable_$index"), 
+        _buildModernTableCell("material_$index"), 
+        _buildModernTableCell("material_from_$index"), 
+        _buildModernTableCell("project_line_$index"), 
+        _buildModernTableCell("optional_$index"), 
+        _buildModernTableCell("ref_item_$index"), 
+        
       ],
     );
   }
@@ -499,15 +518,17 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
 
   DataCell _buildModernTableCell(String key, {String initial = ""}) {
     final controller = _getCtrl(key, initial: initial);
+
     bool isNumeric =
         key.contains("qty") ||
         key.contains("stock") ||
-        key.contains("price") ||
         key.contains("total") ||
-        key.contains("disc");
+        key.contains("disc") ||
+        key.contains("price");
+
     final focusNode = _getFn(
       key,
-      defaultValue: initial.isEmpty ? "0.00" : initial,
+      defaultValue: initial.isEmpty ? "0,00" : initial, // Default 0,00
     );
 
     return DataCell(
@@ -546,37 +567,34 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     return [
       const DataColumn(label: Text("#", style: headerStyle)),
       const DataColumn(label: Text("Item No.", style: headerStyle)),
-      const DataColumn(
-        label: Text("Jenis Barang dan Jasa", style: headerStyle),
-      ),
       const DataColumn(label: Text("Item Description", style: headerStyle)),
-      const DataColumn(label: Text("Jenis Item", style: headerStyle)),
-      const DataColumn(label: Text("Klasifikasi Orbit", style: headerStyle)),
       const DataColumn(label: Text("Item Details", style: headerStyle)),
       const DataColumn(label: Text("Quantity", style: headerStyle)),
-      const DataColumn(label: Text("Quantity Stock", style: headerStyle)),
-      const DataColumn(label: Text("Unit Price", style: headerStyle)),
-      const DataColumn(label: Text("Price Service", style: headerStyle)),
-      const DataColumn(label: Text("Price Reference", style: headerStyle)),
       const DataColumn(label: Text("UoM Name", style: headerStyle)),
-      const DataColumn(label: Text("Free Text", style: headerStyle)),
-      const DataColumn(label: Text("Project Line", style: headerStyle)),
-      const DataColumn(label: Text("LineID", style: headerStyle)),
+      const DataColumn(label: Text("Whse", style: headerStyle)),
+      const DataColumn(label: Text("Unit Price", style: headerStyle)),
       const DataColumn(label: Text("Discount %", style: headerStyle)),
-      const DataColumn(label: Text("Total (LC)", style: headerStyle)),
+      const DataColumn(label: Text("Tax Code", style: headerStyle)),
+      const DataColumn(label: Text("WTax Liable", style: headerStyle)),
+      const DataColumn(label: Text("Material", style: headerStyle)),
+      const DataColumn(label: Text("Material From", style: headerStyle)),
+      const DataColumn(label: Text("Project Line", style: headerStyle)),
+      const DataColumn(label: Text("Optional", style: headerStyle)),
+      const DataColumn(label: Text("Ref Item", style: headerStyle)),
     ];
   }
 
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
+      // Total = Price * Qty (Simplified logic for now, using Total column directly for sum)
       String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows +=
-          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      totalAllRows += _parseIdrStyle(val);
     }
     setState(() {
-      _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
-      _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
+      String formattedTotal = _formatToIdrStyle(totalAllRows);
+      _getCtrl("f_before_disc").text = formattedTotal;
+      _fieldValues["f_before_disc"] = formattedTotal;
     });
   }
 
@@ -695,7 +713,8 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+    String totalStr = _formatToIdrStyle(grandTotal);
+    _getCtrl("f_total_final").text = "IDR $totalStr";
 
     return Column(
       children: [
@@ -767,10 +786,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                             ),
                             child: TextField(
                               controller: _getCtrl("f_dpm_pct", initial: "30"),
-                              focusNode: _getFn(
-                                "f_dpm_pct",
-                                isPercent: true,
-                              ), // Auto Decimal
+                              focusNode: _getFn("f_dpm_pct", isPercent: true),
                               textAlign: TextAlign.right,
                               style: const TextStyle(fontSize: 11),
                               decoration: const InputDecoration(
@@ -782,17 +798,12 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                                 ),
                               ),
                               onChanged: (val) {
-                                // Simple logic: update val based on pct
                                 double pct = double.tryParse(val) ?? 0;
-                                double before =
-                                    double.tryParse(
-                                      _getCtrl(
-                                        "f_before_disc",
-                                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                                    ) ??
-                                    0;
-                                String newVal = (before * pct / 100)
-                                    .toStringAsFixed(2);
+                                double before = _parseIdrStyle(
+                                  _getCtrl("f_before_disc").text,
+                                );
+                                double dpmVal = (before * pct / 100);
+                                String newVal = _formatToIdrStyle(dpmVal);
                                 _getCtrl("f_dpm_val").text = newVal;
                                 setState(() {});
                               },
@@ -809,8 +820,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                         ],
                       ),
                     ),
-
-                    // Rounding Row
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -842,7 +851,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                         ],
                       ),
                     ),
-
                     _buildSummaryRowWithAutoValue(
                       "Tax",
                       "f_tax",
@@ -853,18 +861,16 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                       "f_wtax",
                       isReadOnly: false,
                     ),
-
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
                     ),
-
                     _buildSummaryRowWithAutoValue(
                       "Total",
                       "f_total_final",
                       isBold: true,
                       isReadOnly: true,
-                    ), // Tetap ReadOnly (Hasil Hitung)
+                    ),
                     _buildSummaryRowWithAutoValue(
                       "Applied Amount",
                       "f_applied",
@@ -889,8 +895,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       ],
     );
   }
-
-  // --- HELPER WIDGETS ---
 
   Widget _buildHeaderField(
     String label,
@@ -1050,7 +1054,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   Widget _buildSummaryRowWithAutoValue(
     String label,
     String key, {
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isBold = false,
     bool isReadOnly = false,
   }) {
@@ -1063,7 +1067,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       isReadOnly: isReadOnly,
       defaultValue: defaultValue,
     );
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -1086,7 +1089,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               ),
               child: TextField(
                 controller: controller,
-                focusNode: focusNode, // Pasang FocusNode
+                focusNode: focusNode,
                 readOnly: isReadOnly,
                 textAlign: TextAlign.right,
                 style: TextStyle(
@@ -1114,7 +1117,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
 
   Widget _buildSummaryBox(
     String key, {
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isReadOnly = false,
     bool isPercent = false,
   }) {
@@ -1128,7 +1131,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       defaultValue: defaultValue,
       isPercent: isPercent,
     );
-
     return Container(
       height: 24,
       decoration: BoxDecoration(
@@ -1138,7 +1140,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       ),
       child: TextField(
         controller: controller,
-        focusNode: focusNode, 
+        focusNode: focusNode,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
         style: const TextStyle(fontSize: 12),
@@ -1443,4 +1445,5 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       ],
     ),
   );
+
 }

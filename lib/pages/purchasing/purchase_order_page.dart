@@ -143,10 +143,8 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // HEADER
-  // ---------------------------------------------------------------------------
-  Widget _buildModernHeader() {
+  
+ Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(24),
@@ -172,13 +170,15 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             child: Column(
               children: [
                 _buildHeaderField("Vendor", "vendor", initial: ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildSearchableHeaderRow("Name", "h_name"),
+                 const SizedBox(height: 4),
                 _buildSmallDropdownRowModern("Contact Person", "C_person", [
                   "",
                 ]),
+                 const SizedBox(height: 4),
                 _buildHeaderField("Department", "h_dept", initial: ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 15),
 
                 Row(
                   children: [
@@ -202,7 +202,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 17),
 
                 _buildHeaderField(
                   "E-Mail Address",
@@ -283,7 +283,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 _buildHeaderField(
                   "Status",
@@ -291,14 +291,14 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                   initial: "",
                   isReadOnly: true,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Valid Until", "h_valid_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Document Date", "h_doc_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Required Date", "h_req_date", ""),
               ],
             ),
@@ -308,6 +308,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     );
   }
 
+  
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

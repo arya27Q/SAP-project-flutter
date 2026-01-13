@@ -9,6 +9,7 @@ import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
 import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
+import 'pages/sales_AR/ar_invoice_page.dart';
 import 'pages/Business_Partner_Master_Data.dart';
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
@@ -77,16 +78,14 @@ class _MainLayoutState extends State<MainLayout> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(
-        0xFFF1F5F9,
-      ), 
+      backgroundColor: const Color(0xFFF1F5F9),
 
       drawer: isMobile
           ? SidebarWidget(
               currentView: currentView,
               onViewChanged: (view) {
                 setState(() => currentView = view);
-                Navigator.pop(context); 
+                Navigator.pop(context);
               },
             )
           : null,
@@ -151,10 +150,17 @@ class _MainLayoutState extends State<MainLayout> {
         return const DeliveryPage(key: ValueKey("Delivery"));
 
       case "A/R Down Payment Invoice":
-        return const ArDownPaymentInvoicePage(key: ValueKey("A/R Down Payment Invoice"));
+        return const ArDownPaymentInvoicePage(
+          key: ValueKey("A/R Down Payment Invoice"),
+        );
+
+      case "A/R Invoice":
+        return const ArInvoicePage(key: ValueKey("A/R Invoice"));
 
       case "Business Partner Master Data":
-        return const BpMasterDataPage(key: ValueKey("Business Partner Master Data"));
+        return const BpMasterDataPage(
+          key: ValueKey("Business Partner Master Data"),
+        );
 
       case "Purchase Request":
         return const PurchaseRequestPage(key: ValueKey("Purchase Request"));

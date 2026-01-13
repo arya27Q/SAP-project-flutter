@@ -139,9 +139,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // HEADER
-  // ---------------------------------------------------------------------------
+  
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -168,13 +166,15 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
             child: Column(
               children: [
                 _buildHeaderField("Vendor", "vendor", initial: ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildSearchableHeaderRow("Name", "h_name"),
+                 const SizedBox(height: 4),
                 _buildSmallDropdownRowModern("Contact Person", "C_person", [
                   "",
                 ]),
+                 const SizedBox(height: 4),
                 _buildHeaderField("Department", "h_dept", initial: ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 15),
 
                 Row(
                   children: [
@@ -198,7 +198,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 17),
 
                 _buildHeaderField(
                   "E-Mail Address",
@@ -279,7 +279,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 _buildHeaderField(
                   "Status",
@@ -287,14 +287,14 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                   initial: "",
                   isReadOnly: true,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Valid Until", "h_valid_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Document Date", "h_doc_date", ""),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildHeaderDate("Required Date", "h_req_date", ""),
               ],
             ),

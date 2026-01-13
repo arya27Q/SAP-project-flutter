@@ -36,10 +36,11 @@ class _LoginPageState extends State<LoginPage> {
     "PT. ATMI Duta Engineering",
   ];
 
+  // List Fitur (Pas 9 Item sesuai gambar)
   final List<Map<String, dynamic>> features = [
     {
       "icon": Icons.grid_view_rounded,
-      "title": "Dynamic Dashboard",
+      "title": "Dashboard", // Disesuaikan judulnya biar pendek kayak gambar
       "subtitle": "Real-time overview.",
     },
     {
@@ -55,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
     {
       "icon": Icons.shopping_bag_rounded,
       "title": "Sales - A/R",
-      "subtitle": "Order to Invoicing.",
+      "subtitle": "Orders & Invoicing.",
     },
     {
       "icon": Icons.local_shipping_rounded,
@@ -73,14 +74,20 @@ class _LoginPageState extends State<LoginPage> {
       "subtitle": "Master data mgmt.",
     },
     {
-      "icon": Icons.analytics_rounded,
-      "title": "Advanced Reports",
-      "subtitle": "Business insights.",
+      "icon": Icons.settings_suggest_rounded,
+      "title": "Production",
+      "subtitle": "MRP & Planning.",
     },
     {
       "icon": Icons.security_rounded,
       "title": "Data Security",
       "subtitle": "Encrypted protection.",
+    },
+
+    {
+      "icon": Icons.analytics_rounded,
+      "title": "Reports",
+      "subtitle": "Business insights.",
     },
   ];
 
@@ -91,7 +98,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // --- Login Logic (Tetap Sama) ---
   Future<void> loginTest() async {
     if (selectedCompany == null) {
       _showErrorSnackBar("Please select a Company first.");
@@ -186,10 +192,11 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
+          // Responsive Check: Desktop > 950px
           if (constraints.maxWidth > 950) {
             return Row(
               children: [
-                // --- LEFT PANEL: BRANDING (DIREVISI) ---
+                // --- LEFT PANEL: BRANDING ---
                 Expanded(
                   flex: 6,
                   child: Container(
@@ -202,17 +209,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Center(
                       child: SingleChildScrollView(
-                        // SOLUSI OVERFLOW: Tambahkan scroll
                         padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Container(
-                          width: 620, // Kunci lebar agar lurus kiri
+                          width: 620,
                           padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment
-                                .start, // Kunci kelurusan kiri
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // LOGO & JUDUL (Sekarang Row sejajar kiri)
+                              // LOGO & JUDUL
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -250,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               const SizedBox(height: 50),
-                              // GRID FITUR
+                              // GRID FITUR (2 Kolom)
                               GridView.builder(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
@@ -334,6 +339,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: _buildLoginForm(isMobile: false),
                           ),
                         ),
+                        // Tombol Close di pojok kanan atas desktop
                         Positioned(
                           top: 20,
                           right: 20,
@@ -352,10 +358,12 @@ class _LoginPageState extends State<LoginPage> {
               ],
             );
           } else {
-            // MOBILE VIEW
+            // --- MOBILE VIEW ---
             return Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
                 ),
               ),
@@ -366,6 +374,13 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
                     padding: const EdgeInsets.all(32),
                     child: _buildLoginForm(isMobile: true),
@@ -571,6 +586,8 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       const SizedBox(height: 12),
+
+                      // PERBAIKAN UTAMA: Flexible di Teks Warning
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
@@ -590,12 +607,15 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.amber.shade900,
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              "Note: New registrations require manual Admin approval.",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
+                            const Flexible(
+                              // Pakai Flexible biar ga overflow di mobile
+                              child: Text(
+                                "Note: New registrations require manual Admin approval.",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],

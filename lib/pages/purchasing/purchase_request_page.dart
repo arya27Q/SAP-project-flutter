@@ -240,7 +240,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 _buildHeaderField("Branch", "h_branch", initial: ""),
                 const SizedBox(height: 12),
                 _buildHeaderField("Department", "h_dept", initial: ""),
-                const SizedBox(height: 12),
+                const SizedBox(height: 15),
                 Row(
                   children: [
                     SizedBox(
@@ -263,7 +263,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 17),
                 _buildHeaderField(
                   "E-Mail Address",
                   "h_email",

@@ -34,7 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final List<Map<String, dynamic>> features = [
     {
       "icon": Icons.grid_view_rounded,
-      "title": "Dashboard",
+      "title": "Dashboard", // Disesuaikan judulnya biar pendek kayak gambar
       "subtitle": "Real-time overview.",
     },
     {
@@ -73,14 +73,15 @@ class _SignUpPageState extends State<SignUpPage> {
       "subtitle": "MRP & Planning.",
     },
     {
-      "icon": Icons.analytics_rounded,
-      "title": "Reports",
-      "subtitle": "Business insights.",
-    },
-    {
       "icon": Icons.security_rounded,
       "title": "Data Security",
       "subtitle": "Encrypted protection.",
+    },
+
+    {
+      "icon": Icons.analytics_rounded,
+      "title": "Reports",
+      "subtitle": "Business insights.",
     },
   ];
 
@@ -184,6 +185,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 950) {
+            // DESKTOP LAYOUT (Left Form, Right Branding)
             return Row(
               children: [
                 // PANEL KIRI: FORM PENDAFTARAN
@@ -217,7 +219,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ),
-                // PANEL KANAN: BRANDING (LURUS & ANTI OVERFLOW)
+                // PANEL KANAN: BRANDING
                 Expanded(
                   flex: 6,
                   child: Container(
@@ -230,18 +232,16 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     child: Center(
                       child: SingleChildScrollView(
-                        // <--- Tambahan agar bisa scroll jika layar kecil
                         padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Container(
-                          width:
-                              620, // <--- Kunci lebar agar sejajar dengan deskripsi
+                          width: 620,
                           padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment
-                                .start, // <--- Rata kiri lurus
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(10),
@@ -269,7 +269,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                               const SizedBox(height: 30),
                               const Text(
-                                "Empowering your business with the most advanced ERP solutions.",
+                                "Comprehensive SAP Business One Integration for Modern Enterprises.",
                                 style: TextStyle(
                                   fontSize: 17,
                                   color: Colors.white70,
@@ -348,7 +348,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ],
             );
           } else {
-            // TAMPILAN MOBILE
+            // MOBILE VIEW
             return Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -380,6 +380,18 @@ class _SignUpPageState extends State<SignUpPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (isMobile)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: widget.onBackToDashboard,
+              icon: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primaryIndigo,
+              ),
+            ),
+          ),
         Center(
           child: Column(
             children: [
