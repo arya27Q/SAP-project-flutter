@@ -10,13 +10,13 @@ class PurchaseRequestPage extends StatefulWidget {
 class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _rowCount = 10; // Default row count
+  int _rowCount = 10;
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-  
+
   final ScrollController _horizontalScroll = ScrollController();
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
@@ -31,11 +31,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
-    return _controllers.putIfAbsent(key, () => TextEditingController(text: initial));
+    return _controllers.putIfAbsent(
+      key,
+      () => TextEditingController(text: initial),
+    );
   }
 
-  // Logic FocusNode untuk Auto Decimal 0.00
-  // PERBAIKAN: Menghapus pengecekan isReadOnly di listener agar formatting selalu jalan
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
@@ -45,8 +46,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        // Cek hasFocus saja. Jika user bisa mengetik (fokus), maka saat keluar (blur) harus diformat.
-        if (!fn.hasFocus) { 
+        if (!fn.hasFocus) {
           final controller = _getCtrl(key);
           String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
           double? parsed = double.tryParse(cleanText);
@@ -69,7 +69,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     return _focusNodes[key]!;
   }
 
-  // Logic Hitung Grand Total
   double _getGrandTotal() {
     double parse(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
@@ -97,7 +96,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     super.dispose();
   }
 
-  // --- FUNGSI DATE PICKER (MANUAL FORMAT TANPA INTL) ---
   Future<void> _selectDate(BuildContext context, String key) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -110,7 +108,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       String month = picked.month.toString().padLeft(2, '0');
       String year = picked.year.toString();
       String formattedDate = "$day/$month/$year";
-      
+
       setState(() {
         _getCtrl(key).text = formattedDate;
         _fieldValues[key] = formattedDate;
@@ -129,7 +127,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           children: [
             RepaintBoundary(child: _buildModernHeader()),
             const SizedBox(height: 16),
-            _buildTabSection(), 
+            _buildTabSection(),
             const SizedBox(height: 16),
             _buildModernFooter(),
           ],
@@ -138,9 +136,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // HEADER KIRI-KANAN (SIDE-BY-SIDE)
-  // ---------------------------------------------------------------------------
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -161,69 +156,91 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SISI KIRI (REQUESTER INFO)
           Expanded(
             flex: 6,
             child: Column(
               children: [
-                // 1. Row Requester
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      SizedBox(width: 100, child: Text("Requester", style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-                      const SizedBox(width: 28), 
-                      
-                      // Dropdown Type
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          "Requester",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: secondarySlate,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 28),
                       Container(
                         height: 32,
-                        width: 110, 
+                        width: 110,
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(color: borderGrey),
-                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(6)),
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(6),
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _dropdownValues["h_req_type"] ?? "User",
                             isDense: true,
-                            style: const TextStyle(fontSize: 12, color: Colors.black),
-                            onChanged: (v) => setState(() => _dropdownValues["h_req_type"] = v!),
-                            items: ["User", "Employee"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
+                            onChanged: (v) => setState(
+                              () => _dropdownValues["h_req_type"] = v!,
+                            ),
+                            items: ["User", "Employee"]
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
                       ),
-                      // Input Value (KOSONG)
                       Expanded(
                         child: Container(
                           height: 32,
                           decoration: BoxDecoration(
                             color: bgSlate,
                             border: Border.all(color: borderGrey),
-                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(6)),
+                            borderRadius: const BorderRadius.horizontal(
+                              right: Radius.circular(6),
+                            ),
                           ),
                           child: TextField(
                             controller: _getCtrl("h_req_type_val", initial: ""),
                             style: const TextStyle(fontSize: 12),
-                            decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                // 2. Row Requester Name (POPUP SEARCH)
                 _buildSearchableHeaderRow("Requester Name", "h_req_name"),
-
-                // 3. Branch & Dept (KOSONG)
                 _buildHeaderField("Branch", "h_branch", initial: ""),
                 const SizedBox(height: 12),
                 _buildHeaderField("Department", "h_dept", initial: ""),
                 const SizedBox(height: 12),
-
-                // 4. Checkbox
                 Row(
                   children: [
                     SizedBox(
@@ -232,67 +249,105 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                       child: Checkbox(
                         value: _checkStates["h_send_email"] ?? false,
                         activeColor: primaryIndigo,
-                        onChanged: (v) => setState(() => _checkStates["h_send_email"] = v!),
+                        onChanged: (v) =>
+                            setState(() => _checkStates["h_send_email"] = v!),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(child: Text("Send E-Mail if PO or GRPO is Added", style: TextStyle(fontSize: 12, color: Colors.black87), overflow: TextOverflow.ellipsis)),
+                    const Expanded(
+                      child: Text(
+                        "Send E-Mail if PO or GRPO is Added",
+                        style: TextStyle(fontSize: 12, color: Colors.black87),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // 5. Email (KOSONG)
-                _buildHeaderField("E-Mail Address", "h_email", isReadOnly: true, initial: ""),
+                _buildHeaderField(
+                  "E-Mail Address",
+                  "h_email",
+                  isReadOnly: true,
+                  initial: "",
+                ),
               ],
             ),
           ),
-
           const SizedBox(width: 40),
-
-          // SISI KANAN (DATES & STATUS)
           Expanded(
             flex: 4,
             child: Column(
               children: [
-                // 6. No Series (KOSONG)
                 Row(
                   children: [
-                    SizedBox(width: 100, child: Text("No.", style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        "No.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: secondarySlate,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 28),
                     Container(
                       width: 60,
                       height: 32,
                       margin: const EdgeInsets.only(right: 4),
-                      decoration: BoxDecoration(color: bgSlate, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
+                      decoration: BoxDecoration(
+                        color: bgSlate,
+                        border: Border.all(color: borderGrey),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                       child: Center(
                         child: TextField(
-                            controller: _getCtrl("h_no_series", initial: ""),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 11),
-                            decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero)),
+                          controller: _getCtrl("h_no_series", initial: ""),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 11),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
                       ),
                     ),
                     Expanded(
                       child: Container(
                         height: 32,
-                        decoration: BoxDecoration(color: bgSlate, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
+                        decoration: BoxDecoration(
+                          color: bgSlate,
+                          border: Border.all(color: borderGrey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                         child: Center(
                           child: TextField(
-                              controller: _getCtrl("h_no_val", initial: ""),
-                              style: const TextStyle(fontSize: 12),
-                              decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8))),
+                            controller: _getCtrl("h_no_val", initial: ""),
+                            style: const TextStyle(fontSize: 12),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // 7. Status (KOSONG)
-                _buildHeaderField("Status", "h_status", initial: "", isReadOnly: true),
+                _buildHeaderField(
+                  "Status",
+                  "h_status",
+                  initial: "",
+                  isReadOnly: true,
+                ),
                 const SizedBox(height: 12),
-
-                // 8. Dates (INPUTAN DATE PICKER)
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
                 const SizedBox(height: 12),
                 _buildHeaderDate("Valid Until", "h_valid_date", ""),
@@ -307,24 +362,44 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       ),
     );
   }
-  
-  // Helper khusus untuk Searchable Field di Header (Requester Name)
+
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           const SizedBox(width: 28),
           Expanded(
             child: InkWell(
               onTap: () {
-                List<String> dummyNames = ["Indra", "Budi", "Siti", "Dewi", "Agus", "Rina"];
+                List<String> dummyNames = [
+                  "Indra",
+                  "Budi",
+                  "Siti",
+                  "Dewi",
+                  "Agus",
+                  "Rina",
+                ];
                 _showSearchDialog(label, key, dummyNames);
               },
               child: Container(
                 height: 32,
-                decoration: BoxDecoration(color: bgSlate, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
+                decoration: BoxDecoration(
+                  color: bgSlate,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: borderGrey),
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -332,12 +407,18 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
                           _controllers[key]?.text ?? "",
-                          style: const TextStyle(fontSize: 12, color: Colors.black),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
-                    const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.search, size: 16, color: Colors.grey)),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(Icons.search, size: 16, color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
@@ -348,24 +429,46 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  Widget _buildHeaderField(String label, String key, {String initial = "", bool isReadOnly = false}) {
+  Widget _buildHeaderField(
+    String label,
+    String key, {
+    String initial = "",
+    bool isReadOnly = false,
+  }) {
     return Row(
       children: [
-        SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-        const SizedBox(width: 28), 
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
             height: 32,
             decoration: BoxDecoration(
-              color: bgSlate, 
-              borderRadius: BorderRadius.circular(6), 
-              border: Border.all(color: borderGrey)
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
             ),
             child: TextField(
               controller: _getCtrl(key, initial: initial),
               readOnly: isReadOnly,
               style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+              ),
             ),
           ),
         ),
@@ -373,27 +476,47 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // --- HELPER DATE PICKER ---
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Row(
       children: [
-        SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
         const SizedBox(width: 28),
         Expanded(
           child: InkWell(
-            onTap: () => _selectDate(context, key), // Trigger Date Picker
+            onTap: () => _selectDate(context, key),
             child: Container(
               height: 32,
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
-              child: IgnorePointer( // Biar keyboard gak muncul
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: IgnorePointer(
                 child: TextField(
                   controller: _getCtrl(key, initial: initial),
                   style: const TextStyle(fontSize: 12),
                   decoration: const InputDecoration(
-                    border: InputBorder.none, 
-                    isDense: true, 
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    suffixIcon: Icon(Icons.calendar_today, size: 14, color: Colors.grey)
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    suffixIcon: Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -415,7 +538,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.12),
-            blurRadius: 18, spreadRadius: 2,
+            blurRadius: 18,
+            spreadRadius: 2,
             offset: const Offset(0, 10),
           ),
         ],
@@ -427,7 +551,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             decoration: BoxDecoration(
               color: primaryIndigo,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20), topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
             child: TabBar(
@@ -440,7 +565,10 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              indicatorPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              indicatorPadding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 8,
+              ),
               tabs: const [
                 Tab(text: "Contents"),
                 Tab(text: "Attachments"),
@@ -468,9 +596,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // TABLE CONTENTS (DROPDOWNS & SEARCH ENABLED)
-  // ---------------------------------------------------------------------------
   Widget _buildContentsTab() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -480,15 +605,23 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(bottom: BorderSide(color: primaryIndigo, width: 2.5)),
+            border: Border(
+              bottom: BorderSide(color: primaryIndigo, width: 2.5),
+            ),
           ),
           child: Row(
             children: [
-              const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const Text(
+                "Item/Service Type",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(width: 12),
               _buildSmallDropdown("item_type_main", ["Service", "Item"]),
               const Spacer(),
-              const Text("Summary Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const Text(
+                "Summary Type",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(width: 12),
               _buildSmallDropdown("summary_type", ["No Summary"]),
               const SizedBox(width: 20),
@@ -501,11 +634,17 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
             color: const Color.fromARGB(255, 246, 246, 246),
-            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
             border: Border.all(color: borderGrey, width: 0.5),
           ),
           child: ClipRRect(
-            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
             child: Scrollbar(
               controller: _horizontalScroll,
               thumbVisibility: true,
@@ -516,13 +655,24 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   columnSpacing: 30,
                   horizontalMargin: 15,
                   headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(const Color(0xFF257575)),
+                  headingRowColor: WidgetStateProperty.all(
+                    const Color(0xFF257575),
+                  ),
                   border: const TableBorder(
-                    verticalInside: BorderSide(color: Color.fromARGB(208, 166, 164, 164), width: 0.5),
-                    horizontalInside: BorderSide(color: Color.fromARGB(208, 166, 164, 164), width: 0.5),
+                    verticalInside: BorderSide(
+                      color: Color.fromARGB(208, 166, 164, 164),
+                      width: 0.5,
+                    ),
+                    horizontalInside: BorderSide(
+                      color: Color.fromARGB(208, 166, 164, 164),
+                      width: 0.5,
+                    ),
                   ),
                   columns: _buildStaticColumns(),
-                  rows: List.generate(_rowCount, (index) => _buildDataRow(index)),
+                  rows: List.generate(
+                    _rowCount,
+                    (index) => _buildDataRow(index),
+                  ),
                 ),
               ),
             ),
@@ -532,9 +682,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // TABLE COLUMNS
   List<DataColumn> _buildStaticColumns() {
-    const headerStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white);
+    const headerStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    );
     return [
       const DataColumn(label: Text("#", style: headerStyle)),
       const DataColumn(label: Text("Description", style: headerStyle)),
@@ -559,33 +712,49 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         _buildModernTableCell("desc_$index"),
         _buildModernTableCell("req_date_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
-        _buildSearchableCell("uom_$index"), 
+        _buildSearchableCell("uom_$index"),
         _buildModernTableCell("price_$index", initial: "0.00"),
         _buildModernTableCell("info_price_$index", initial: "0.00"),
         _buildModernTableCell("disc_$index", initial: "0.00"),
-        _buildDropdownCell("tax_$index", ["VATin11", "VATin12", "Exempt"]), 
+        _buildDropdownCell("tax_$index", ["VATin11", "VATin12", "Exempt"]),
         _buildModernTableCell("total_$index", initial: "0.00"),
-        _buildSearchableCell("div_$index"), 
-        _buildDropdownCell("cat_$index", ["Alat-alat Kebersihan", "Perlengkapan Kerja", "Isolasi"]), 
+        _buildSearchableCell("div_$index"),
+        _buildDropdownCell("cat_$index", [
+          "Alat-alat Kebersihan",
+          "Perlengkapan Kerja",
+          "Isolasi",
+        ]),
       ],
     );
   }
 
-  // --- CELL HELPERS ---
-
   Widget _buildAddRowButtons() {
     return Row(
       children: [
-        IconButton(onPressed: () => setState(() => _rowCount++), icon: const Icon(Icons.add_box, color: Colors.green)),
-        IconButton(onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null), icon: const Icon(Icons.indeterminate_check_box, color: Colors.red)),
+        IconButton(
+          onPressed: () => setState(() => _rowCount++),
+          icon: const Icon(Icons.add_box, color: Colors.green),
+        ),
+        IconButton(
+          onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null),
+          icon: const Icon(Icons.indeterminate_check_box, color: Colors.red),
+        ),
       ],
     );
   }
 
   DataCell _buildModernTableCell(String key, {String initial = ""}) {
     final controller = _getCtrl(key, initial: initial);
-    bool isNumeric = key.contains("qty") || key.contains("price") || key.contains("total") || key.contains("disc") || key.contains("info_price");
-    final focusNode = _getFn(key, defaultValue: initial.isEmpty ? "0.00" : initial);
+    bool isNumeric =
+        key.contains("qty") ||
+        key.contains("price") ||
+        key.contains("total") ||
+        key.contains("disc") ||
+        key.contains("info_price");
+    final focusNode = _getFn(
+      key,
+      defaultValue: initial.isEmpty ? "0.00" : initial,
+    );
 
     return DataCell(
       Padding(
@@ -597,11 +766,15 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             focusNode: focusNode,
             textAlign: isNumeric ? TextAlign.right : TextAlign.left,
             style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(vertical: 10)),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
+            ),
             onChanged: (val) {
               _fieldValues[key] = val;
               if (isNumeric) {
-                 _syncTotalBeforeDiscount();
+                _syncTotalBeforeDiscount();
               }
             },
           ),
@@ -610,12 +783,16 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // Helper untuk cell yang bisa SEARCH + KETIK (Popup Search)
   DataCell _buildSearchableCell(String key) {
     return DataCell(
       InkWell(
         onTap: () {
-          List<String> dummyData = ["Option A", "Option B", "Option C", "Option D"];
+          List<String> dummyData = [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D",
+          ];
           _showSearchDialog("Select Item", key, dummyData);
         },
         child: Padding(
@@ -627,7 +804,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
               children: [
                 Expanded(
                   child: Text(
-                    _fieldValues[key] ?? _controllers[key]?.text ?? "", 
+                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
                     style: const TextStyle(fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -641,7 +818,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  // Helper untuk cell DROPDOWN + ICON (Tax Code, Kategori)
   DataCell _buildDropdownCell(String key, List<String> items) {
     return DataCell(
       Padding(
@@ -650,7 +826,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           width: 140,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: _dropdownValues[key], 
+              value: _dropdownValues[key],
               hint: const Text("", style: TextStyle(fontSize: 12)),
               isDense: true,
               style: const TextStyle(fontSize: 12, color: Colors.black),
@@ -677,7 +853,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
       String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows += double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      totalAllRows +=
+          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
     }
     setState(() {
       _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
@@ -685,9 +862,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // FOOTER SESUAI GAMBAR 2
-  // ---------------------------------------------------------------------------
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -702,56 +876,93 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: Colors.white, width: 3.5),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 18, spreadRadius: 2, offset: const Offset(0, 8))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 18,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Sisi Kiri (Owner & Remarks)
-              Expanded(child: Column(children: [
-                _buildModernFieldRow("Owner", "f_owner", initial: ""),
-                const SizedBox(height: 12),
-                _buildModernFieldRow("Remarks", "f_rem", isTextArea: true, initial: ""),
-              ])),
-              
-              const SizedBox(width: 60),
-              
-              // Sisi Kanan (Totals)
-              SizedBox(width: 350, child: Column(children: [
-                // PERBAIKAN: isReadOnly: false agar user bisa ketik manual
-                _buildSummaryRowWithAutoValue("Total Before Discount", "f_before_disc", isReadOnly: false),
-                const SizedBox(height: 8),
-                
-                // Freight with Yellow Arrow
-                Row(
-                   children: [
-                     SizedBox(
-                       width: 140, 
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                         children: const [
-                           Text("Freight", style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                           Icon(Icons.arrow_forward, size: 14, color: Colors.orange)
-                         ],
-                       )
-                     ),
-                     const SizedBox(width: 58),
-                     Expanded(child: _buildSummaryBox("f_freight"))
-                   ]
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildModernFieldRow("Owner", "f_owner", initial: ""),
+                    const SizedBox(height: 12),
+                    _buildModernFieldRow(
+                      "Remarks",
+                      "f_rem",
+                      isTextArea: true,
+                      initial: "",
+                    ),
+                  ],
                 ),
-                
-                const SizedBox(height: 8),
-                _buildSummaryRowWithAutoValue("Tax", "f_tax"),
-                
-                const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, thickness: 1)),
-                _buildSummaryRowWithAutoValue("Total Payment Due", "f_total_final", isBold: true, isReadOnly: true),
-              ])),
+              ),
+
+              const SizedBox(width: 60),
+              SizedBox(
+                width: 350,
+                child: Column(
+                  children: [
+                    _buildSummaryRowWithAutoValue(
+                      "Total Before Discount",
+                      "f_before_disc",
+                      isReadOnly: false,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 140,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text(
+                                "Freight",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 14,
+                                color: Colors.orange,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 58),
+                        Expanded(child: _buildSummaryBox("f_freight")),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSummaryRowWithAutoValue("Tax", "f_tax"),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1, thickness: 1),
+                    ),
+                    _buildSummaryRowWithAutoValue(
+                      "Total Payment Due",
+                      "f_total_final",
+                      isBold: true,
+                      isReadOnly: true,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        
-        // Buttons Footer
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: _buildActionButtons()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: _buildActionButtons(),
+        ),
         const SizedBox(height: 20),
       ],
     );
@@ -759,135 +970,260 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
   Widget _buildActionButtons() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(children: [
-      _buildFooterButton("Add", const Color(0xFF4F46E5)),
-      const SizedBox(width: 8),
-      _buildFooterButton("Cancel", Colors.red),
-      const Spacer(),
-      _buildFooterButton("Copy From", const Color(0xFF1976D2)), 
-      const SizedBox(width: 8),
-      _buildFooterButton("Copy To", Colors.orange),
-    ]),
+    child: Row(
+      children: [
+        _buildFooterButton("Add", const Color(0xFF4F46E5)),
+        const SizedBox(width: 8),
+        _buildFooterButton("Cancel", Colors.red),
+        const Spacer(),
+        _buildFooterButton("Copy From", const Color(0xFF1976D2)),
+        const SizedBox(width: 8),
+        _buildFooterButton("Copy To", Colors.orange),
+      ],
+    ),
   );
 
   Widget _buildFooterButton(String label, Color color) {
     return ElevatedButton(
       onPressed: () => debugPrint("Klik $label"),
       style: ElevatedButton.styleFrom(
-        backgroundColor: color, 
-        foregroundColor: Colors.white, 
+        backgroundColor: color,
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
-  // --- PERBAIKAN: MENAMBAHKAN FOCUSNODE UNTUK AUTO DECIMAL DI FOOTER ---
-  Widget _buildSummaryRowWithAutoValue(String label, String key, {String defaultValue = "0.00", bool isBold = false, bool isReadOnly = false}) {
-    final controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
-    // Add focus node here logic
-    final focusNode = _getFn(key, isReadOnly: isReadOnly, defaultValue: defaultValue);
-    
+  Widget _buildSummaryRowWithAutoValue(
+    String label,
+    String key, {
+    String defaultValue = "0.00",
+    bool isBold = false,
+    bool isReadOnly = false,
+  }) {
+    final controller = _getCtrl(
+      key,
+      initial: _fieldValues[key] ?? defaultValue,
+    );
+    final focusNode = _getFn(
+      key,
+      isReadOnly: isReadOnly,
+      defaultValue: defaultValue,
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(children: [
-        SizedBox(width: 140, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate))),
-        const SizedBox(width: 58),
-        Expanded(child: Container(
-          height: 28,
-          decoration: BoxDecoration(color: isReadOnly ? bgSlate : Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
-          child: TextField(
-            controller: controller, 
-            focusNode: focusNode, // Added here
-            readOnly: isReadOnly, 
-            textAlign: TextAlign.right,
-            style: TextStyle(fontSize: 12, fontWeight: isBold ? FontWeight.bold : FontWeight.w500),
-            decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6)),
-            onChanged: (val) { if (!isReadOnly) setState(() => _fieldValues[key] = val); },
+      child: Row(
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 12, color: secondarySlate),
+            ),
           ),
-        )),
-      ]),
+          const SizedBox(width: 58),
+          Expanded(
+            child: Container(
+              height: 28,
+              decoration: BoxDecoration(
+                color: isReadOnly ? bgSlate : Colors.white,
+                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                readOnly: isReadOnly,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                ),
+                onChanged: (val) {
+                  if (!isReadOnly) setState(() => _fieldValues[key] = val);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // --- PERBAIKAN: MENAMBAHKAN FOCUSNODE UNTUK AUTO DECIMAL DI FOOTER (FREIGHT) ---
-  Widget _buildSummaryBox(String key, {String defaultValue = "0.00", bool isReadOnly = false, bool isPercent = false}) {
-    final controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
-    // Add focus node here logic
-    final focusNode = _getFn(key, isReadOnly: isReadOnly, defaultValue: defaultValue, isPercent: isPercent);
+  Widget _buildSummaryBox(
+    String key, {
+    String defaultValue = "0.00",
+    bool isReadOnly = false,
+    bool isPercent = false,
+  }) {
+    final controller = _getCtrl(
+      key,
+      initial: _fieldValues[key] ?? defaultValue,
+    );
+    final focusNode = _getFn(
+      key,
+      isReadOnly: isReadOnly,
+      defaultValue: defaultValue,
+      isPercent: isPercent,
+    );
 
     return Container(
       height: 24,
-      decoration: BoxDecoration(color: isReadOnly ? bgSlate : Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(
+        color: isReadOnly ? bgSlate : Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: TextField(
-        controller: controller, 
-        focusNode: focusNode, // Added here
-        readOnly: isReadOnly, 
-        textAlign: TextAlign.right, 
+        controller: controller,
+        focusNode: focusNode,
+        readOnly: isReadOnly,
+        textAlign: TextAlign.right,
         style: const TextStyle(fontSize: 12),
-        decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 8)),
+        decoration: const InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        ),
         onChanged: (val) {
-          if (!isReadOnly) setState(() {
-            _fieldValues[key] = val;
-          });
+          if (!isReadOnly) {
+            setState(() {
+              _fieldValues[key] = val;
+            });
+          }
         },
       ),
     );
   }
 
-  Widget _buildModernFieldRow(String label, String key, {bool isTextArea = false, String initial = ""}) => Padding(
+  Widget _buildModernFieldRow(
+    String label,
+    String key, {
+    bool isTextArea = false,
+    String initial = "",
+  }) => Padding(
     padding: EdgeInsets.zero,
-    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      SizedBox(width: 120, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-      Expanded(child: Container(
-        height: isTextArea ? 80 : 32, padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(color: bgSlate, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
-        child: Center(child: TextField(
-          controller: _getCtrl(key, initial: initial), maxLines: isTextArea ? 3 : 1,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
-          decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(vertical: 8)),
-        )),
-      )),
-    ]),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: isTextArea ? 80 : 32,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: Center(
+              child: TextField(
+                controller: _getCtrl(key, initial: initial),
+                maxLines: isTextArea ? 3 : 1,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8), height: 30,
-      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(6)),
-      child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-        value: _dropdownValues[key], isDense: true, style: const TextStyle(fontSize: 12, color: Colors.black),
-        onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-        items: items.map((val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
-      )),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 30,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _dropdownValues[key],
+          isDense: true,
+          style: const TextStyle(fontSize: 12, color: Colors.black),
+          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          items: items
+              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+              .toList(),
+        ),
+      ),
     );
   }
 
- 
-
-  // FUNGSI POPUP SEARCH (Dipakai oleh Header & Table)
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
-    showDialog(context: context, builder: (c) => StatefulBuilder(builder: (context, setDialogState) => AlertDialog(
-      title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
-      content: SizedBox(width: 300, height: 300, child: Column(children: [
-        TextField(
-          decoration: const InputDecoration(hintText: "Cari data...", prefixIcon: Icon(Icons.search)), 
-          onChanged: (v) => setDialogState(() => filteredList = data.where((e) => e.toLowerCase().contains(v.toLowerCase())).toList())
+    showDialog(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(" $label", style: const TextStyle(fontSize: 14)),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: Column(
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                    hintText: "Cari data...",
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (v) => setDialogState(
+                    () => filteredList = data
+                        .where((e) => e.toLowerCase().contains(v.toLowerCase()))
+                        .toList(),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, i) => ListTile(
+                      title: Text(filteredList[i]),
+                      onTap: () {
+                        setState(() {
+                          _getCtrl(key).text = filteredList[i];
+                          _fieldValues[key] = filteredList[i];
+                        });
+                        Navigator.pop(c);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        Expanded(child: ListView.builder(itemCount: filteredList.length, itemBuilder: (context, i) => ListTile(
-          title: Text(filteredList[i]), 
-          onTap: () { 
-            setState(() {
-              _getCtrl(key).text = filteredList[i];
-              _fieldValues[key] = filteredList[i];
-            });
-            Navigator.pop(c); 
-          }
-        ))),
-      ])),
-    )));
+      ),
+    );
   }
 }

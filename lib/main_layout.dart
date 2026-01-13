@@ -9,7 +9,7 @@ import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
 import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
-import 'pages/bpmasterdata_page.dart';
+import 'pages/Business_Partner_Master_Data.dart';
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
@@ -79,14 +79,14 @@ class _MainLayoutState extends State<MainLayout> {
       key: _scaffoldKey,
       backgroundColor: const Color(
         0xFFF1F5F9,
-      ), // Pakai slate grey agar kontras dengan kotak putih
+      ), 
 
       drawer: isMobile
           ? SidebarWidget(
               currentView: currentView,
               onViewChanged: (view) {
                 setState(() => currentView = view);
-                Navigator.pop(context); // Tutup sidebar setelah pilih menu
+                Navigator.pop(context); 
               },
             )
           : null,
@@ -153,8 +153,8 @@ class _MainLayoutState extends State<MainLayout> {
       case "A/R Down Payment Invoice":
         return const ArDownPaymentInvoicePage(key: ValueKey("A/R Down Payment Invoice"));
 
-      case "Bp Master Data":
-        return const BpMasterDataPage(key: ValueKey("Bp Master Data"));
+      case "Business Partner Master Data":
+        return const BpMasterDataPage(key: ValueKey("Business Partner Master Data"));
 
       case "Purchase Request":
         return const PurchaseRequestPage(key: ValueKey("Purchase Request"));

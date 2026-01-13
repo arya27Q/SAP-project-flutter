@@ -42,7 +42,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     _tabController.dispose();
     super.dispose();
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
             _buildHeaderSection(),
             const SizedBox(height: 24),
 
-           _buildTabSection(),
+            _buildTabSection(),
 
             const SizedBox(height: 20),
             _buildActionArea(),
@@ -101,146 +100,153 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   }
 
   Widget _buildAccountingGeneralSubTab() {
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Consolidating BP
-        _buildSearchField("Consolidating BP", "acc_con_bp", []),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            const SizedBox(width: 145), 
-            _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
-            const SizedBox(width: 20),
-            _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Consolidating BP
+          _buildSearchField("Consolidating BP", "acc_con_bp", []),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const SizedBox(width: 145),
+              _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
+              const SizedBox(width: 20),
+              _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
+            ],
+          ),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        
-        Row(
-          children: [
-            const SizedBox(
-              width: 140,
-              child: Text("Control Accounts", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              const SizedBox(
+                width: 140,
+                child: Text(
+                  "Control Accounts",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              _buildSmallIconButton(Icons.more_horiz),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          _buildAccountFieldRow(
+            "Accounts Payable",
+            "acc_payable",
+            "2113102-0-0-00",
+            "Hutang Dagang (Lokal) Pembelian Non Material (GN, GN, GN)",
+          ),
+          _buildAccountFieldRow(
+            "Down Payment Clearing",
+            "acc_dp_clear",
+            "1171101-0-0-00",
+            "Uang Muka Pembelian Lokal (GN, GN, GN)",
+          ),
+          _buildAccountFieldRow(
+            "Down Payment Interim",
+            "acc_dp_interim",
+            "1171101-0-0-00",
+            "Uang Muka Pembelian Lokal (GN, GN, GN)",
+          ),
+
+          const SizedBox(height: 24),
+
+          // Connected Customer
+          _buildSearchField("Connected Customer", "acc_conn_cust", []),
+          const SizedBox(height: 24),
+
+          // Planning Group
+          _buildModernFieldRow("Planning Group", "acc_plan_grp"),
+
+          const SizedBox(height: 32),
+
+          // Affiliate Checkbox
+          Row(
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  value: _checkStates["acc_affiliate"] ?? false,
+                  onChanged: (v) =>
+                      setState(() => _checkStates["acc_affiliate"] = v!),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text("Affiliate", style: TextStyle(fontSize: 12)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountFieldRow(
+    String label,
+    String key,
+    String accCode,
+    String accName,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(label, style: const TextStyle(fontSize: 11)),
+          ),
+          Icon(Icons.play_arrow, size: 12, color: Colors.orange.shade400),
+          const SizedBox(width: 4),
+          Container(
+            width: 90,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: borderGrey, width: 0.8),
             ),
-            _buildSmallIconButton(Icons.more_horiz),
-          ],
-        ),
-        const SizedBox(height: 8),
-
-        _buildAccountFieldRow(
-        "Accounts Payable",
-        "acc_payable",
-        "2113102-0-0-00",
-        "Hutang Dagang (Lokal) Pembelian Non Material (GN, GN, GN)",
-      ),
-      _buildAccountFieldRow(
-        "Down Payment Clearing",
-        "acc_dp_clear",
-        "1171101-0-0-00",
-        "Uang Muka Pembelian Lokal (GN, GN, GN)",
-      ),
-      _buildAccountFieldRow(
-        "Down Payment Interim",
-        "acc_dp_interim",
-        "1171101-0-0-00",
-        "Uang Muka Pembelian Lokal (GN, GN, GN)",
-      ),
-
-        const SizedBox(height: 24),
-
-        // Connected Customer
-        _buildSearchField("Connected Customer", "acc_conn_cust", []),
-        const SizedBox(height: 24),
-
-        // Planning Group
-        _buildModernFieldRow("Planning Group", "acc_plan_grp"),
-
-        const SizedBox(height: 32),
-
-        // Affiliate Checkbox
-        Row(
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: Checkbox(
-                value: _checkStates["acc_affiliate"] ?? false,
-                onChanged: (v) => setState(() => _checkStates["acc_affiliate"] = v!),
+            child: TextField(
+              controller: _getCtrl("${key}_code", initial: accCode),
+              style: const TextStyle(fontSize: 10),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 4,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            const Text("Affiliate", style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-Widget _buildAccountFieldRow(
-  String label,
-  String key,
-  String accCode,
-  String accName,
-) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 140,
-          child: Text(label, style: const TextStyle(fontSize: 11)),
-        ),
-        Icon(Icons.play_arrow, size: 12, color: Colors.orange.shade400),
-        const SizedBox(width: 4),
-        Container(
-          width: 90, 
-          height: 20,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: borderGrey, width: 0.8),
           ),
-          child: TextField(
-            controller: _getCtrl("${key}_code", initial: accCode),
-            style: const TextStyle(fontSize: 10),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+
+          const SizedBox(width: 6),
+          const Text(
+            "=",
+            style: TextStyle(fontSize: 11, color: Colors.black54),
+          ),
+          const SizedBox(width: 6),
+
+          Expanded(
+            child: Text(
+              accName,
+              style: const TextStyle(fontSize: 11, color: Colors.black87),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
 
-        const SizedBox(width: 6),
-        const Text("=", style: TextStyle(fontSize: 11, color: Colors.black54)),
-        const SizedBox(width: 6),
-
-        Expanded(
-          child: Text(
-            accName,
-            style: const TextStyle(fontSize: 11, color: Colors.black87),
-            maxLines: 1, 
-            overflow: TextOverflow.ellipsis, 
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
- 
   Widget _buildStatusRadioSmall(String label, String groupKey) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 32, 
+          width: 32,
           child: Radio<String>(
             value: label,
             visualDensity: const VisualDensity(
@@ -276,9 +282,9 @@ Widget _buildAccountFieldRow(
                     ]),
                     // Layout Akun (Panah -> Box -> = -> Deskripsi)
                     _buildAccountFieldRow("Tax Group", "tax_group", "", ""),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // --- Bagian WTax Sejajar Horizontal ---
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,9 +343,9 @@ Widget _buildAccountFieldRow(
                     _buildModernFieldRow("Certificate No.", "tax_cert_no"),
                     _buildModernFieldRow("Expiration Date", "tax_exp_date"),
                     _buildModernFieldRow("NI Number", "tax_ni_no"),
-                    
+
                     const SizedBox(height: 30),
-                    
+
                     _buildSmallDropdownRowModern(
                       "Type for WTax Rpt",
                       "tax_rpt_type",
@@ -350,9 +356,9 @@ Widget _buildAccountFieldRow(
               ),
             ],
           ),
-          
+
           const SizedBox(height: 60),
-          
+
           // --- BAGIAN BAWAH ---
           Row(
             children: [
@@ -837,268 +843,280 @@ Widget _buildAccountFieldRow(
     );
   }
 
+  Widget _buildHeaderSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white,
+          width: 2.5, // Border lebih tebel
+        ),
 
- Widget _buildHeaderSection() {
-  return Container(
-    
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24), 
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16), 
-      border: Border.all(
-        color: Colors.white, 
-        width: 2.5, // Border lebih tebel
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 8), // Bayangan jatuh ke bawah
+          ),
+        ],
       ),
-    
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 15,
-          spreadRadius: 2,
-          offset: const Offset(0, 8), // Bayangan jatuh ke bawah
-        ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "Code",
-                "bp_series",
-                ["Manual", "System"],
-                "bp_code_val",
-                initialNo: "VJS-481",
-              ),
-              _buildModernFieldRow(
-                "Name",
-                "bp_name",
-                initial: "Dinamika Polimerindo, PT",
-              ),
-              _buildModernFieldRow("Foreign Name", "bp_f_name"),
-              _buildSmallDropdownRowModern("Group", "bp_group", [
-                "General",
-                "Suppliers",
-                "Customers",
-              ]),
-              _buildSmallDropdownRowModern("Currency", "bp_curr", [
-                "Indonesian Rupiah",
-                "USD",
-                "EUR",
-              ]),
-              _buildModernFieldRow("Federal Tax ID", "bp_tax_id"),
-            ],
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                _buildModernNoFieldRow(
+                  "Code",
+                  "bp_series",
+                  ["Manual", "System"],
+                  "bp_code_val",
+                  initialNo: "VJS-481",
+                ),
+                _buildModernFieldRow(
+                  "Name",
+                  "bp_name",
+                  initial: "Dinamika Polimerindo, PT",
+                ),
+                _buildModernFieldRow("Foreign Name", "bp_f_name"),
+                _buildSmallDropdownRowModern("Group", "bp_group", [
+                  "General",
+                  "Suppliers",
+                  "Customers",
+                ]),
+                _buildSmallDropdownRowModern("Currency", "bp_curr", [
+                  "Indonesian Rupiah",
+                  "USD",
+                  "EUR",
+                ]),
+                _buildModernFieldRow("Federal Tax ID", "bp_tax_id"),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 1,
-          child: Column(
-            children: [
-              _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
-                "All Currencies",
-              ]),
-              _buildSummaryRowWithArrow("Account Balance", ""),
-              _buildSummaryRowWithArrow("Goods Receipt POs", ""),
-              _buildSummaryRowWithArrow("Purchase Orders", ""),
-            ],
+          const SizedBox(width: 60),
+          Expanded(
+            flex: 1,
+            child: Column(
+              children: [
+                _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
+                  "All Currencies",
+                ]),
+                _buildSummaryRowWithArrow("Account Balance", ""),
+                _buildSummaryRowWithArrow("Goods Receipt POs", ""),
+                _buildSummaryRowWithArrow("Purchase Orders", ""),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildTabSection() {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 15,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Column(
-      children: [
-        Container(
-          color: primaryIndigo, 
-          child: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            dividerColor: Colors.transparent, 
-            labelColor: primaryIndigo,
-            unselectedLabelColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              color: const Color.fromARGB(255, 255, 255, 255),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            indicatorPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
-            tabs: const [
-              Tab(text: "General"),
-              Tab(text: "Contact Persons"),
-              Tab(text: "Addresses"),
-              Tab(text: "Payment Terms"),
-              Tab(text: "Payment Run"),
-              Tab(text: "Accounting"),
-              Tab(text: "Properties"),
-              Tab(text: "Remarks"),
-              Tab(text: "Attachments"),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-        ),
-        
-        // AREA ISI (Garis biru tebal pemisah header & konten)
-        Container(
-          height: 3, 
-          color: primaryIndigo
-        ),
-
-        SizedBox(
-          height: 500,
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildGeneralTab(),
-              _buildContactPersonsTab(),
-              _buildAddressesTab(),
-              _buildPaymentTermTab(),
-              _buildPaymentRunTab(),
-              _buildAccountingTab(),
-              const Center(child: Text("BP Properties")),
-              const Center(child: Text("Internal Remarks")),
-              const Center(child: Text("Document Attachments")),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-
- Widget _buildModernNoFieldRow(
-  String label,
-  String dropdownKey,
-  List<String> series,
-  String textKey, {
-  String initialNo = "",
-}) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 130,
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 12, color: secondarySlate),
-          ),
-        ),
-        // 1. Dropdown Kiri (Manual / System)
-        Container(
-          width: 100,
-          height: 30,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: bgSlate,
-            border: Border.all(color: borderGrey),
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(6),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            color: primaryIndigo,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              dividerColor: Colors.transparent,
+              labelColor: primaryIndigo,
+              unselectedLabelColor: const Color.fromARGB(
+                255,
+                255,
+                255,
+                255,
+              ).withOpacity(0.9),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                color: const Color.fromARGB(255, 255, 255, 255),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              indicatorPadding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 4,
+              ),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+              tabs: const [
+                Tab(text: "General"),
+                Tab(text: "Contact Persons"),
+                Tab(text: "Addresses"),
+                Tab(text: "Payment Terms"),
+                Tab(text: "Payment Run"),
+                Tab(text: "Accounting"),
+                Tab(text: "Properties"),
+                Tab(text: "Remarks"),
+                Tab(text: "Attachments"),
+              ],
             ),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dropdownValues[dropdownKey] ?? series.first,
-              isDense: true,
-              style: const TextStyle(fontSize: 11, color: Colors.black),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-              onChanged: (v) =>
-                  setState(() => _dropdownValues[dropdownKey] = v!),
-              items: series
-                  .map((e) => DropdownMenuItem(
-                        value: e, 
-                        child: Text(e, style: const TextStyle(color: Colors.black))
-                      ))
-                  .toList(),
+
+          // AREA ISI (Garis biru tebal pemisah header & konten)
+          Container(height: 3, color: primaryIndigo),
+
+          SizedBox(
+            height: 500,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildGeneralTab(),
+                _buildContactPersonsTab(),
+                _buildAddressesTab(),
+                _buildPaymentTermTab(),
+                _buildPaymentRunTab(),
+                _buildAccountingTab(),
+                const Center(child: Text("BP Properties")),
+                const Center(child: Text("Internal Remarks")),
+                const Center(child: Text("Document Attachments")),
+              ],
             ),
           ),
-        ),
-        // 2. TextField Tengah (VJS-481)
-        Expanded(
-          child: Container(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernNoFieldRow(
+    String label,
+    String dropdownKey,
+    List<String> series,
+    String textKey, {
+    String initialNo = "",
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 12, color: secondarySlate),
+            ),
+          ),
+          // 1. Dropdown Kiri (Manual / System)
+          Container(
+            width: 100,
             height: 30,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(color: borderGrey),
-                bottom: BorderSide(color: borderGrey),
+              color: bgSlate,
+              border: Border.all(color: borderGrey),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(6),
               ),
             ),
-            child: TextField(
-              controller: _getCtrl(textKey, initial: initialNo),
-              style: const TextStyle(fontSize: 12, color: Colors.black),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[dropdownKey] ?? series.first,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues[dropdownKey] = v!),
+                items: series
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(
+                          e,
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+          // 2. TextField Tengah (VJS-481)
+          Expanded(
+            child: Container(
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: borderGrey),
+                  bottom: BorderSide(color: borderGrey),
+                ),
+              ),
+              child: TextField(
+                controller: _getCtrl(textKey, initial: initialNo),
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Container(
-          width: 100,
-          height: 30,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: borderGrey),
-            borderRadius: const BorderRadius.horizontal(
-              right: Radius.circular(6),
+          Container(
+            width: 100,
+            height: 30,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: borderGrey),
+              borderRadius: const BorderRadius.horizontal(
+                right: Radius.circular(6),
+              ),
             ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dropdownValues["bp_type_header"] ?? "Vendor",
-              isDense: true,
-              isExpanded: true,
-              // PERBAIKAN: Warna teks hitam dan icon terlihat
-              style: const TextStyle(fontSize: 11, color: Colors.black),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-              onChanged: (v) =>
-                  setState(() => _dropdownValues["bp_type_header"] = v!),
-              items: ["Vendor", "Customer"]
-                  .map(
-                    (e) => DropdownMenuItem(
-                      value: e,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8), // Sesuaikan padding agar tidak terlalu ke kanan
-                        child: Text(e, style: const TextStyle(color: Colors.black)),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues["bp_type_header"] ?? "Vendor",
+                isDense: true,
+                isExpanded: true,
+                // PERBAIKAN: Warna teks hitam dan icon terlihat
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues["bp_type_header"] = v!),
+                items: ["Vendor", "Customer"]
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 8,
+                          ), // Sesuaikan padding agar tidak terlalu ke kanan
+                          child: Text(
+                            e,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .toList(),
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildSmallDropdownRowModern(
     String label,
@@ -1158,9 +1176,11 @@ Widget _buildAccountFieldRow(
     String key, {
     String value = "0.00",
   }) {
- 
-    final TextEditingController _controller = _getCtrl(key, initial: _fieldValues[key] ?? value);
-    
+    final TextEditingController _controller = _getCtrl(
+      key,
+      initial: _fieldValues[key] ?? value,
+    );
+
     if (!_focusNodes.containsKey(key)) {
       _focusNodes[key] = FocusNode();
       _focusNodes[key]!.addListener(() {
@@ -1173,7 +1193,7 @@ Widget _buildAccountFieldRow(
             _controller.text = "0.00";
           }
           _fieldValues[key] = _controller.text;
-        
+
           if (mounted) setState(() {});
         }
       });
@@ -1204,12 +1224,14 @@ Widget _buildAccountFieldRow(
               controller: _controller,
               focusNode: _focusNode,
               textAlign: TextAlign.right, // Angka rata kanan khas SAP
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               decoration: const InputDecoration(
                 isDense: true,
                 // Padding disesuaikan agar teks tetap di tengah container 24px
-                contentPadding: EdgeInsets.only(right: 8, top: 4, bottom: 4), 
+                contentPadding: EdgeInsets.only(right: 8, top: 4, bottom: 4),
                 border: InputBorder.none,
               ),
               onChanged: (val) {
@@ -1221,6 +1243,7 @@ Widget _buildAccountFieldRow(
       ),
     );
   }
+
   Widget _buildModernFieldRow(
     String label,
     String key, {
@@ -1404,303 +1427,477 @@ Widget _buildAccountFieldRow(
     );
   }
 
- Widget _buildPaymentTermTab() {
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildSmallDropdownRowModern("Payment Terms", "paymentTerm", [""]),
-                      ),
-                    ],
-                  ),
-                  _buildModernFieldRow("Interest on Arreas %", "Interest"),
-                  const SizedBox(height: 20),
-                  _buildSmallDropdownRowModern("Price List", "PriceList", [""]),
-                  _buildModernFieldRow("Total Discount %", "total disc"),
-                  _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
-                  _buildSimpleFieldRow("Commitmen Limit", "commitmen Limit"),
-                  const SizedBox(height: 30),
-                  _buildSmallDropdownRowModern("Effective Discount Group", "Effective Discount Group", [""]),
-                  _buildSmallDropdownRowModern("Effective Price", "Effective Price", [""]),
-                  const SizedBox(height: 10),
-                  _buildModernFieldRow("Bank Country", "bank country"),
-                  _buildModernFieldRow("Bank Name", "Bank Name"),
-                  _buildModernFieldRow("bank Code", "Bank code"),
-                  _buildModernFieldRow("Account", "Account"),
-
-                  const SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
-                      child: Text(
-                        "Business Partner Bank",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  _buildModernFieldRow("BIC/SWIFT code", "BIC/SWIFT code"),
-                  _buildModernFieldRow("Account", "Account"),
-                  _buildModernFieldRow("Bank Account Name", "Bank Account Name"),
-                  _buildModernFieldRow("Account", "Account"),
-                  _buildModernFieldRow("Branch", "Branch"),
-                  _buildModernFieldRow("Ctrl Int ID", "Control Int ID"),
-                  _buildModernFieldRow("IBAN", "iban"),
-                  _buildModernFieldRow("Mandate ID", "Mandate ID"),
-                  _buildSmallDropdownRowModern("Date Of Signature", "Date OF Signature", [""]),
-                ],
-              ),
-            ),
-            const SizedBox(width: 40),
-            Expanded(
-              child: Column(
-                children: [
-                  _buildSmallDropdownRowModern("Credit Card Type", "Credit Card Type", [""]),
-                  _buildModernFieldRow("Credit Card No", "Credit Card No"),
-                  _buildModernFieldRow("Expiration Date", "Expiration Date"),
-                  _buildModernFieldRow("ID number", "Id number"),
-                  _buildModernFieldRow("Expiration Date", "Expiration Date"),
-                  _buildModernFieldRow("Average Delay", "Average Delay"),
-                  _buildSmallDropdownRowModern("Priority", "priority", [""]),
-                  _buildModernFieldRow("Default IBAN", " Default IBAN"),
-                  _buildSmallDropdownRowModern("Hollidays", "Hollidays", [""]),
-
-                  const SizedBox(height: 40), 
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFDE68A),
-                          foregroundColor: Colors.black87,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.amber.shade200),
+  Widget _buildPaymentTermTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildSmallDropdownRowModern(
+                            "Payment Terms",
+                            "paymentTerm",
+                            [""],
                           ),
                         ),
-                        child: const Text("UPDATE INFO", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton.icon(
-                        onPressed: () => _showPaymentTermsSetup(),
-                        icon: const Icon(Icons.settings_suggest_rounded, size: 20),
-                        label: const Text("SETUP PAYMENT TERMS", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent.shade400,
-                          foregroundColor: Colors.white,
-                          elevation: 4,
-                          shadowColor: Colors.redAccent.withOpacity(0.4),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ],
-    ),
-  );
-}
+                      ],
+                    ),
+                    _buildModernFieldRow("Interest on Arreas %", "Interest"),
+                    const SizedBox(height: 20),
+                    _buildSmallDropdownRowModern("Price List", "PriceList", [
+                      "",
+                    ]),
+                    _buildModernFieldRow("Total Discount %", "total disc"),
+                    _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
+                    _buildSimpleFieldRow("Commitmen Limit", "commitmen Limit"),
+                    const SizedBox(height: 30),
+                    _buildSmallDropdownRowModern(
+                      "Effective Discount Group",
+                      "Effective Discount Group",
+                      [""],
+                    ),
+                    _buildSmallDropdownRowModern(
+                      "Effective Price",
+                      "Effective Price",
+                      [""],
+                    ),
+                    const SizedBox(height: 10),
+                    _buildModernFieldRow("Bank Country", "bank country"),
+                    _buildModernFieldRow("Bank Name", "Bank Name"),
+                    _buildModernFieldRow("bank Code", "Bank code"),
+                    _buildModernFieldRow("Account", "Account"),
 
-void _showPaymentTermsSetup() {
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (context) {
-      return Center(
-        child: SingleChildScrollView(
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Container(
-              width: 550, 
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 25, offset: const Offset(0, 10))
-                ],
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 0.0,
+                        ),
+                        child: Text(
+                          "Business Partner Bank",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    _buildModernFieldRow("BIC/SWIFT code", "BIC/SWIFT code"),
+                    _buildModernFieldRow("Account", "Account"),
+                    _buildModernFieldRow(
+                      "Bank Account Name",
+                      "Bank Account Name",
+                    ),
+                    _buildModernFieldRow("Account", "Account"),
+                    _buildModernFieldRow("Branch", "Branch"),
+                    _buildModernFieldRow("Ctrl Int ID", "Control Int ID"),
+                    _buildModernFieldRow("IBAN", "iban"),
+                    _buildModernFieldRow("Mandate ID", "Mandate ID"),
+                    _buildSmallDropdownRowModern(
+                      "Date Of Signature",
+                      "Date OF Signature",
+                      [""],
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                    color: primaryIndigo,
-                    child: Row(
+              const SizedBox(width: 40),
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildSmallDropdownRowModern(
+                      "Credit Card Type",
+                      "Credit Card Type",
+                      [""],
+                    ),
+                    _buildModernFieldRow("Credit Card No", "Credit Card No"),
+                    _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                    _buildModernFieldRow("ID number", "Id number"),
+                    _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                    _buildModernFieldRow("Average Delay", "Average Delay"),
+                    _buildSmallDropdownRowModern("Priority", "priority", [""]),
+                    _buildModernFieldRow("Default IBAN", " Default IBAN"),
+                    _buildSmallDropdownRowModern("Hollidays", "Hollidays", [
+                      "",
+                    ]),
+
+                    const SizedBox(height: 40),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Icon(Icons.payments_rounded, color: Colors.white, size: 22),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFDE68A),
+                            foregroundColor: Colors.black87,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 15,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.amber.shade200),
+                            ),
+                          ),
+                          child: const Text(
+                            "UPDATE INFO",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 12),
-                        const Text("Payment Terms Setup", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Icon(Icons.close, color: Colors.white70, size: 22),
-                        )
+                        ElevatedButton.icon(
+                          onPressed: () => _showPaymentTermsSetup(),
+                          icon: const Icon(
+                            Icons.settings_suggest_rounded,
+                            size: 20,
+                          ),
+                          label: const Text(
+                            "SETUP PAYMENT TERMS",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent.shade400,
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shadowColor: Colors.redAccent.withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 15,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                       
-                        _buildModernFieldRow("PT Code", "pt_code", initial: "COD"),
-                        const SizedBox(height: 4),
-                        _buildSmallDropdownRowModern("Due Date Based on", "pt_due", ["Document Date"]),
-                        const SizedBox(height: 12),
-                
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              width: 130, 
-                              child: Text("Start From", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF64748B))),
-                            ),
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  
-                                  Expanded(
-                                    flex: 3,
-                                    child: _buildSmallDropdown("ptTSart", [""]),
-                                  ),
-                                  const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text("+", style: TextStyle(fontWeight: FontWeight.bold))),
-                                  
-                                  // Input Months
-                                  SizedBox(
-                                    width: 45,
-                                    child: _buildSmallBox("pt_m"),
-                                  ),
-                                  const Padding(padding: EdgeInsets.only(left: 4, right: 6), child: Text("Mos", style: TextStyle(fontSize: 11, color: Colors.grey))),
-                                  const Text("+"),
-                                  
-                                  // Input Days
-                                  const SizedBox(width: 6),
-                                  SizedBox(
-                                    width: 45,
-                                    child: _buildSmallBox("pt_d"),
-                                  ),
-                                  const Padding(padding: EdgeInsets.only(left: 4), child: Text("Days", style: TextStyle(fontSize: 11, color: Colors.grey))),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        _buildModernFieldRow("Tolerance Days", "pt_tol", initial: "0"),
-                        const SizedBox(height: 4),
-                        _buildModernFieldRow("Installments", "pt_inst", initial: "0"),
-                        const SizedBox(height: 4),
-                        _buildSmallDropdownRowModern("Open Inc. Pay", "pt_open", ["No"]),
-                        const SizedBox(height: 4),
-                        _buildSmallDropdownRowModern("Cash Disc. Name", "pt_cash", [""]),
-                        
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(color: Color(0xFFEEEEEE), thickness: 1.5)),
-                        
-                        const Align(
-                          alignment: Alignment.centerLeft, 
-                          child: Text("BUSINESS PARTNER FIELDS", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.indigo, letterSpacing: 1.2))
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        _buildSimpleFieldRow("Disc %", "pt_disc"),
-                        const SizedBox(height: 4),
-                        _buildSimpleFieldRow("Interest %", "pt_int"),
-                        const SizedBox(height: 4),
-                        _buildSmallDropdownRowModern("Price List", "pt_plist", ["Price List 01"]),
-                        const SizedBox(height: 4),
-                        _buildSimpleFieldRow("Max. Credit", "pt_max"),
-                        const SizedBox(height: 4),
-                        _buildSimpleFieldRow("Comm. Limit", "pt_com"),
-                        
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("CANCEL", style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold)),
-                            ),
-                            const SizedBox(width: 12),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryIndigo,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                elevation: 4,
-                                shadowColor: primaryIndigo.withOpacity(0.4),
-                              ),
-                              child: const Text("SAVE CHANGES", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                            ),
-                          ],
-                        )
-                      ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPaymentTermsSetup() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Center(
+          child: SingleChildScrollView(
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
+              child: Container(
+                width: 550,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 25,
+                      offset: const Offset(0, 10),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
+                      ),
+                      color: primaryIndigo,
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.payments_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            "Payment Terms Setup",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white70,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          _buildModernFieldRow(
+                            "PT Code",
+                            "pt_code",
+                            initial: "COD",
+                          ),
+                          const SizedBox(height: 4),
+                          _buildSmallDropdownRowModern(
+                            "Due Date Based on",
+                            "pt_due",
+                            ["Document Date"],
+                          ),
+                          const SizedBox(height: 12),
+
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                width: 130,
+                                child: Text(
+                                  "Start From",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: _buildSmallDropdown("ptTSart", [
+                                        "",
+                                      ]),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      child: Text(
+                                        "+",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Input Months
+                                    SizedBox(
+                                      width: 45,
+                                      child: _buildSmallBox("pt_m"),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                        left: 4,
+                                        right: 6,
+                                      ),
+                                      child: Text(
+                                        "Mos",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                    const Text("+"),
+
+                                    // Input Days
+                                    const SizedBox(width: 6),
+                                    SizedBox(
+                                      width: 45,
+                                      child: _buildSmallBox("pt_d"),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 4),
+                                      child: Text(
+                                        "Days",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+                          _buildModernFieldRow(
+                            "Tolerance Days",
+                            "pt_tol",
+                            initial: "0",
+                          ),
+                          const SizedBox(height: 4),
+                          _buildModernFieldRow(
+                            "Installments",
+                            "pt_inst",
+                            initial: "0",
+                          ),
+                          const SizedBox(height: 4),
+                          _buildSmallDropdownRowModern(
+                            "Open Inc. Pay",
+                            "pt_open",
+                            ["No"],
+                          ),
+                          const SizedBox(height: 4),
+                          _buildSmallDropdownRowModern(
+                            "Cash Disc. Name",
+                            "pt_cash",
+                            [""],
+                          ),
+
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Divider(
+                              color: Color(0xFFEEEEEE),
+                              thickness: 1.5,
+                            ),
+                          ),
+
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "BUSINESS PARTNER FIELDS",
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.indigo,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          _buildSimpleFieldRow("Disc %", "pt_disc"),
+                          const SizedBox(height: 4),
+                          _buildSimpleFieldRow("Interest %", "pt_int"),
+                          const SizedBox(height: 4),
+                          _buildSmallDropdownRowModern(
+                            "Price List",
+                            "pt_plist",
+                            ["Price List 01"],
+                          ),
+                          const SizedBox(height: 4),
+                          _buildSimpleFieldRow("Max. Credit", "pt_max"),
+                          const SizedBox(height: 4),
+                          _buildSimpleFieldRow("Comm. Limit", "pt_com"),
+
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "CANCEL",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryIndigo,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 36,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  elevation: 4,
+                                  shadowColor: primaryIndigo.withOpacity(0.4),
+                                ),
+                                child: const Text(
+                                  "SAVE CHANGES",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
-Widget _buildSmallDropdown(String key, List<String> items) {
-  if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8),
-    height: 30, // Tinggi standar agar lurus dengan TextField
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: borderGrey),
-      borderRadius: BorderRadius.circular(6),
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: _dropdownValues[key],
-        isDense: true,
-        style: const TextStyle(fontSize: 12, color: Colors.black),
-        icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-        onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-        items: items
-            .map((val) => DropdownMenuItem(
-                  value: val,
-                  child: Text(val),
-                ))
-            .toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildSmallDropdown(String key, List<String> items) {
+    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 30, // Tinggi standar agar lurus dengan TextField
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(6),
       ),
-    ),
-  );
-}
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _dropdownValues[key],
+          isDense: true,
+          style: const TextStyle(fontSize: 12, color: Colors.black),
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          items: items
+              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+              .toList(),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSimpleFieldRow(
     String label,
@@ -1933,56 +2130,63 @@ Widget _buildSmallDropdown(String key, List<String> items) {
   }
 
   Widget _buildActionArea() {
-  return Container(
-    // Tambahkan horizontal padding agar sejajar dengan box di atasnya (margin 16)
-    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-    child: Row(
-      // Menggunakan spaceBetween untuk mendorong satu grup ke kiri dan satu ke kanan
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-      children: [
-        // GRUP TOMBOL KIRI (Add / Update & Cancel)
-        Row(
-          children: [
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryIndigo, 
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+    return Container(
+      // Tambahkan horizontal padding agar sejajar dengan box di atasnya (margin 16)
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: Row(
+        // Menggunakan spaceBetween untuk mendorong satu grup ke kiri dan satu ke kanan
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // GRUP TOMBOL KIRI (Add / Update & Cancel)
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryIndigo,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 2,
                 ),
-                elevation: 2,
-              ),
-              child: const Text(
-                "Add / Update",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(width: 12),
-            ElevatedButton( 
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                child: const Text(
+                  "Add / Update",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                elevation: 2,
               ),
-              child: const Text(
-                "Cancel",
-                style: TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ],
-        ),
-        _buildYouCanAlsoMenu(), 
-      ],
-    ),
-  );
-}
+            ],
+          ),
+          _buildYouCanAlsoMenu(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildYouCanAlsoMenu() {
     return PopupMenuButton<String>(
       onSelected: (value) {
@@ -2221,22 +2425,22 @@ Widget _buildSmallDropdown(String key, List<String> items) {
     );
   }
 
- Widget _buildSmallIconButton(IconData icon, {VoidCallback? onTap}) {
-  return InkWell(
-    onTap: onTap ?? () {}, // Sekarang bisa menerima fungsi klik
-    borderRadius: BorderRadius.circular(4),
-    child: Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(4),
+  Widget _buildSmallIconButton(IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap ?? () {}, // Sekarang bisa menerima fungsi klik
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: borderGrey),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Icon(icon, size: 14, color: Colors.grey),
       ),
-      child: Icon(icon, size: 14, color: Colors.grey),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildContactListItem(
     String key, {

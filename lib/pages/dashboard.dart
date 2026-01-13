@@ -113,8 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-  // --- 1. SUBSIDIARY SYNC ---
+  
   Widget _buildBranchSyncStatusRow() {
     final List<Map<String, dynamic>> branchSyncData = [
       {"name": "PT. Dempo Laser Metalindo Surabaya", "status_id": 1},

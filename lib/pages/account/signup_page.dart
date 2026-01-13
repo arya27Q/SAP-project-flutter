@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Pastikan import http sudah ada
+import 'package:http/http.dart' as http;
 import '../../constants.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -31,6 +31,59 @@ class _SignUpPageState extends State<SignUpPage> {
     "PT. ATMI Duta Engineering",
   ];
 
+  final List<Map<String, dynamic>> features = [
+    {
+      "icon": Icons.grid_view_rounded,
+      "title": "Dashboard",
+      "subtitle": "Real-time overview.",
+    },
+    {
+      "icon": Icons.admin_panel_settings_rounded,
+      "title": "Administration",
+      "subtitle": "Setup & Approvals.",
+    },
+    {
+      "icon": Icons.account_balance_wallet_rounded,
+      "title": "Financials",
+      "subtitle": "Accounting & Banking.",
+    },
+    {
+      "icon": Icons.shopping_bag_rounded,
+      "title": "Sales - A/R",
+      "subtitle": "Orders & Invoicing.",
+    },
+    {
+      "icon": Icons.local_shipping_rounded,
+      "title": "Purchasing",
+      "subtitle": "Procurement control.",
+    },
+    {
+      "icon": Icons.inventory_2_rounded,
+      "title": "Inventory",
+      "subtitle": "Warehouse tracking.",
+    },
+    {
+      "icon": Icons.people_alt_rounded,
+      "title": "Business Partners",
+      "subtitle": "Master data mgmt.",
+    },
+    {
+      "icon": Icons.settings_suggest_rounded,
+      "title": "Production",
+      "subtitle": "MRP & Planning.",
+    },
+    {
+      "icon": Icons.analytics_rounded,
+      "title": "Reports",
+      "subtitle": "Business insights.",
+    },
+    {
+      "icon": Icons.security_rounded,
+      "title": "Data Security",
+      "subtitle": "Encrypted protection.",
+    },
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -40,20 +93,15 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _handleSignUp() async {
-    // 1. Validasi Input
-    if (selectedCompany == null || 
-        _nameController.text.isEmpty || 
-        _emailController.text.isEmpty || 
+    if (selectedCompany == null ||
+        _nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Mohon lengkapi semua data!")),
-      );
+      _showErrorSnackBar("Please complete all required fields!");
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     Map<String, String> companyMapping = {
       "PT. Dempo Laser Metalindo Surabaya": "pt1",
@@ -64,39 +112,38 @@ class _SignUpPageState extends State<SignUpPage> {
     String targetPT = companyMapping[selectedCompany!]!;
 
     try {
-    
       var url = Uri.parse('http://192.168.0.101:8000/api/test-register');
-      var response = await http.post(
-        url,
-        body: {
-          'name': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-          'target_pt': targetPT, 
-        },
-      ).timeout(const Duration(seconds: 10));
+      var response = await http
+          .post(
+            url,
+            body: {
+              'name': _nameController.text.trim(),
+              'email': _emailController.text.trim(),
+              'password': _passwordController.text,
+              'target_pt': targetPT,
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Pendaftaran Berhasil! Silahkan Login."),
+              content: Text("Registration Successful! Please Login."),
               backgroundColor: Colors.green,
             ),
           );
           widget.onGoToLogin();
         }
       } else {
-        _showErrorSnackBar("Gagal mendaftar. Email mungkin sudah digunakan.");
+        _showErrorSnackBar(
+          "Registration failed. Email might already be in use.",
+        );
       }
     } catch (e) {
-      _showErrorSnackBar("Koneksi Error: Pastikan server menyala");
+      _showErrorSnackBar("Connection Error: Server is unreachable.");
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -106,173 +153,431 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  InputDecoration _buildInputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
+      filled: true,
+      fillColor: Colors.grey[100],
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: AppColors.primaryIndigo,
+          width: 1.5,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 950) {
+            return Row(
+              children: [
+                // PANEL KIRI: FORM PENDAFTARAN
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    color: Colors.white,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 50,
+                              vertical: 40,
+                            ),
+                            child: _buildSignUpForm(isMobile: false),
+                          ),
+                        ),
+                        Positioned(
+                          top: 20,
+                          left: 20,
+                          child: IconButton(
+                            onPressed: widget.onBackToDashboard,
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // PANEL KANAN: BRANDING (LURUS & ANTI OVERFLOW)
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
+                      ),
+                    ),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        // <--- Tambahan agar bisa scroll jika layar kecil
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Container(
+                          width:
+                              620, // <--- Kunci lebar agar sejajar dengan deskripsi
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment
+                                .start, // <--- Rata kiri lurus
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.bolt_rounded,
+                                      color: Colors.white,
+                                      size: 42,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  const Text(
+                                    "SAP SYSTEM",
+                                    style: TextStyle(
+                                      fontSize: 38,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              const Text(
+                                "Empowering your business with the most advanced ERP solutions.",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: Colors.white70,
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 50),
+                              // GRID FITUR
+                              GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      childAspectRatio: 3.2,
+                                      crossAxisSpacing: 30,
+                                      mainAxisSpacing: 20,
+                                    ),
+                                itemCount: features.length,
+                                itemBuilder: (context, index) {
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          features[index]['icon'],
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              features[index]['title'],
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              features[index]['subtitle'],
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 11,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            // TAMPILAN MOBILE
+            return Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
+                ),
+              ),
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.all(32),
+                    child: _buildSignUpForm(isMobile: true),
+                  ),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildSignUpForm({required bool isMobile}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: Column(
+            children: [
+              const Text(
+                "Create New Account",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.darkIndigo,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Start your journey towards a more digital and integrated enterprise.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 15),
+              ),
+            ],
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(maxWidth: 450),
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  )
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: _isLoading ? null : widget.onBackToDashboard,
-                      icon: const Icon(Icons.close, color: Colors.grey, size: 20),
-                    ),
+        const SizedBox(height: 35),
+        const Text(
+          "Business Unit",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: selectedCompany,
+          isExpanded: true,
+          decoration: _buildInputDecoration(
+            "Select Company",
+            Icons.business_rounded,
+          ),
+          items: companies
+              .map(
+                (s) => DropdownMenuItem(
+                  value: s,
+                  child: Text(
+                    s,
+                    style: const TextStyle(fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const Icon(Icons.person_add_alt_1_rounded,
-                      color: AppColors.primaryIndigo, size: 50),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Buat Akun Baru",
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkIndigo),
-                  ),
-                  const Text("Lengkapi data untuk mendaftar",
-                      style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 32),
-                  
-                  DropdownButtonFormField<String>(
-                    value: selectedCompany,
-                    onChanged: _isLoading ? null : (newValue) {
-                      setState(() {
-                        selectedCompany = newValue;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: "Daftar untuk Company",
-                      prefixIcon: const Icon(Icons.business_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    hint: const Text("Pilih Unit Bisnis"),
-                    items: companies.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, 
-                            style: const TextStyle(fontSize: 12),
-                            overflow: TextOverflow.ellipsis),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: _nameController,
-                    enabled: !_isLoading,
-                    decoration: InputDecoration(
-                      labelText: "Nama Lengkap",
-                      prefixIcon: const Icon(Icons.badge_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: _emailController,
-                    enabled: !_isLoading,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: _passwordController,
-                    enabled: !_isLoading,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleSignUp, 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryIndigo,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: _isLoading 
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
-                        : const Text("Daftar Sekarang",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  TextButton(
-                    onPressed: _isLoading ? null : widget.onGoToLogin,
-                    child: const Text("Sudah punya akun? Masuk di sini"),
-                  ),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Divider(),
-                  ),
-
-                  TextButton.icon(
-                    onPressed: _isLoading ? null : widget.onBackToDashboard,
-                    icon: const Icon(Icons.arrow_back, size: 16),
-                    label: const Text("Kembali ke Dashboard"),
-                    style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                  ),
-                ],
+                ),
+              )
+              .toList(),
+          onChanged: _isLoading
+              ? null
+              : (val) => setState(() => selectedCompany = val),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Full Name",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _nameController,
+          enabled: !_isLoading,
+          decoration: _buildInputDecoration(
+            "Enter your full name",
+            Icons.badge_outlined,
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Email Address",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _emailController,
+          enabled: !_isLoading,
+          decoration: _buildInputDecoration(
+            "name@company.com",
+            Icons.email_outlined,
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Password",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _passwordController,
+          enabled: !_isLoading,
+          obscureText: true,
+          decoration: _buildInputDecoration(
+            "••••••••",
+            Icons.lock_outline_rounded,
+          ),
+        ),
+        const SizedBox(height: 30),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _handleSignUp,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryIndigo,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
+            child: _isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  )
+                : const Text(
+                    "Create Account",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
           ),
         ),
-      ),
+        const SizedBox(height: 25),
+        Center(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Already have an account? ",
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  InkWell(
+                    onTap: widget.onGoToLogin,
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        color: AppColors.primaryIndigo,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade200),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 18,
+                      color: Colors.amber.shade900,
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "Registration requires manual confirmation from the Admin before you can access the system.",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

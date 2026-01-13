@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 
 class ArDownPaymentInvoicePage extends StatefulWidget {
-      const ArDownPaymentInvoicePage({super.key});
+  const ArDownPaymentInvoicePage({super.key});
 
   @override
-  State<ArDownPaymentInvoicePage> createState() => _ArDownPaymentInvoicePageState();
+  State<ArDownPaymentInvoicePage> createState() =>
+      _ArDownPaymentInvoicePageState();
 }
 
 class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
@@ -18,14 +18,13 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
   final Color borderGrey = const Color(0xFFE2E8F0);
-  
+
   final ScrollController _horizontalScroll = ScrollController();
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
-  final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
@@ -34,7 +33,10 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
-    return _controllers.putIfAbsent(key, () => TextEditingController(text: initial));
+    return _controllers.putIfAbsent(
+      key,
+      () => TextEditingController(text: initial),
+    );
   }
 
   FocusNode _getFn(
@@ -46,8 +48,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        // PERBAIKAN: Hapus pengecekan isReadOnly di sini agar format tetap jalan saat diedit
-        if (!fn.hasFocus) { 
+        if (!fn.hasFocus) {
           final controller = _getCtrl(key);
           String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
           double? parsed = double.tryParse(cleanText);
@@ -81,7 +82,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     double dpm = parse("f_dpm_val");
     double tax = parse("f_tax");
     double rounding = parse("f_rounding"); // Sesuaikan key
-    
+
     // Total = Total Before Disc - DPM + Tax + Rounding
     return before - dpm + tax + rounding;
   }
@@ -114,7 +115,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       String month = picked.month.toString().padLeft(2, '0');
       String year = picked.year.toString();
       String formattedDate = "$day/$month/$year";
-      
+
       setState(() {
         _getCtrl(key).text = formattedDate;
         _fieldValues[key] = formattedDate;
@@ -135,23 +136,17 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               children: [
                 RepaintBoundary(child: _buildModernHeader()),
                 const SizedBox(height: 16),
-                _buildTabSection(), 
+                _buildTabSection(),
                 const SizedBox(height: 16),
                 _buildModernFooter(),
               ],
             ),
           ),
-          if (showSidePanel)
-            Positioned(
-              top: 0, right: 0, bottom: 0,
-              child: RepaintBoundary(child: _buildFloatingSidePanel()),
-            ),
         ],
       ),
     );
   }
 
-  
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -189,56 +184,83 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                   child: Row(
                     children: [
                       Container(
-                        width: 100, 
+                        width: 100,
                         height: 32,
                         padding: const EdgeInsets.symmetric(horizontal: 0),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: _dropdownValues["h_curr_type"] ?? "BP Currency",
+                            value:
+                                _dropdownValues["h_curr_type"] ?? "BP Currency",
                             isDense: true,
                             isExpanded: true,
-                            icon: const Icon(Icons.arrow_drop_down, size: 20, color: Colors.grey),
-                            style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500),
-                            onChanged: (v) => setState(() => _dropdownValues["h_curr_type"] = v!),
-                            items: ["BP Currency", "Local Currency", "System Currency"]
-                                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: secondarySlate,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            onChanged: (v) => setState(
+                              () => _dropdownValues["h_curr_type"] = v!,
+                            ),
+                            items:
+                                [
+                                      "BP Currency",
+                                      "Local Currency",
+                                      "System Currency",
+                                    ]
+                                    .map(
+                                      (e) => DropdownMenuItem(
+                                        value: e,
+                                        child: Text(e),
+                                      ),
+                                    )
+                                    .toList(),
                           ),
                         ),
                       ),
-                      
-                      const SizedBox(width: 28), 
-
-                    
+                      const SizedBox(width: 28),
                       Container(
                         width: 60,
                         height: 32,
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color: bgSlate, 
-                          border: Border.all(color: borderGrey), 
-                          borderRadius: BorderRadius.circular(4)
+                          color: bgSlate,
+                          border: Border.all(color: borderGrey),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Center(
-                          child: Text("IDR", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            "IDR",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(
                         child: Container(
                           height: 32,
                           decoration: BoxDecoration(
-                            color: bgSlate, 
-                            border: Border.all(color: borderGrey), 
-                            borderRadius: BorderRadius.circular(4)
+                            color: bgSlate,
+                            border: Border.all(color: borderGrey),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: TextField(
                             controller: _getCtrl("h_curr_rate", initial: ""),
                             style: const TextStyle(fontSize: 12),
                             textAlign: TextAlign.right,
                             decoration: const InputDecoration(
-                              border: InputBorder.none, 
-                              isDense: true, 
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                             ),
                           ),
                         ),
@@ -246,7 +268,6 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                     ],
                   ),
                 ),
-                
               ],
             ),
           ),
@@ -256,9 +277,20 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             flex: 4,
             child: Column(
               children: [
-                _buildModernNoFieldRow("No.", "h_no_series", [""], "h_no_val", initialNo: ""),
+                _buildModernNoFieldRow(
+                  "No.",
+                  "h_no_series",
+                  [""],
+                  "h_no_val",
+                  initialNo: "",
+                ),
                 const SizedBox(height: 8),
-                _buildHeaderField("Status", "h_status", initial: "Open", isReadOnly: true),
+                _buildHeaderField(
+                  "Status",
+                  "h_status",
+                  initial: "Open",
+                  isReadOnly: true,
+                ),
                 const SizedBox(height: 8),
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
                 const SizedBox(height: 8),
@@ -272,6 +304,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       ),
     );
   }
+
   Widget _buildTabSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -283,7 +316,8 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.12),
-            blurRadius: 18, spreadRadius: 2,
+            blurRadius: 18,
+            spreadRadius: 2,
             offset: const Offset(0, 10),
           ),
         ],
@@ -295,7 +329,8 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             decoration: BoxDecoration(
               color: primaryIndigo,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20), topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
             child: TabBar(
@@ -308,7 +343,10 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              indicatorPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              indicatorPadding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 8,
+              ),
               tabs: const [
                 Tab(text: "Contents"),
                 Tab(text: "Logistics"),
@@ -349,11 +387,16 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(bottom: BorderSide(color: primaryIndigo, width: 2.5)),
+            border: Border(
+              bottom: BorderSide(color: primaryIndigo, width: 2.5),
+            ),
           ),
           child: Row(
             children: [
-              const Text("Item/Service Type", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const Text(
+                "Item/Service Type",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(width: 12),
               _buildSmallDropdown("item_type_main", ["Item", "Service"]),
               const Spacer(),
@@ -366,11 +409,17 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
             color: const Color.fromARGB(255, 246, 246, 246),
-            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
             border: Border.all(color: borderGrey, width: 0.5),
           ),
           child: ClipRRect(
-            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
             child: Scrollbar(
               controller: _horizontalScroll,
               thumbVisibility: true,
@@ -381,13 +430,24 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                   columnSpacing: 45,
                   horizontalMargin: 15,
                   headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(const Color(0xFF257575)),
+                  headingRowColor: WidgetStateProperty.all(
+                    const Color(0xFF257575),
+                  ),
                   border: const TableBorder(
-                    verticalInside: BorderSide(color: Color.fromARGB(208, 166, 164, 164), width: 0.5),
-                    horizontalInside: BorderSide(color: Color.fromARGB(208, 166, 164, 164), width: 0.5),
+                    verticalInside: BorderSide(
+                      color: Color.fromARGB(208, 166, 164, 164),
+                      width: 0.5,
+                    ),
+                    horizontalInside: BorderSide(
+                      color: Color.fromARGB(208, 166, 164, 164),
+                      width: 0.5,
+                    ),
                   ),
                   columns: _buildStaticColumns(),
-                  rows: List.generate(_rowCount, (index) => _buildDataRow(index)),
+                  rows: List.generate(
+                    _rowCount,
+                    (index) => _buildDataRow(index),
+                  ),
                 ),
               ),
             ),
@@ -425,21 +485,30 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   Widget _buildAddRowButtons() {
     return Row(
       children: [
-        ElevatedButton(
-          onPressed: () => setState(() => showSidePanel = true),
-          style: ElevatedButton.styleFrom(backgroundColor: primaryIndigo),
-          child: const Text("Add Item SO", style: TextStyle(color: Colors.white, fontSize: 11)),
+        IconButton(
+          onPressed: () => setState(() => _rowCount++),
+          icon: const Icon(Icons.add_box, color: Colors.green),
         ),
-        IconButton(onPressed: () => setState(() => _rowCount++), icon: const Icon(Icons.add_box, color: Colors.green)),
-        IconButton(onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null), icon: const Icon(Icons.indeterminate_check_box, color: Colors.red)),
+        IconButton(
+          onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null),
+          icon: const Icon(Icons.indeterminate_check_box, color: Colors.red),
+        ),
       ],
     );
   }
 
   DataCell _buildModernTableCell(String key, {String initial = ""}) {
     final controller = _getCtrl(key, initial: initial);
-    bool isNumeric = key.contains("qty") || key.contains("stock") || key.contains("price") || key.contains("total") || key.contains("disc");
-    final focusNode = _getFn(key, defaultValue: initial.isEmpty ? "0.00" : initial);
+    bool isNumeric =
+        key.contains("qty") ||
+        key.contains("stock") ||
+        key.contains("price") ||
+        key.contains("total") ||
+        key.contains("disc");
+    final focusNode = _getFn(
+      key,
+      defaultValue: initial.isEmpty ? "0.00" : initial,
+    );
 
     return DataCell(
       Padding(
@@ -451,11 +520,15 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             focusNode: focusNode,
             textAlign: isNumeric ? TextAlign.right : TextAlign.left,
             style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(vertical: 10)),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
+            ),
             onChanged: (val) {
               _fieldValues[key] = val;
               if (isNumeric) {
-                 _syncTotalBeforeDiscount();
+                _syncTotalBeforeDiscount();
               }
             },
           ),
@@ -465,11 +538,17 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   }
 
   List<DataColumn> _buildStaticColumns() {
-    const headerStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white);
+    const headerStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    );
     return [
       const DataColumn(label: Text("#", style: headerStyle)),
       const DataColumn(label: Text("Item No.", style: headerStyle)),
-      const DataColumn(label: Text("Jenis Barang dan Jasa", style: headerStyle)),
+      const DataColumn(
+        label: Text("Jenis Barang dan Jasa", style: headerStyle),
+      ),
       const DataColumn(label: Text("Item Description", style: headerStyle)),
       const DataColumn(label: Text("Jenis Item", style: headerStyle)),
       const DataColumn(label: Text("Klasifikasi Orbit", style: headerStyle)),
@@ -492,7 +571,8 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
       String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows += double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      totalAllRows +=
+          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
     }
     setState(() {
       _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
@@ -505,27 +585,45 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Column(children: [
-          _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [""]),
-        ])),
+        Expanded(
+          child: Column(
+            children: [
+              _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
+                "",
+              ]),
+            ],
+          ),
+        ),
         const SizedBox(width: 60),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _buildModernCheckbox("Print Picking Sheet", "cb_print"),
-          _buildModernCheckbox("Proc. Doc. For Non Drop-Ship", "cb_non_drop"),
-          _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
-          _buildModernCheckbox("Approved", "cb_approved"),
-          _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
-          const SizedBox(height: 20),
-          _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("BP Channel Contact", "log_bp_cont", [""]),
-        ])),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildModernCheckbox("Print Picking Sheet", "cb_print"),
+              _buildModernCheckbox(
+                "Proc. Doc. For Non Drop-Ship",
+                "cb_non_drop",
+              ),
+              _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
+              _buildModernCheckbox("Approved", "cb_approved"),
+              _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
+              const SizedBox(height: 20),
+              _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("BP Channel Name", "log_bp_name"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "BP Channel Contact",
+                "log_bp_cont",
+                [""],
+              ),
+            ],
+          ),
+        ),
       ],
     ),
   );
@@ -535,42 +633,66 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Column(children: [
-          _buildModernFieldRow("Journal Remark", "acc_journal"),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [""]),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [""]),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Central Bank Ind.", "acc_central_bank", [""]),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Manually\nRecalculate Due Date", "acc_manual_due"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Cash Discount\nDate Offset", "acc_cash_disc"),
-          const SizedBox(height: 12),
-          _buildModernCheckbox("Use Shipped Goods Account", "cb_shipped_acc"),
-        ])),
+        Expanded(
+          child: Column(
+            children: [
+              _buildModernFieldRow("Journal Remark", "acc_journal"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "Central Bank Ind.",
+                "acc_central_bank",
+                [""],
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "Manually\nRecalculate Due Date",
+                "acc_manual_due",
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "Cash Discount\nDate Offset",
+                "acc_cash_disc",
+              ),
+              const SizedBox(height: 12),
+              _buildModernCheckbox(
+                "Use Shipped Goods Account",
+                "cb_shipped_acc",
+              ),
+            ],
+          ),
+        ),
         const SizedBox(width: 60),
-        Expanded(child: Column(children: [
-          _buildModernFieldRow("BP Project", "acc_bp_proj"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Required Date", "acc_req_date"),
-          const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Order Number", "acc_order_no"),
-          const SizedBox(height: 12),
-          _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
-        ])),
+        Expanded(
+          child: Column(
+            children: [
+              _buildModernFieldRow("BP Project", "acc_bp_proj"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Required Date", "acc_req_date"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Order Number", "acc_order_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
+            ],
+          ),
+        ),
       ],
     ),
   );
 
-  
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -585,78 +707,184 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: Colors.white, width: 3.5),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 18, spreadRadius: 2, offset: const Offset(0, 8))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 18,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-              Expanded(child: Column(children: [
-                _buildSmallDropdownRowModern("Sales Employee", "f_employ", ["-No Sales Employee-"]),
-                const SizedBox(height: 8),
-                _buildHeaderField("Owner", "f_owner"),
-                const SizedBox(height: 8),
-                _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
-              ])),
-              
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildSmallDropdownRowModern("Sales Employee", "f_employ", [
+                      "-No Sales Employee-",
+                    ]),
+                    const SizedBox(height: 8),
+                    _buildHeaderField("Owner", "f_owner"),
+                    const SizedBox(height: 8),
+                    _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
+                  ],
+                ),
+              ),
               const SizedBox(width: 60),
-              
-              SizedBox(width: 400, child: Column(children: [
-                _buildSummaryRowWithAutoValue("Total Before Discount", "f_before_disc", isReadOnly: false), 
-                
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(children: [
-                    const SizedBox(width: 140, child: Text("DPM", style: TextStyle(fontSize: 12, color: Color(0xFF64748B)))),
-                    Container(
-                      width: 50, height: 24, margin: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
-                      child: TextField(
-                        controller: _getCtrl("f_dpm_pct", initial: "30"),
-                        focusNode: _getFn("f_dpm_pct", isPercent: true), // Auto Decimal
-                        textAlign: TextAlign.right, style: const TextStyle(fontSize: 11),
-                        decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4)),
-                        onChanged: (val) {
-                             // Simple logic: update val based on pct
-                             double pct = double.tryParse(val) ?? 0;
-                             double before = double.tryParse(_getCtrl("f_before_disc").text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-                             String newVal = (before * pct / 100).toStringAsFixed(2);
-                             _getCtrl("f_dpm_val").text = newVal;
-                             setState((){});
-                        },
-                      )
+              SizedBox(
+                width: 400,
+                child: Column(
+                  children: [
+                    _buildSummaryRowWithAutoValue(
+                      "Total Before Discount",
+                      "f_before_disc",
+                      isReadOnly: false,
                     ),
-                    const Text("%", style: TextStyle(fontSize: 12)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildSummaryBox("f_dpm_val", isReadOnly: false)), // BISA DIKETIK
-                  ]),
-                ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 140,
+                            child: Text(
+                              "DPM",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 50,
+                            height: 24,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: borderGrey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: TextField(
+                              controller: _getCtrl("f_dpm_pct", initial: "30"),
+                              focusNode: _getFn(
+                                "f_dpm_pct",
+                                isPercent: true,
+                              ), // Auto Decimal
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(fontSize: 11),
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
+                              ),
+                              onChanged: (val) {
+                                // Simple logic: update val based on pct
+                                double pct = double.tryParse(val) ?? 0;
+                                double before =
+                                    double.tryParse(
+                                      _getCtrl(
+                                        "f_before_disc",
+                                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
+                                    ) ??
+                                    0;
+                                String newVal = (before * pct / 100)
+                                    .toStringAsFixed(2);
+                                _getCtrl("f_dpm_val").text = newVal;
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          const Text("%", style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildSummaryBox(
+                              "f_dpm_val",
+                              isReadOnly: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-                // Rounding Row
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(children: [
-                    SizedBox(width: 24, height: 24, child: Checkbox(value: _checkStates["cb_round"] ?? false, onChanged: (v) => setState(() => _checkStates["cb_round"] = v!))),
-                    const Text("Rounding", style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                    const Spacer(),
-                    SizedBox(width: 100, child: _buildSummaryBox("f_round", isReadOnly: false)), // BISA DIKETIK
-                  ]),
-                ),
+                    // Rounding Row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Checkbox(
+                              value: _checkStates["cb_round"] ?? false,
+                              onChanged: (v) =>
+                                  setState(() => _checkStates["cb_round"] = v!),
+                            ),
+                          ),
+                          const Text(
+                            "Rounding",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          const Spacer(),
+                          SizedBox(
+                            width: 100,
+                            child: _buildSummaryBox(
+                              "f_round",
+                              isReadOnly: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-                _buildSummaryRowWithAutoValue("Tax", "f_tax", isReadOnly: false), // BISA DIKETIK
-                _buildSummaryRowWithAutoValue("WTax Amount", "f_wtax", isReadOnly: false), // BISA DIKETIK
-                
-                const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, thickness: 1)),
-                
-                _buildSummaryRowWithAutoValue("Total", "f_total_final", isBold: true, isReadOnly: true), // Tetap ReadOnly (Hasil Hitung)
-                _buildSummaryRowWithAutoValue("Applied Amount", "f_applied", isReadOnly: false), // BISA DIKETIK
-                _buildSummaryRowWithAutoValue("Balance Due", "f_balance", isReadOnly: true),
-              ])),
+                    _buildSummaryRowWithAutoValue(
+                      "Tax",
+                      "f_tax",
+                      isReadOnly: false,
+                    ),
+                    _buildSummaryRowWithAutoValue(
+                      "WTax Amount",
+                      "f_wtax",
+                      isReadOnly: false,
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1, thickness: 1),
+                    ),
+
+                    _buildSummaryRowWithAutoValue(
+                      "Total",
+                      "f_total_final",
+                      isBold: true,
+                      isReadOnly: true,
+                    ), // Tetap ReadOnly (Hasil Hitung)
+                    _buildSummaryRowWithAutoValue(
+                      "Applied Amount",
+                      "f_applied",
+                      isReadOnly: false,
+                    ),
+                    _buildSummaryRowWithAutoValue(
+                      "Balance Due",
+                      "f_balance",
+                      isReadOnly: true,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: _buildActionButtons()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: _buildActionButtons(),
+        ),
         const SizedBox(height: 20),
       ],
     );
@@ -664,20 +892,46 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
 
   // --- HELPER WIDGETS ---
 
-  Widget _buildHeaderField(String label, String key, {String initial = "", bool isReadOnly = false}) {
+  Widget _buildHeaderField(
+    String label,
+    String key, {
+    String initial = "",
+    bool isReadOnly = false,
+  }) {
     return Row(
       children: [
-        SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-        const SizedBox(width: 28), 
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
             height: 32,
-            decoration: BoxDecoration(color: isReadOnly ? bgSlate : bgSlate, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
+            decoration: BoxDecoration(
+              color: isReadOnly ? bgSlate : bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
             child: TextField(
               controller: _getCtrl(key, initial: initial),
               readOnly: isReadOnly,
               style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+              ),
             ),
           ),
         ),
@@ -690,18 +944,48 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           const SizedBox(width: 28),
           Expanded(
             child: InkWell(
-              onTap: () => _showSearchDialog(label, key, ["Customer A", "Customer B"]),
+              onTap: () =>
+                  _showSearchDialog(label, key, ["Customer A", "Customer B"]),
               child: Container(
                 height: 32,
-                decoration: BoxDecoration(color: bgSlate, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
+                decoration: BoxDecoration(
+                  color: bgSlate,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: borderGrey),
+                ),
                 child: Row(
                   children: [
-                    Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text(_controllers[key]?.text ?? "", style: const TextStyle(fontSize: 12, color: Colors.black), overflow: TextOverflow.ellipsis))),
-                    const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.search, size: 16, color: Colors.grey)),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          _controllers[key]?.text ?? "",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(Icons.search, size: 16, color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
@@ -715,19 +999,45 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Row(
       children: [
-        SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
         const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
             child: Container(
               height: 32,
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
               child: IgnorePointer(
                 child: TextField(
                   controller: _getCtrl(key, initial: initial),
                   style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8), suffixIcon: Icon(Icons.calendar_today, size: 14, color: Colors.grey)),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    suffixIcon: Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -737,226 +1047,400 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     );
   }
 
-  // --- PERBAIKAN: Menambahkan focusNode di Footer agar bisa diedit & auto decimal ---
-  Widget _buildSummaryRowWithAutoValue(String label, String key, {String defaultValue = "0.00", bool isBold = false, bool isReadOnly = false}) {
-    final controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
-    // Tambahkan focusNode di sini
-    final focusNode = _getFn(key, isReadOnly: isReadOnly, defaultValue: defaultValue);
-    
+  Widget _buildSummaryRowWithAutoValue(
+    String label,
+    String key, {
+    String defaultValue = "0.00",
+    bool isBold = false,
+    bool isReadOnly = false,
+  }) {
+    final controller = _getCtrl(
+      key,
+      initial: _fieldValues[key] ?? defaultValue,
+    );
+    final focusNode = _getFn(
+      key,
+      isReadOnly: isReadOnly,
+      defaultValue: defaultValue,
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(children: [
-        SizedBox(width: 140, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate))),
-        const SizedBox(width: 25),
-        Expanded(child: Container(
-          height: 28,
-          decoration: BoxDecoration(color: isReadOnly ? bgSlate : Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode, // Pasang FocusNode
-            readOnly: isReadOnly, 
-            textAlign: TextAlign.right,
-            style: TextStyle(fontSize: 12, fontWeight: isBold ? FontWeight.bold : FontWeight.w500),
-            decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6)),
-            onChanged: (val) { 
-               // Allow editing if not readOnly
-               if (!isReadOnly) setState(() => _fieldValues[key] = val); 
-            },
+      child: Row(
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 12, color: secondarySlate),
+            ),
           ),
-        )),
-      ]),
-    );
-  }
-
-  // --- PERBAIKAN: Menambahkan focusNode di Footer agar bisa diedit & auto decimal ---
-  Widget _buildSummaryBox(String key, {String defaultValue = "0.00", bool isReadOnly = false, bool isPercent = false}) {
-    final controller = _getCtrl(key, initial: _fieldValues[key] ?? defaultValue);
-    // Tambahkan focusNode di sini
-    final focusNode = _getFn(key, isReadOnly: isReadOnly, defaultValue: defaultValue, isPercent: isPercent);
-    
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(color: isReadOnly ? bgSlate : Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(4)),
-      child: TextField(
-        controller: controller, 
-        focusNode: focusNode, // Pasang FocusNode
-        readOnly: isReadOnly, 
-        textAlign: TextAlign.right, style: const TextStyle(fontSize: 12),
-        decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 8)),
-        onChanged: (val) { if (!isReadOnly) setState(() => _fieldValues[key] = val); },
+          const SizedBox(width: 25),
+          Expanded(
+            child: Container(
+              height: 28,
+              decoration: BoxDecoration(
+                color: isReadOnly ? bgSlate : Colors.white,
+                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode, // Pasang FocusNode
+                readOnly: isReadOnly,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                ),
+                onChanged: (val) {
+                  if (!isReadOnly) setState(() => _fieldValues[key] = val);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildModernFieldRow(String label, String key, {bool isTextArea = false, String initial = ""}) => Padding(padding: EdgeInsets.zero, child: Row(children: [SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))), const SizedBox(width: 28), Expanded(child: Container(height: isTextArea ? 80 : 32, padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(color: bgSlate, borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)), child: Center(child: TextField(controller: _getCtrl(key, initial: initial), maxLines: isTextArea ? 3 : 1, style: const TextStyle(fontSize: 12, color: Colors.black), decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(vertical: 8))))))]));
+  Widget _buildSummaryBox(
+    String key, {
+    String defaultValue = "0.00",
+    bool isReadOnly = false,
+    bool isPercent = false,
+  }) {
+    final controller = _getCtrl(
+      key,
+      initial: _fieldValues[key] ?? defaultValue,
+    );
+    final focusNode = _getFn(
+      key,
+      isReadOnly: isReadOnly,
+      defaultValue: defaultValue,
+      isPercent: isPercent,
+    );
 
-  Widget _buildModernNoFieldRow(String label, String dropdownKey, List<String> seriesOptions, String textKey, {String initialNo = ""}) => Padding(
+    return Container(
+      height: 24,
+      decoration: BoxDecoration(
+        color: isReadOnly ? bgSlate : Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode, 
+        readOnly: isReadOnly,
+        textAlign: TextAlign.right,
+        style: const TextStyle(fontSize: 12),
+        decoration: const InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        ),
+        onChanged: (val) {
+          if (!isReadOnly) setState(() => _fieldValues[key] = val);
+        },
+      ),
+    );
+  }
+
+  Widget _buildModernFieldRow(
+    String label,
+    String key, {
+    bool isTextArea = false,
+    String initial = "",
+  }) => Padding(
     padding: EdgeInsets.zero,
-    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-      const SizedBox(width: 28),
-      Expanded(child: Container(
-        height: 32, decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), border: Border.all(color: borderGrey)),
-        child: Row(children: [
-          Container(
-            width: 80, height: 32, padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(color: bgSlate, borderRadius: const BorderRadius.horizontal(left: Radius.circular(5)), border: Border(right: BorderSide(color: borderGrey))),
-            child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-              value: _dropdownValues[dropdownKey] ?? seriesOptions.first, isDense: true, style: const TextStyle(fontSize: 11, color: Colors.black),
-              onChanged: (v) => setState(() => _dropdownValues[dropdownKey] = v!),
-              items: seriesOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            )),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          Expanded(child: Container(
-            height: 32, decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.horizontal(right: Radius.circular(5))),
-            child: Center(child: TextField(
-              controller: _getCtrl(textKey, initial: initialNo), style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
-            )),
-          )),
-        ]),
-      )),
-    ]),
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: isTextArea ? 80 : 32,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: Center(
+              child: TextField(
+                controller: _getCtrl(key, initial: initial),
+                maxLines: isTextArea ? 3 : 1,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 
-  Widget _buildModernCheckbox(String label, String key) => Row(children: [
-    SizedBox(width: 24, height: 32, child: Checkbox(value: _checkStates[key] ?? false, activeColor: primaryIndigo, onChanged: (val) => setState(() => _checkStates[key] = val!))),
-    const SizedBox(width: 8),
-    Text(label, style: const TextStyle(fontSize: 12)),
-  ]);
+  Widget _buildModernNoFieldRow(
+    String label,
+    String dropdownKey,
+    List<String> seriesOptions,
+    String textKey, {
+    String initialNo = "",
+  }) => Padding(
+    padding: EdgeInsets.zero,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: 32,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: bgSlate,
+                    borderRadius: const BorderRadius.horizontal(
+                      left: Radius.circular(5),
+                    ),
+                    border: Border(right: BorderSide(color: borderGrey)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value:
+                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
+                      isDense: true,
+                      style: const TextStyle(fontSize: 11, color: Colors.black),
+                      onChanged: (v) =>
+                          setState(() => _dropdownValues[dropdownKey] = v!),
+                      items: seriesOptions
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.horizontal(
+                        right: Radius.circular(5),
+                      ),
+                    ),
+                    child: Center(
+                      child: TextField(
+                        controller: _getCtrl(textKey, initial: initialNo),
+                        style: const TextStyle(fontSize: 12),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildModernCheckbox(String label, String key) => Row(
+    children: [
+      SizedBox(
+        width: 24,
+        height: 32,
+        child: Checkbox(
+          value: _checkStates[key] ?? false,
+          activeColor: primaryIndigo,
+          onChanged: (val) => setState(() => _checkStates[key] = val!),
+        ),
+      ),
+      const SizedBox(width: 8),
+      Text(label, style: const TextStyle(fontSize: 12)),
+    ],
+  );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8), height: 30,
-      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(6)),
-      child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-        value: _dropdownValues[key], isDense: true, style: const TextStyle(fontSize: 12, color: Colors.black),
-        onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-        items: items.map((val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
-      )),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 30,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _dropdownValues[key],
+          isDense: true,
+          style: const TextStyle(fontSize: 12, color: Colors.black),
+          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          items: items
+              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+              .toList(),
+        ),
+      ),
     );
   }
 
-  Widget _buildSmallDropdownRowModern(String label, String key, List<String> items) => Padding(
+  Widget _buildSmallDropdownRowModern(
+    String label,
+    String key,
+    List<String> items,
+  ) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      SizedBox(width: 100, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-      const SizedBox(width: 28),
-      Expanded(child: _buildSmallDropdown(key, items)),
-    ]),
-  );
-
-  Widget _buildChooseFromListField(String label, String key, List<String> data) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      SizedBox(width: 120, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-      Expanded(child: InkWell(
-        onTap: () => _showSearchDialog(label, key, data),
-        child: Container(
-          height: 32, decoration: BoxDecoration(color: bgSlate, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(6)),
-          child: Row(children: [
-            Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Align(alignment: Alignment.centerLeft, child: Text(_getCtrl(key).text.isEmpty ? (data.isNotEmpty ? data.first : "") : _getCtrl(key).text, style: const TextStyle(fontSize: 12, color: Colors.black), overflow: TextOverflow.ellipsis)))),
-            const Padding(padding: EdgeInsets.only(right: 10), child: Icon(Icons.search, size: 16, color: Colors.grey)),
-          ]),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
-      )),
-    ]),
+        const SizedBox(width: 28),
+        Expanded(child: _buildSmallDropdown(key, items)),
+      ],
+    ),
   );
 
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
-    showDialog(context: context, builder: (c) => StatefulBuilder(builder: (context, setDialogState) => AlertDialog(
-      title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
-      content: SizedBox(width: 300, height: 300, child: Column(children: [
-        TextField(decoration: const InputDecoration(hintText: "Cari data...", prefixIcon: Icon(Icons.search)), onChanged: (v) => setDialogState(() => filteredList = data.where((e) => e.toLowerCase().contains(v.toLowerCase())).toList())),
-        Expanded(child: ListView.builder(itemCount: filteredList.length, itemBuilder: (context, i) => ListTile(title: Text(filteredList[i]), onTap: () { setState(() => _getCtrl(key).text = filteredList[i]); Navigator.pop(c); }))),
-      ])),
-    )));
-  }
-
-  Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      SizedBox(width: 120, child: Text(label, style: TextStyle(fontSize: 12, color: secondarySlate, fontWeight: FontWeight.w500))),
-      Expanded(child: InkWell(
-        onTap: () async {
-          FilePickerResult? res = await FilePicker.platform.pickFiles();
-          if (res != null) setState(() => _formValues[key] = res.files.first.name);
-        },
-        child: Container(
-          height: 32, decoration: BoxDecoration(color: bgSlate, border: Border.all(color: borderGrey), borderRadius: BorderRadius.circular(6)),
-          child: Row(children: [
-            Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Align(alignment: Alignment.centerLeft, child: Text(_formValues[key] ?? "No file selected", style: const TextStyle(fontSize: 11, color: Colors.black87), overflow: TextOverflow.ellipsis)))),
-            const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.upload_file, size: 16, color: Colors.grey)),
-          ]),
+    showDialog(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: Column(
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                    hintText: "Cari data...",
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (v) => setDialogState(
+                    () => filteredList = data
+                        .where((e) => e.toLowerCase().contains(v.toLowerCase()))
+                        .toList(),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, i) => ListTile(
+                      title: Text(filteredList[i]),
+                      onTap: () {
+                        setState(() => _getCtrl(key).text = filteredList[i]);
+                        Navigator.pop(c);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      )),
-    ]),
-  );
-
-  Widget _buildSAPActionButton(String label, {bool isPrimary = false, bool isDanger = false, Color? customColor}) {
-    Color bgColor = isDanger ? Colors.red : (isPrimary ? primaryIndigo : (customColor ?? Colors.white));
-    return ElevatedButton(
-      onPressed: () => debugPrint("Klik $label"),
-      style: ElevatedButton.styleFrom(backgroundColor: bgColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-      child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
-  Widget _buildFloatingSidePanel() => Container(
-    width: 380, decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0))]),
-    child: Column(children: [
-      AppBar(backgroundColor: primaryIndigo, title: const Text("Sales Order", style: TextStyle(fontSize: 14, color: Colors.white)), actions: [IconButton(onPressed: () => setState(() => showSidePanel = false), icon: const Icon(Icons.close), color: Colors.white)]),
-      Expanded(child: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          _buildChooseFromListField("Business Unit", "cfg_bu", [""]), const SizedBox(height: 12),
-          _buildFileUploadRow("File 1", "cfg_f1"), const SizedBox(height: 8),
-          _buildFileUploadRow("File 2", "cfg_f2"), const SizedBox(height: 8),
-          _buildFileUploadRow("File 3", "cfg_f3"), const SizedBox(height: 8),
-          _buildFileUploadRow("File 4", "cfg_f4"), const SizedBox(height: 12),
-          _buildModernFieldRow("Create By", "cfg_by"), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Upload Status", "cfg_up", ["No", "Yes"]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", ["No", "Yes", "N/A"]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Punching", "cfg_punch", ["No", "Yes", "N/A"]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Bending", "cfg_bend", ["No", "Yes", "N/A"]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Assy", "cfg_assy", ["No", "Yes", "N/A"]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("SubCont", "cfg_sub", ["No", "Yes", "N/A"]), const SizedBox(height: 12),
-          _buildModernFieldRow("Internal Memo", "cfg_memo", isTextArea: true),
-          const Divider(height: 45, thickness: 3),
-          _buildModernFieldRow("Production\nDue date", "cfg_prod_date"), const SizedBox(height: 12),
-          _buildModernFieldRow("AP Tax Date", "cfg_tax_date"), const SizedBox(height: 12),
-          _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", ["010", "020"]), const SizedBox(height: 12),
-          _buildModernFieldRow("Area", "cfg_area"), const SizedBox(height: 12),
-          _buildChooseFromListField("Kategori SO", "cfg_cat", ["SO Resmi", "SO Sample"]), const SizedBox(height: 12),
-          _buildModernFieldRow("Customer Name", "cfg_cust_name"), const SizedBox(height: 12),
-          _buildModernFieldRow("alasan rubah duedate", "cfg_duedate", isTextArea: true), const SizedBox(height: 12),
-          _buildChooseFromListField("validasi PO", "cfg_validasi_po", ["Lengkap", "Tidak Lengkap"]), const SizedBox(height: 12),
-          _buildModernFieldRow("PIC Engineering", "cfg_pic", isTextArea: true), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]), const SizedBox(height: 12),
-          _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [""]), const SizedBox(height: 30),
-          SizedBox(width: double.infinity, height: 40, child: ElevatedButton(onPressed: () => setState(() => showSidePanel = false), style: ElevatedButton.styleFrom(backgroundColor: Colors.green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: const Text("APPLY", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
-          const SizedBox(height: 20),
-        ],
-      )),
-    ]),
-  );
+  Widget _buildSAPActionButton(
+    String label, {
+    bool isPrimary = false,
+    bool isDanger = false,
+    Color? customColor,
+  }) {
+    Color bgColor = isDanger
+        ? Colors.red
+        : (isPrimary ? primaryIndigo : (customColor ?? Colors.white));
+    return ElevatedButton(
+      onPressed: () => debugPrint("Klik $label"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
 
   Widget _buildActionButtons() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(children: [
-      _buildSAPActionButton("Add", isPrimary: true),
-      const SizedBox(width: 8),
-      _buildSAPActionButton("Cancel",customColor: Color.fromARGB(255, 255, 0, 0)),
-      const Spacer(),
-      _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-      const SizedBox(width: 8),
-      _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
-    ]),
+    child: Row(
+      children: [
+        _buildSAPActionButton("Add", isPrimary: true),
+        const SizedBox(width: 8),
+        _buildSAPActionButton(
+          "Cancel",
+          customColor: const Color.fromARGB(255, 255, 0, 0),
+        ),
+        const Spacer(),
+        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
+        const SizedBox(width: 8),
+        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
+      ],
+    ),
   );
-  
- 
 }
