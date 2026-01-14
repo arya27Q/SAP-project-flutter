@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   String _errorMessage = "";
 
   final List<String> companies = [
-    "PT. Dempo Laser Metalindo Surabaya",
+    "PT. Dempo Laser Metalindo",
     "PT. Duta Laserindo Metal",
     "PT. Senzo Feinmetal",
     "PT. ATMI Duta Engineering",
@@ -106,8 +106,19 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    if (!_userController.text.contains('_') ||
+        !_userController.text.endsWith('@gmail.com')) {
+      _showErrorSnackBar("Format login: nama_company@gmail.com");
+      return;
+    }
+
+    if (!_passController.text.startsWith('_')) {
+      _showErrorSnackBar("Format password: _nama_divisi");
+      return;
+    }
+
     Map<String, String> companyMapping = {
-      "PT. Dempo Laser Metalindo Surabaya": "pt1",
+      "PT. Dempo Laser Metalindo": "pt1",
       "PT. Duta Laserindo Metal": "pt2",
       "PT. Senzo Feinmetal": "pt3",
       "PT. ATMI Duta Engineering": "pt4",
@@ -121,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       var response = await http
           .post(
-            Uri.parse('http://192.168.0.101:8000/api/test-login'),
+            Uri.parse('http://192.168.40.92:8000/api/test-login'),
             body: {
               'email': _userController.text.trim(),
               'password': _passController.text,
@@ -140,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
           () => widget.onLoginSuccess(),
         );
       } else {
-        _handleLoginError("Invalid credentials or incorrect Company.");
+        _handleLoginError("Invalid credentials or Account not approved yet.");
       }
     } catch (e) {
       _handleLoginError("Failed to connect to the server.");
@@ -168,14 +179,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- STACK LEVEL PALING ATAS ---
       body: Stack(
         children: [
-          // 1. LAYOUT UTAMA (Kiri & Kanan)
           LayoutBuilder(
             builder: (context, constraints) {
               return AnimatedOpacity(
-                // Seluruh layar meredup saat proses login
                 opacity: (_isLoading || _isSuccess || _isError) ? 0.4 : 1.0,
                 duration: const Duration(milliseconds: 300),
                 child: IgnorePointer(
@@ -185,14 +193,10 @@ class _LoginPageState extends State<LoginPage> {
               );
             },
           ),
-
-          // 2. GLOBAL OVERLAY (Loading / Status di Tengah Layar)
           if (_isLoading || _isSuccess || _isError)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(
-                  0.1,
-                ), // Efek gelap tipis di seluruh monitor
+                color: Colors.black.withOpacity(0.1),
                 child: Center(child: _buildStatusOverlay()),
               ),
             ),
@@ -201,7 +205,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Widget Status Overlay yang muncul di tengah layar
   Widget _buildStatusOverlay() {
     if (_isLoading) {
       return Container(
@@ -256,7 +259,6 @@ class _LoginPageState extends State<LoginPage> {
     if (constraints.maxWidth > 950) {
       return Row(
         children: [
-          // PANEL KIRI
           Expanded(
             flex: 6,
             child: Container(
@@ -279,7 +281,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          // PANEL KANAN
           Expanded(
             flex: 4,
             child: Container(
@@ -439,9 +440,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 10),
               Text(
-                "Enter your credentials to access the SAP environment.",
+                "Use your registered format: nama_company@gmail.com",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 15),
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],
           ),
@@ -467,44 +468,78 @@ class _LoginPageState extends State<LoginPage> {
               .map(
                 (s) => DropdownMenuItem(
                   value: s,
-                  child: Text(s, style: const TextStyle(fontSize: 14)),
+                  child: Text(
+                    s,
+                    style: const TextStyle(fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               )
               .toList(),
           onChanged: (val) => setState(() => selectedCompany = val),
         ),
         const SizedBox(height: 24),
-        const Text(
-          "Email Address",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+
+        // --- EMAIL SECTION (FORMAT DI KANAN) ---
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Email Address",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const Text(
+              "(format: nama_company@gmail.com)",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _userController,
           decoration: _buildInputDecoration(
-            "name@company.com",
+            "indra_dempo@gmail.com",
             Icons.email_outlined,
           ),
         ),
         const SizedBox(height: 24),
-        const Text(
-          "Password",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+
+        // --- PASSWORD SECTION (FORMAT DI KANAN) ---
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Password",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const Text(
+              "(format: _nama_divisi)",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _passController,
           obscureText: true,
           decoration: _buildInputDecoration(
-            "••••••••",
+            "_indra_it",
             Icons.lock_outline_rounded,
           ),
         ),

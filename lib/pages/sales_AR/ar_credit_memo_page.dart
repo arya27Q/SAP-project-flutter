@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart'; 
-import 'package:file_picker/file_picker.dart';
+import '../../constants.dart';
 
 class ArCreditMemoPage extends StatefulWidget {
   const ArCreditMemoPage({super.key});
 
   @override
-  State<ArCreditMemoPage> createState() =>
-      _ArCreditMemoPageState();
+  State<ArCreditMemoPage> createState() => _ArCreditMemoPageState();
 }
 
 class _ArCreditMemoPageState extends State<ArCreditMemoPage>
@@ -27,7 +25,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
-  final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
@@ -41,6 +38,36 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       key,
       () => TextEditingController(text: _fieldValues[key] ?? initial),
     );
+  }
+
+  FocusNode _getFnPrecision(String key) {
+    if (!_focusNodes.containsKey(key)) {
+      final fn = FocusNode();
+      fn.addListener(() {
+        if (!fn.hasFocus) {
+          final controller = _getCtrl(key);
+          if (controller.text.trim().isEmpty) return;
+
+          // Bersihkan karakter non-angka kecuali titik
+          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
+          double? parsed = double.tryParse(cleanText);
+
+          if (mounted) {
+            setState(() {
+              if (parsed != null) {
+                // Format ke 4 angka di belakang koma
+                controller.text = parsed.toStringAsFixed(4);
+              } else {
+                controller.text = "0.0000";
+              }
+              _fieldValues[key] = controller.text;
+            });
+          }
+        }
+      });
+      _focusNodes[key] = fn;
+    }
+    return _focusNodes[key]!;
   }
 
   FocusNode _getFn(
@@ -122,6 +149,26 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     double tax = parse("f_tax");
     double rounding = parse("f_rounding");
     return (before - discVal) + wtaxamount + rounding + tax;
+  }
+
+  Future<void> _selectDate(BuildContext context, String key) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      String day = picked.day.toString().padLeft(2, '0');
+      String month = picked.month.toString().padLeft(2, '0');
+      String year = picked.year.toString();
+      String formattedDate = "$day/$month/$year";
+
+      setState(() {
+        _getCtrl(key).text = formattedDate;
+        _fieldValues[key] = formattedDate;
+      });
+    }
   }
 
   @override
@@ -386,10 +433,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
         key.contains("p_service") ||
         key.contains("p_ref");
 
-    final focusNode = _getFn(
-      key,
-      defaultValue: isNumeric ? "0.00" : "",
-    );
+    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
 
     return DataCell(
       Padding(
@@ -457,7 +501,8 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       centeredHeader("Ref Item"),
     ];
   }
-   DataCell _buildSearchableCell(String key) {
+
+  DataCell _buildSearchableCell(String key) {
     return DataCell(
       InkWell(
         onTap: () {
@@ -675,19 +720,11 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               const SizedBox(height: 12),
               _buildModernFieldRow("Status", "h_stat", initial: "Open"),
               const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Posting Date",
-                "h_post",
-                initial: "28/Dec/2025",
-              ),
+              _buildHeaderDate("Posting Date", "h_post", ""),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Delivery Date", "h_deliv"),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
               const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Document Date",
-                "h_doc",
-                initial: "28/Dec/2025",
-              ),
+              _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
         ),
@@ -747,10 +784,13 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                     _buildDiscountRow(),
                     const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue("Tax", "f_tax"),
-                     const SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     _buildRoundingRow(),
-                      const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue("Wtax Amount", "f_wtaxamount"),
+                    const SizedBox(height: 2),
+                    _buildSummaryRowWithAutoValue(
+                      "Wtax Amount",
+                      "f_wtaxamount",
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -761,18 +801,18 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                       isBold: true,
                       isReadOnly: true,
                     ),
-                     _buildSummaryRowWithAutoValue(
+                    _buildSummaryRowWithAutoValue(
                       "Applied Amount",
                       "f_Applied Amnount",
                       isBold: true,
                       isReadOnly: true,
-                     ),
-                      _buildSummaryRowWithAutoValue(
+                    ),
+                    _buildSummaryRowWithAutoValue(
                       "Balance Due",
                       "f_Balance Due",
                       isBold: true,
                       isReadOnly: true,
-                     ),
+                    ),
                   ],
                 ),
               ),
@@ -812,6 +852,116 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       ],
     ),
   );
+
+  Widget _buildHeaderDate(String label, String key, String initial) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 92,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: InkWell(
+            onTap: () => _selectDate(context, key),
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: IgnorePointer(
+                child: TextField(
+                  controller: _getCtrl(key, initial: initial),
+                  style: const TextStyle(fontSize: 12),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    suffixIcon: Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernFieldRowPrecision(
+    String label,
+    String key, {
+    bool isTextArea = false,
+    String initial = "0.0000",
+  }) {
+    final controller = _getCtrl(key, initial: initial);
+    final focusNode = _getFnPrecision(key);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.left, // Tetap di kiri sesuai permintaanmu
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildRoundingRow() => Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -983,35 +1133,54 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     String key, {
     bool isTextArea = false,
     String initial = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+    bool isDecimal = false,
+  }) {
+    // Jika desimal dan input kosong, set awal ke 0.00
+    String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
+    final controller = _getCtrl(key, initial: effectiveInitial);
+
+    FocusNode? focusNode;
+    if (isDecimal) {
+      // Menggunakan fungsi _getFn yang sudah kamu punya untuk auto-format saat pindah kolom
+      focusNode = _getFn(key, defaultValue: "0.00");
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 4,
+      ), // Beri sedikit jarak antar baris
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Container(
-            height: isTextArea ? 80 : 32,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: Center(
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
               child: TextField(
-                controller: _getCtrl(key, initial: initial),
+                controller: controller,
+                focusNode: focusNode,
                 maxLines: isTextArea ? 3 : 1,
+                // AGAR KURSOR TETAP DI KIRI: Gunakan TextAlign.left
+                textAlign: TextAlign.left,
+                keyboardType: isDecimal
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
                 style: const TextStyle(fontSize: 12, color: Colors.black),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
@@ -1019,15 +1188,16 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
                 onChanged: (val) {
+                  // Simpan ke map variabel agar state tetap terjaga saat diedit
                   _fieldValues[key] = val;
                 },
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   Widget _buildModernNoFieldRow(
     String label,
@@ -1297,72 +1467,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     );
   }
 
-  Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildSAPActionButton(
     String label, {
     bool isPrimary = false,
@@ -1414,22 +1518,23 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+              _buildChooseFromListField("Return Date", "cfg_bu", [""]),
               const SizedBox(height: 12),
-              _buildFileUploadRow("File 1", "cfg_f1"),
+              _buildModernFieldRow("No Kendaraan", "No_ken"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 2", "cfg_f2"),
+              _buildModernFieldRow("Departemen", "Departemen"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 3", "cfg_f3"),
+              _buildModernFieldRow("Request By", "Request_by"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 4", "cfg_f4"),
+              _buildModernFieldRow("Driver", "Driver"),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Create By", "cfg_by"),
+              _buildSmallDropdownRowModern("Create By", "cfg_by", [""]),
               const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
-                "No",
-                "Yes",
-              ]),
+              _buildModernFieldRow(
+                "Send To Subcont",
+                "sendtoSub",
+                isTextArea: true,
+              ),
               const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
                 "No",
@@ -1467,50 +1572,88 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                 isTextArea: true,
               ),
               const Divider(height: 45, thickness: 3),
-              _buildModernFieldRow("Production\nDue date", "cfg_prod_date"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("AP Tax Date", "cfg_tax_date"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
-                "010",
-                "020",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Area", "cfg_area"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kategori SO", "cfg_cat", [
-                "SO Resmi",
-                "SO Sample",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Name", "cfg_cust_name"),
+              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
               const SizedBox(height: 12),
               _buildModernFieldRow(
-                "alasan rubah duedate",
-                "cfg_duedate",
+                "Internal Memo",
+                "Internal_memo",
                 isTextArea: true,
               ),
               const SizedBox(height: 12),
-              _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
-                "Lengkap",
-                "Tidak Lengkap",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "PIC Engineering",
-                "cfg_pic",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
+              _buildSmallDropdownRowModern("Delivered To", "Delivered_to", [
                 "",
               ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("AP FP Number", "AP_FP_num"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "AP FP tax Amount",
+                "f_tax_amount",
+                isDecimal: true,
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("E faktur AP Date", "E_faktur"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "E faktur AP Date Creditable",
+                "ap_date_credit",
+                [""],
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO reject Number", "do_reject_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("ETD Delivery", "etd_del"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("AR FP Number", "AR FP Number", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRowPrecision("Tax Rate", "tax_rate"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PPBJNO", "ppbjno", isTextArea: true),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PO number", "po_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Request Due Date", "req_due_date"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Upload Status", "upload_status", [
+                "",
+                "Yes",
+                "No",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("SO No", "so_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO No", "do_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PDO No", "pdo_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Kode Faktur Pajak", "code_tax"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Area", "area", [""]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Credit Note Number", "Credit_note_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("AR FP Number E Faktur", "ar_fp_numb"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "Number Series Faktur",
+                "numb_s_faktur",
+                [""],
+              ),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Business Unit ", "business_unit", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO Receipt Date", "receipt_date"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("GI Type", "gi_type", [""]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("GR Type", "gr_type", [""]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Customer Code", "cust_cod"),
+
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,

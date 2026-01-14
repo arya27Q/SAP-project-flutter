@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../constants.dart';
+
 class SalesOrderPage extends StatefulWidget {
   const SalesOrderPage({super.key});
 
@@ -9,7 +10,7 @@ class SalesOrderPage extends StatefulWidget {
 }
 
 class _SalesOrderPageState extends State<SalesOrderPage>
-   with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
@@ -106,6 +107,26 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       _focusNodes[key] = fn;
     }
     return _focusNodes[key]!;
+  }
+
+  Future<void> _selectDate(BuildContext context, String key) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      String day = picked.day.toString().padLeft(2, '0');
+      String month = picked.month.toString().padLeft(2, '0');
+      String year = picked.year.toString();
+      String formattedDate = "$day/$month/$year";
+
+      setState(() {
+        _getCtrl(key).text = formattedDate;
+        _fieldValues[key] = formattedDate;
+      });
+    }
   }
 
   double _getGrandTotal() {
@@ -496,7 +517,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
@@ -680,19 +700,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               const SizedBox(height: 12),
               _buildModernFieldRow("Status", "h_stat", initial: "Open"),
               const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Posting Date",
-                "h_post",
-                initial: "28/Dec/2025",
-              ),
+              _buildHeaderDate("Posting Date", "h_post_date", ""),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Delivery Date", "h_deliv"),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
               const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Document Date",
-                "h_doc",
-                initial: "28/Dec/2025",
-              ),
+              _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
         ),
@@ -805,6 +817,57 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       ],
     ),
   );
+
+  Widget _buildHeaderDate(String label, String key, String initial) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 92,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: InkWell(
+            onTap: () => _selectDate(context, key),
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: IgnorePointer(
+                child: TextField(
+                  controller: _getCtrl(key, initial: initial),
+                  style: const TextStyle(fontSize: 12),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    suffixIcon: Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildRoundingRow() => Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -1460,9 +1523,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                 isTextArea: true,
               ),
               const Divider(height: 45, thickness: 3),
-              _buildModernFieldRow("Production\nDue date", "cfg_prod_date"),
+              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
               const SizedBox(height: 12),
-              _buildModernFieldRow("AP Tax Date", "cfg_tax_date"),
+              _buildHeaderDate("AP Tax Date", "cfg_tax_date", ""),
               const SizedBox(height: 12),
               _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
                 "010",

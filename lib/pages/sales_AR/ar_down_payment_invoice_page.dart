@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart'; 
+import '../../constants.dart';
 import 'package:file_picker/file_picker.dart';
 
 class ArDownPaymentInvoicePage extends StatefulWidget {
@@ -386,10 +386,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
         key.contains("p_service") ||
         key.contains("p_ref");
 
-    final focusNode = _getFn(
-      key,
-      defaultValue: isNumeric ? "0.00" : "",
-    );
+    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
 
     return DataCell(
       Padding(
@@ -457,7 +454,8 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       centeredHeader("Ref Item"),
     ];
   }
-   DataCell _buildSearchableCell(String key) {
+
+  DataCell _buildSearchableCell(String key) {
     return DataCell(
       InkWell(
         onTap: () {
@@ -652,11 +650,14 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               const SizedBox(height: 12),
               _buildModernFieldRow("Customer Ref. No.", "h_ref"),
               const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
+              Row(
+                children: [
+                  const SizedBox(
+                    width: 120,
+                  ), // Memberi ruang kosong sebesar lebar label yang dihapus tadi
+                  Expanded(child: _buildBpCurrencyRow()),
+                ],
+              ),
             ],
           ),
         ),
@@ -747,10 +748,13 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                     _buildDiscountRow(),
                     const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue("Tax", "f_tax"),
-                     const SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     _buildRoundingRow(),
-                      const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue("Wtax Amount", "f_wtaxamount"),
+                    const SizedBox(height: 2),
+                    _buildSummaryRowWithAutoValue(
+                      "Wtax Amount",
+                      "f_wtaxamount",
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -761,18 +765,18 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                       isBold: true,
                       isReadOnly: true,
                     ),
-                     _buildSummaryRowWithAutoValue(
+                    _buildSummaryRowWithAutoValue(
                       "Applied Amount",
                       "f_Applied Amnount",
                       isBold: true,
                       isReadOnly: true,
-                     ),
-                      _buildSummaryRowWithAutoValue(
+                    ),
+                    _buildSummaryRowWithAutoValue(
                       "Balance Due",
                       "f_Balance Due",
                       isBold: true,
                       isReadOnly: true,
-                     ),
+                    ),
                   ],
                 ),
               ),
@@ -1539,4 +1543,83 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       ],
     ),
   );
+
+  Widget _buildBpCurrencyRow() {
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: Row(
+        children: [
+          // 1. Dropdown Tipe Currency (BP/Local/Foreign)
+          Container(
+            width: 150,
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues["h_curr_type"] ?? "BP Currency",
+                isDense: true,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues["h_curr_type"] = v!),
+                items: ["BP Currency", "Local Currency", "Foreign Currency"]
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          Container(
+            width: 60,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: const Text(
+              "IDR",
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: _getCtrl("h_curr_rate", initial: ""),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (val) => _fieldValues["h_curr_rate"] = val,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

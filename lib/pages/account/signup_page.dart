@@ -18,6 +18,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   String? selectedCompany;
+  String? selectedDivisi;
   bool _isLoading = false;
 
   final TextEditingController _nameController = TextEditingController();
@@ -25,10 +26,20 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   final List<String> companies = [
-    "PT. Dempo Laser Metalindo Surabaya",
+    "PT. Dempo Laser Metalindo",
     "PT. Duta Laserindo Metal",
     "PT. Senzo Feinmetal",
     "PT. ATMI Duta Engineering",
+  ];
+
+  final List<String> divisions = [
+    "IT",
+    "Finance",
+    "Purchasing",
+    "Production",
+    "Sales",
+    "Inventory",
+    "HR",
   ];
 
   final List<Map<String, dynamic>> features = [
@@ -92,34 +103,66 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  String _getCompanyAlias(String? companyName) {
+    if (companyName == null) return "company";
+    if (companyName.contains("Dempo")) return "dempo";
+    if (companyName.contains("Duta")) return "duta";
+    if (companyName.contains("Senzo")) return "senzo";
+    if (companyName.contains("ATMI")) return "atmi";
+    return "company";
+  }
+
   Future<void> _handleSignUp() async {
+    String nameRaw = _nameController.text.trim();
+    String nameClean = nameRaw.toLowerCase().replaceAll(' ', '');
+    String email = _emailController.text.trim().toLowerCase();
+    String password = _passwordController.text.trim().toLowerCase();
+    String div = selectedDivisi?.toLowerCase() ?? "";
+    String alias = _getCompanyAlias(selectedCompany);
+
     if (selectedCompany == null ||
-        _nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
+        selectedDivisi == null ||
+        nameRaw.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty) {
       _showErrorSnackBar("Please complete all required fields!");
       return;
     }
 
-    setState(() => _isLoading = true);
+    String expectedEmail = "${nameClean}_$alias@gmail.com";
+    if (email != expectedEmail) {
+      _showErrorSnackBar("Format Email Salah! Wajib: $expectedEmail");
+      return;
+    }
 
+    String expectedPw = "_${nameClean}_$div";
+    if (password != expectedPw) {
+      _showErrorSnackBar("Format Password Salah! Wajib: $expectedPw");
+      return;
+    }
+
+    
     Map<String, String> companyMapping = {
-      "PT. Dempo Laser Metalindo Surabaya": "pt1",
+      "PT. Dempo Laser Metalindo": "pt1",
       "PT. Duta Laserindo Metal": "pt2",
       "PT. Senzo Feinmetal": "pt3",
       "PT. ATMI Duta Engineering": "pt4",
     };
-    String targetPT = companyMapping[selectedCompany!]!;
+
+    String targetDatabase = companyMapping[selectedCompany!] ?? "pt1";
+
+    setState(() => _isLoading = true);
 
     try {
       var response = await http
           .post(
-            Uri.parse('http://192.168.0.101:8000/api/test-register'),
+            Uri.parse('http://192.168.40.92:8000/api/test-register'),
             body: {
-              'name': _nameController.text.trim(),
-              'email': _emailController.text.trim(),
-              'password': _passwordController.text,
-              'target_pt': targetPT,
+              'name': nameRaw,
+              'email': email,
+              'password': _passwordController.text, // Tetap kirim password asli
+              'target_pt': targetDatabase, // Ini yang masuk ke pt1/pt2/dst
+              'divisi': selectedDivisi,
             },
           )
           .timeout(const Duration(seconds: 10));
@@ -157,7 +200,6 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. MAIN CONTENT (BLUR/FADED WHEN LOADING)
           LayoutBuilder(
             builder: (context, constraints) {
               return AnimatedOpacity(
@@ -170,8 +212,6 @@ class _SignUpPageState extends State<SignUpPage> {
               );
             },
           ),
-
-          // 2. GLOBAL LOADING OVERLAY (TRUE CENTER)
           if (_isLoading)
             Positioned.fill(
               child: Container(
@@ -219,7 +259,6 @@ class _SignUpPageState extends State<SignUpPage> {
     if (constraints.maxWidth > 950) {
       return Row(
         children: [
-          // LEFT PANEL: FORM
           Expanded(
             flex: 4,
             child: Container(
@@ -250,7 +289,6 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
           ),
-          // RIGHT PANEL: BRANDING
           Expanded(
             flex: 6,
             child: Container(
@@ -263,7 +301,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Container(
                     width: 620,
                     padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -376,6 +414,12 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildSignUpForm({required bool isMobile}) {
+    String previewName = _nameController.text.isEmpty
+        ? "nama"
+        : _nameController.text.toLowerCase().replaceAll(' ', '');
+    String previewAlias = _getCompanyAlias(selectedCompany);
+    String previewDiv = selectedDivisi?.toLowerCase() ?? "divisi";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -393,7 +437,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               SizedBox(height: 10),
               Text(
-                "Start your journey towards a more digital and integrated enterprise.",
+                "Register with the required format to access the system.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, fontSize: 15),
               ),
@@ -435,6 +479,35 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         const SizedBox(height: 20),
         const Text(
+          "Division",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: selectedDivisi,
+          isExpanded: true,
+          decoration: _buildInputDecoration(
+            "Select Division",
+            Icons.groups_outlined,
+          ),
+          items: divisions
+              .map(
+                (s) => DropdownMenuItem(
+                  value: s,
+                  child: Text(s, style: const TextStyle(fontSize: 13)),
+                ),
+              )
+              .toList(),
+          onChanged: _isLoading
+              ? null
+              : (val) => setState(() => selectedDivisi = val),
+        ),
+        const SizedBox(height: 20),
+        const Text(
           "Full Name",
           style: TextStyle(
             fontSize: 13,
@@ -446,37 +519,66 @@ class _SignUpPageState extends State<SignUpPage> {
         TextField(
           controller: _nameController,
           enabled: !_isLoading,
+          onChanged: (v) => setState(() {}),
           decoration: _buildInputDecoration(
             "Enter your full name",
             Icons.badge_outlined,
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Email Address",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Email Address",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              "(format: ${previewName}_$previewAlias@gmail.com)",
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _emailController,
           enabled: !_isLoading,
           decoration: _buildInputDecoration(
-            "name@company.com",
+            "e.g. budi_dempo@gmail.com",
             Icons.email_outlined,
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Password",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Password",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              "(format: _${previewName}_$previewDiv)",
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(
@@ -484,7 +586,7 @@ class _SignUpPageState extends State<SignUpPage> {
           enabled: !_isLoading,
           obscureText: true,
           decoration: _buildInputDecoration(
-            "••••••••",
+            "e.g. _budi_it",
             Icons.lock_outline_rounded,
           ),
         ),
@@ -553,7 +655,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        "Registration requires manual confirmation from the Admin before you can access the system.",
+                        "Registration requires manual confirmation from the Admin.",
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.black87,
