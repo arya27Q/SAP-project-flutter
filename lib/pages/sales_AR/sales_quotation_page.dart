@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../constants.dart'; // Pastikan path ini benar
 
 class SalesQuotationPage extends StatefulWidget {
   const SalesQuotationPage({super.key});
@@ -35,7 +34,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
-    // Memastikan controller selalu menggunakan data terbaru dari state agar tidak reset
     return _controllers.putIfAbsent(
       key,
       () => TextEditingController(text: _fieldValues[key] ?? initial),
@@ -54,13 +52,11 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
         if (!fn.hasFocus && !isReadOnly) {
           final controller = _getCtrl(key);
 
-          // 1. Jika field benar-benar kosong, jangan paksa 0.00 (biarkan kosong)
           if (controller.text.trim().isEmpty) {
             _fieldValues[key] = "";
             return;
           }
 
-          // 2. Cek apakah ini kolom angka (qty, price, total, disc, stock, dll)
           bool isNumericField =
               key.contains("qty") ||
               key.contains("stock") ||
@@ -88,14 +84,12 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                       ? parsed.toStringAsFixed(0)
                       : parsed.toStringAsFixed(2);
                 } else {
-                  // Jika yang diketik bukan angka sama sekali, baru kembalikan ke default
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
               });
             }
           } else {
-            // 3. Jika ini kolom teks (Item No, Description, dll), simpan apa adanya
             if (mounted) {
               setState(() {
                 _fieldValues[key] = controller.text;
@@ -188,6 +182,73 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
       ),
     );
   }
+
+  Widget _buildModernHeader() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 18,
+          spreadRadius: 2,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 6,
+          child: Column(
+            children: [
+              _buildModernFieldRow("Customer", "h_cust"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Name", "h_name"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Contact Person", "h_cont"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
+                "IDR",
+                "USD",
+                "EUR",
+              ]),
+            ],
+          ),
+        ),
+        const SizedBox(width: 60),
+        Expanded(
+          flex: 4,
+          child: Column(
+            children: [
+              _buildModernNoFieldRow(
+                "No.",
+                "h_no_series",
+                ["2025-COM", "2024-REG"],
+                "h_no_val",
+                initialNo: "256100727",
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
+              const SizedBox(height: 12),
+              _buildHeaderDate("Posting Date", "h_post_date", ""),
+              const SizedBox(height: 12),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
+              const SizedBox(height: 12),
+              _buildHeaderDate("Document Date", "h_doc", ""),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildTabSection() {
     return Container(
@@ -315,9 +376,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: WidgetStateProperty.all(
-                      AppColors.darkIndigo,
-                    ),
+                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
                     border: const TableBorder(
                       verticalInside: BorderSide(
                         color: Color.fromARGB(208, 166, 164, 164),
@@ -407,11 +466,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
         key.contains("p_service") ||
         key.contains("p_ref");
 
-    final focusNode = _getFn(
-      key,
-      // Jika kolom teks (bukan angka), defaultValue biarkan kosong agar tidak jadi 0.00
-      defaultValue: isNumeric ? "0.00" : "",
-    );
+    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
 
     return DataCell(
       Padding(
@@ -433,7 +488,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 ),
               ),
               onChanged: (val) {
-                // Simpan perubahan secara real-time ke fieldValues
                 _fieldValues[key] = val;
                 if (isNumeric) {
                   _syncTotalBeforeDiscount();
@@ -520,7 +574,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      // Pastikan mengambil dari fieldValues agar hitungan sinkron dengan ketikan terakhir
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
       totalAllRows +=
@@ -645,73 +698,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     ),
   );
 
-  Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["2025-COM", "2024-REG"],
-                "h_no_val",
-                initialNo: "256100727",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Posting Date", "h_post_date", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Document Date", "h_doc", ""),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -798,9 +784,10 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     child: Row(
       children: [
         const SizedBox(
-          width: 140,
+          width: 120,
           child: Text("Discount", style: TextStyle(fontSize: 12)),
         ),
+        const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
         SizedBox(
           width: 40,
           child: _buildSummaryBox(
@@ -822,7 +809,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     return Row(
       children: [
         SizedBox(
-          width: 92,
+          width: 120, // Lebar label seragam agar kotak input sejajar
           child: Text(
             label,
             style: TextStyle(
@@ -832,7 +819,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
+        const SizedBox(width: 28), // Berikan jarak spasi pemisah
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
@@ -843,24 +830,33 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
-              child: IgnorePointer(
-                child: TextField(
-                  controller: _getCtrl(key, initial: initial),
-                  style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: IgnorePointer(
+                        child: TextField(
+                          controller: _getCtrl(key, initial: initial),
+                          style: const TextStyle(fontSize: 12),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
                     ),
-                    suffixIcon: Icon(
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Icon(
                       Icons.calendar_today,
                       size: 14,
                       color: Colors.grey,
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -899,7 +895,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ],
           ),
         ),
-        const SizedBox(width: 58),
+        const SizedBox(width: 28), // Samakan jarak spasi
         Expanded(
           child: _buildSummaryBox(
             "f_rounding",
@@ -947,7 +943,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               style: TextStyle(fontSize: 12, color: secondarySlate),
             ),
           ),
-          const SizedBox(width: 58),
+          const SizedBox(width: 8), // Gunakan spasi konsisten
           Expanded(
             child: Container(
               height: 28,
@@ -1039,51 +1035,64 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     String key, {
     bool isTextArea = false,
     String initial = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: isTextArea ? 80 : 32,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: Center(
-              child: TextField(
-                controller: _getCtrl(key, initial: initial),
-                maxLines: isTextArea ? 3 : 1,
-                style: const TextStyle(fontSize: 12, color: Colors.black),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                ),
-                onChanged: (val) {
-                  _fieldValues[key] = val;
-                },
+    bool isDecimal = false,
+  }) {
+    String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
+    final controller = _getCtrl(key, initial: effectiveInitial);
+    FocusNode? focusNode = isDecimal ? _getFn(key, defaultValue: "0.00") : null;
+
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120, // Lebar label seragam agar kotak input sejajar
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: Center(
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  maxLines: isTextArea ? 3 : 1,
+                  textAlign: TextAlign.left,
+                  keyboardType: isDecimal
+                      ? const TextInputType.numberWithOptions(decimal: true)
+                      : TextInputType.text,
+                  style: const TextStyle(fontSize: 12, color: Colors.black),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  onChanged: (val) {
+                    _fieldValues[key] = val;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildModernNoFieldRow(
     String label,
@@ -1107,6 +1116,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // Jarak spasi konsisten
         Expanded(
           child: Container(
             height: 32,
@@ -1239,6 +1249,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // Spasi pemisah konsisten
         Expanded(child: _buildSmallDropdown(key, items)),
       ],
     ),
@@ -1264,6 +1275,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // Spasi pemisah konsisten
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1369,6 +1381,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // Spasi pemisah konsisten
         Expanded(
           child: InkWell(
             onTap: () async {

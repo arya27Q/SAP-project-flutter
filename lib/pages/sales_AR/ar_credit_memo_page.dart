@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart';
+
 
 class ArCreditMemoPage extends StatefulWidget {
   const ArCreditMemoPage({super.key});
@@ -33,7 +33,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
-    // Memastikan controller selalu menggunakan data terbaru dari state agar tidak reset
     return _controllers.putIfAbsent(
       key,
       () => TextEditingController(text: _fieldValues[key] ?? initial),
@@ -48,14 +47,12 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           final controller = _getCtrl(key);
           if (controller.text.trim().isEmpty) return;
 
-          // Bersihkan karakter non-angka kecuali titik
           String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
           double? parsed = double.tryParse(cleanText);
 
           if (mounted) {
             setState(() {
               if (parsed != null) {
-                // Format ke 4 angka di belakang koma
                 controller.text = parsed.toStringAsFixed(4);
               } else {
                 controller.text = "0.0000";
@@ -82,13 +79,11 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
         if (!fn.hasFocus && !isReadOnly) {
           final controller = _getCtrl(key);
 
-          // 1. Jika field benar-benar kosong, jangan paksa 0.00 (biarkan kosong)
           if (controller.text.trim().isEmpty) {
             _fieldValues[key] = "";
             return;
           }
 
-          // 2. Cek apakah ini kolom angka (qty, price, total, disc, stock, dll)
           bool isNumericField =
               key.contains("qty") ||
               key.contains("stock") ||
@@ -116,14 +111,12 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                       ? parsed.toStringAsFixed(0)
                       : parsed.toStringAsFixed(2);
                 } else {
-                  // Jika yang diketik bukan angka sama sekali, baru kembalikan ke default
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
               });
             }
           } else {
-            // 3. Jika ini kolom teks (Item No, Description, dll), simpan apa adanya
             if (mounted) {
               setState(() {
                 _fieldValues[key] = controller.text;
@@ -216,6 +209,69 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       ),
     );
   }
+
+  Widget _buildModernHeader() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 18,
+          spreadRadius: 2,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 6,
+          child: Column(
+            children: [
+              _buildModernFieldRow("Customer", "h_cust"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Name", "h_name"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Contact Person", "h_cont"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+              const SizedBox(height: 4),
+              _buildBpCurrencyRow(),
+            ],
+          ),
+        ),
+        const SizedBox(width: 60),
+        Expanded(
+          flex: 4,
+          child: Column(
+            children: [
+              _buildModernNoFieldRow(
+                "No.",
+                "h_no_series",
+                ["Primary", "Manual"],
+                "h_no_val",
+                initialNo: "",
+              ),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Status", "h_stat", initial: ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Posting Date", "h_post", ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Document Date", "h_doc", ""),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildTabSection() {
     return Container(
@@ -343,9 +399,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: WidgetStateProperty.all(
-                      AppColors.darkIndigo,
-                    ),
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: const TableBorder(
                       verticalInside: BorderSide(
                         color: Color.fromARGB(208, 166, 164, 164),
@@ -455,7 +509,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                 ),
               ),
               onChanged: (val) {
-                // Simpan perubahan secara real-time ke fieldValues
                 _fieldValues[key] = val;
                 if (isNumeric) {
                   _syncTotalBeforeDiscount();
@@ -540,7 +593,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      // Pastikan mengambil dari fieldValues agar hitungan sinkron dengan ketikan terakhir
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
       totalAllRows +=
@@ -665,73 +717,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     ),
   );
 
-  Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["2025-COM", "2024-REG"],
-                "h_no_val",
-                initialNo: "256100727",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Posting Date", "h_post", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Document Date", "h_doc", ""),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -803,13 +788,13 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                     ),
                     _buildSummaryRowWithAutoValue(
                       "Applied Amount",
-                      "f_Applied Amnount",
+                      "f_applied_amt",
                       isBold: true,
                       isReadOnly: true,
                     ),
                     _buildSummaryRowWithAutoValue(
                       "Balance Due",
-                      "f_Balance Due",
+                      "f_balance_due",
                       isBold: true,
                       isReadOnly: true,
                     ),
@@ -836,6 +821,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           width: 140,
           child: Text("DPM", style: TextStyle(fontSize: 12)),
         ),
+        const SizedBox(width: 58),
         SizedBox(
           width: 40,
           child: _buildSummaryBox(
@@ -854,53 +840,65 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
   );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 92,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120, // KUNCI LURUS: 120
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectDate(context, key),
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: IgnorePointer(
-                child: TextField(
-                  controller: _getCtrl(key, initial: initial),
-                  style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
+          const SizedBox(width: 28), // KUNCI LURUS: 28
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDate(context, key),
+              child: Container(
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: borderGrey),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: IgnorePointer(
+                          child: TextField(
+                            controller: _getCtrl(key, initial: initial),
+                            style: const TextStyle(fontSize: 12),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    suffixIcon: Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: Colors.grey,
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -919,7 +917,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120,
+            width: 120, // KUNCI LURUS: 120
             child: Text(
               label,
               style: TextStyle(
@@ -929,6 +927,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               ),
             ),
           ),
+          const SizedBox(width: 28), // KUNCI LURUS: 28
           Expanded(
             child: Container(
               height: isTextArea ? 80 : 32,
@@ -942,7 +941,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                 controller: controller,
                 focusNode: focusNode,
                 maxLines: isTextArea ? 3 : 1,
-                textAlign: TextAlign.left, // Tetap di kiri sesuai permintaanmu
+                textAlign: TextAlign.left,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -969,7 +968,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 140,
           child: Row(
             children: [
               SizedBox(
@@ -1135,25 +1134,20 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     String initial = "",
     bool isDecimal = false,
   }) {
-    // Jika desimal dan input kosong, set awal ke 0.00
     String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
     final controller = _getCtrl(key, initial: effectiveInitial);
-
     FocusNode? focusNode;
     if (isDecimal) {
-      // Menggunakan fungsi _getFn yang sudah kamu punya untuk auto-format saat pindah kolom
       focusNode = _getFn(key, defaultValue: "0.00");
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4,
-      ), // Beri sedikit jarak antar baris
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120,
+            width: 120, // KUNCI LURUS: 120
             child: Text(
               label,
               style: TextStyle(
@@ -1163,6 +1157,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               ),
             ),
           ),
+          const SizedBox(width: 28), // KUNCI LURUS: 28
           Expanded(
             child: Container(
               height: isTextArea ? 80 : 32,
@@ -1176,7 +1171,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                 controller: controller,
                 focusNode: focusNode,
                 maxLines: isTextArea ? 3 : 1,
-                // AGAR KURSOR TETAP DI KIRI: Gunakan TextAlign.left
                 textAlign: TextAlign.left,
                 keyboardType: isDecimal
                     ? const TextInputType.numberWithOptions(decimal: true)
@@ -1188,7 +1182,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
                 onChanged: (val) {
-                  // Simpan ke map variabel agar state tetap terjaga saat diedit
                   _fieldValues[key] = val;
                 },
               ),
@@ -1206,12 +1199,12 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     String textKey, {
     String initialNo = "",
   }) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1221,6 +1214,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(
           child: Container(
             height: 32,
@@ -1338,12 +1332,12 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1353,6 +1347,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(child: _buildSmallDropdown(key, items)),
       ],
     ),
@@ -1363,12 +1358,12 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     String key,
     List<String> data,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1378,6 +1373,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1653,7 +1649,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               _buildSmallDropdownRowModern("GR Type", "gr_type", [""]),
               const SizedBox(height: 12),
               _buildModernFieldRow("Customer Code", "cust_cod"),
-
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
@@ -1682,4 +1677,92 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       ],
     ),
   );
+
+  Widget _buildBpCurrencyRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
+          // SizedBox(
+          //   width: 120,
+          //   child: Text("BP Currency", ...),
+          // ),
+          // const SizedBox(width: 28),
+
+          // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
+          Container(
+            width: 150,
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues["h_curr_type"] ?? "BP Currency",
+                isDense: true,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues["h_curr_type"] = v!),
+                items: ["BP Currency", "Local Currency", "Foreign Currency"]
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 2. Label IDR
+          Container(
+            width: 60,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: const Text(
+              "IDR",
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 3. Input Rate
+          Expanded(
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: _getCtrl("h_curr_rate", initial: ""),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (val) => _fieldValues["h_curr_rate"] = val,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

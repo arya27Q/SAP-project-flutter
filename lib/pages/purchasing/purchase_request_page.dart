@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart';
 
 class PurchaseRequestPage extends StatefulWidget {
   const PurchaseRequestPage({super.key});
@@ -658,9 +657,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   columnSpacing: 30,
                   horizontalMargin: 15,
                   headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    AppColors.darkIndigo,
-                  ),
+                  headingRowColor: MaterialStateProperty.all(primaryIndigo),
                   border: const TableBorder(
                     verticalInside: BorderSide(
                       color: Color.fromARGB(208, 166, 164, 164),

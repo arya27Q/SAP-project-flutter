@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart'; 
-import 'package:file_picker/file_picker.dart';
+
 class ArInvoicePage extends StatefulWidget {
   const ArInvoicePage({super.key});
 
   @override
-  State<ArInvoicePage> createState() =>
-      _ArInvoicePageState();
+  State<ArInvoicePage> createState() => _ArInvoicePageState();
 }
 
 class _ArInvoicePageState extends State<ArInvoicePage>
@@ -26,7 +24,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
-  final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
@@ -35,11 +32,38 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
-    // Memastikan controller selalu menggunakan data terbaru dari state agar tidak reset
     return _controllers.putIfAbsent(
       key,
       () => TextEditingController(text: _fieldValues[key] ?? initial),
     );
+  }
+
+  FocusNode _getFnPrecision(String key) {
+    if (!_focusNodes.containsKey(key)) {
+      final fn = FocusNode();
+      fn.addListener(() {
+        if (!fn.hasFocus) {
+          final controller = _getCtrl(key);
+          if (controller.text.trim().isEmpty) return;
+
+          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
+          double? parsed = double.tryParse(cleanText);
+
+          if (mounted) {
+            setState(() {
+              if (parsed != null) {
+                controller.text = parsed.toStringAsFixed(4);
+              } else {
+                controller.text = "0.0000";
+              }
+              _fieldValues[key] = controller.text;
+            });
+          }
+        }
+      });
+      _focusNodes[key] = fn;
+    }
+    return _focusNodes[key]!;
   }
 
   FocusNode _getFn(
@@ -54,13 +78,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         if (!fn.hasFocus && !isReadOnly) {
           final controller = _getCtrl(key);
 
-          // 1. Jika field benar-benar kosong, jangan paksa 0.00 (biarkan kosong)
           if (controller.text.trim().isEmpty) {
             _fieldValues[key] = "";
             return;
           }
 
-          // 2. Cek apakah ini kolom angka (qty, price, total, disc, stock, dll)
           bool isNumericField =
               key.contains("qty") ||
               key.contains("stock") ||
@@ -88,14 +110,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                       ? parsed.toStringAsFixed(0)
                       : parsed.toStringAsFixed(2);
                 } else {
-                  // Jika yang diketik bukan angka sama sekali, baru kembalikan ke default
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
               });
             }
           } else {
-            // 3. Jika ini kolom teks (Item No, Description, dll), simpan apa adanya
             if (mounted) {
               setState(() {
                 _fieldValues[key] = controller.text;
@@ -121,6 +141,26 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     double tax = parse("f_tax");
     double rounding = parse("f_rounding");
     return (before - discVal) + wtaxamount + rounding + tax;
+  }
+
+  Future<void> _selectDate(BuildContext context, String key) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      String day = picked.day.toString().padLeft(2, '0');
+      String month = picked.month.toString().padLeft(2, '0');
+      String year = picked.year.toString();
+      String formattedDate = "$day/$month/$year";
+
+      setState(() {
+        _getCtrl(key).text = formattedDate;
+        _fieldValues[key] = formattedDate;
+      });
+    }
   }
 
   @override
@@ -168,6 +208,69 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       ),
     );
   }
+
+  Widget _buildModernHeader() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 18,
+          spreadRadius: 2,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 6,
+          child: Column(
+            children: [
+              _buildModernFieldRow("Customer", "h_cust"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Name", "h_name"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Contact Person", "h_cont"),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+              const SizedBox(height: 4),
+              _buildBpCurrencyRow(),
+            ],
+          ),
+        ),
+        const SizedBox(width: 60),
+        Expanded(
+          flex: 4,
+          child: Column(
+            children: [
+              _buildModernNoFieldRow(
+                "No.",
+                "h_no_series",
+                ["Primary", "Manual"],
+                "h_no_val",
+                initialNo: "",
+              ),
+              const SizedBox(height: 4),
+              _buildModernFieldRow("Status", "h_stat", initial: ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Posting Date", "h_post", ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
+              const SizedBox(height: 4),
+              _buildHeaderDate("Document Date", "h_doc", ""),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildTabSection() {
     return Container(
@@ -295,9 +398,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: WidgetStateProperty.all(
-                      AppColors.darkIndigo,
-                    ),
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: const TableBorder(
                       verticalInside: BorderSide(
                         color: Color.fromARGB(208, 166, 164, 164),
@@ -385,10 +486,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         key.contains("p_service") ||
         key.contains("p_ref");
 
-    final focusNode = _getFn(
-      key,
-      defaultValue: isNumeric ? "0.00" : "",
-    );
+    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
 
     return DataCell(
       Padding(
@@ -410,7 +508,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 ),
               ),
               onChanged: (val) {
-                // Simpan perubahan secara real-time ke fieldValues
                 _fieldValues[key] = val;
                 if (isNumeric) {
                   _syncTotalBeforeDiscount();
@@ -456,7 +553,8 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       centeredHeader("Ref Item"),
     ];
   }
-   DataCell _buildSearchableCell(String key) {
+
+  DataCell _buildSearchableCell(String key) {
     return DataCell(
       InkWell(
         onTap: () {
@@ -494,7 +592,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      // Pastikan mengambil dari fieldValues agar hitungan sinkron dengan ketikan terakhir
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
       totalAllRows +=
@@ -619,81 +716,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     ),
   );
 
-  Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["2025-COM", "2024-REG"],
-                "h_no_val",
-                initialNo: "256100727",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Posting Date",
-                "h_post",
-                initial: "28/Dec/2025",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Delivery Date", "h_deliv"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Document Date",
-                "h_doc",
-                initial: "28/Dec/2025",
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
@@ -746,10 +768,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     _buildDiscountRow(),
                     const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue("Tax", "f_tax"),
-                     const SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     _buildRoundingRow(),
-                      const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue("Wtax Amount", "f_wtaxamount"),
+                    const SizedBox(height: 2),
+                    _buildSummaryRowWithAutoValue(
+                      "Wtax Amount",
+                      "f_wtaxamount",
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -760,18 +785,18 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                       isBold: true,
                       isReadOnly: true,
                     ),
-                     _buildSummaryRowWithAutoValue(
+                    _buildSummaryRowWithAutoValue(
                       "Applied Amount",
-                      "f_Applied Amnount",
+                      "f_applied_amt",
                       isBold: true,
                       isReadOnly: true,
-                     ),
-                      _buildSummaryRowWithAutoValue(
+                    ),
+                    _buildSummaryRowWithAutoValue(
                       "Balance Due",
-                      "f_Balance Due",
+                      "f_balance_due",
                       isBold: true,
                       isReadOnly: true,
-                     ),
+                    ),
                   ],
                 ),
               ),
@@ -795,6 +820,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           width: 140,
           child: Text("DPM", style: TextStyle(fontSize: 12)),
         ),
+        const SizedBox(width: 58),
         SizedBox(
           width: 40,
           child: _buildSummaryBox(
@@ -812,13 +838,136 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     ),
   );
 
+  Widget _buildHeaderDate(String label, String key, String initial) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120, // KUNCI LURUS: 120
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 28), // KUNCI LURUS: 28
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDate(context, key),
+              child: Container(
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: borderGrey),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: IgnorePointer(
+                          child: TextField(
+                            controller: _getCtrl(key, initial: initial),
+                            style: const TextStyle(fontSize: 12),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernFieldRowPrecision(
+    String label,
+    String key, {
+    bool isTextArea = false,
+    String initial = "0.0000",
+  }) {
+    final controller = _getCtrl(key, initial: initial);
+    final focusNode = _getFnPrecision(key);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120, // KUNCI LURUS: 120
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 28), // KUNCI LURUS: 28
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.left,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRoundingRow() => Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 140,
           child: Row(
             children: [
               SizedBox(
@@ -982,35 +1131,49 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String key, {
     bool isTextArea = false,
     String initial = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+    bool isDecimal = false,
+  }) {
+    String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
+    final controller = _getCtrl(key, initial: effectiveInitial);
+    FocusNode? focusNode;
+    if (isDecimal) {
+      focusNode = _getFn(key, defaultValue: "0.00");
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120, // KUNCI LURUS: 120
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Container(
-            height: isTextArea ? 80 : 32,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: Center(
+          const SizedBox(width: 28), // KUNCI LURUS: 28
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
               child: TextField(
-                controller: _getCtrl(key, initial: initial),
+                controller: controller,
+                focusNode: focusNode,
                 maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.left,
+                keyboardType: isDecimal
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
                 style: const TextStyle(fontSize: 12, color: Colors.black),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
@@ -1023,10 +1186,10 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   Widget _buildModernNoFieldRow(
     String label,
@@ -1035,12 +1198,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String textKey, {
     String initialNo = "",
   }) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1050,6 +1213,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(
           child: Container(
             height: 32,
@@ -1167,12 +1331,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1182,6 +1346,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(child: _buildSmallDropdown(key, items)),
       ],
     ),
@@ -1192,12 +1357,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String key,
     List<String> data,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 120, // KUNCI LURUS: 120
           child: Text(
             label,
             style: TextStyle(
@@ -1207,6 +1372,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
         ),
+        const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1296,72 +1462,6 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     );
   }
 
-  Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildSAPActionButton(
     String label, {
     bool isPrimary = false,
@@ -1413,22 +1513,23 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+              _buildChooseFromListField("Return Date", "cfg_bu", [""]),
               const SizedBox(height: 12),
-              _buildFileUploadRow("File 1", "cfg_f1"),
+              _buildModernFieldRow("No Kendaraan", "No_ken"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 2", "cfg_f2"),
+              _buildModernFieldRow("Departemen", "Departemen"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 3", "cfg_f3"),
+              _buildModernFieldRow("Request By", "Request_by"),
               const SizedBox(height: 8),
-              _buildFileUploadRow("File 4", "cfg_f4"),
+              _buildModernFieldRow("Driver", "Driver"),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Create By", "cfg_by"),
+              _buildSmallDropdownRowModern("Create By", "cfg_by", [""]),
               const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
-                "No",
-                "Yes",
-              ]),
+              _buildModernFieldRow(
+                "Send To Subcont",
+                "sendtoSub",
+                isTextArea: true,
+              ),
               const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
                 "No",
@@ -1466,50 +1567,87 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 isTextArea: true,
               ),
               const Divider(height: 45, thickness: 3),
-              _buildModernFieldRow("Production\nDue date", "cfg_prod_date"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("AP Tax Date", "cfg_tax_date"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
-                "010",
-                "020",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Area", "cfg_area"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kategori SO", "cfg_cat", [
-                "SO Resmi",
-                "SO Sample",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Name", "cfg_cust_name"),
+              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
               const SizedBox(height: 12),
               _buildModernFieldRow(
-                "alasan rubah duedate",
-                "cfg_duedate",
+                "Internal Memo",
+                "Internal_memo",
                 isTextArea: true,
               ),
               const SizedBox(height: 12),
-              _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
-                "Lengkap",
-                "Tidak Lengkap",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "PIC Engineering",
-                "cfg_pic",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
+              _buildSmallDropdownRowModern("Delivered To", "Delivered_to", [
                 "",
               ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("AP FP Number", "AP_FP_num"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow(
+                "AP FP tax Amount",
+                "f_tax_amount",
+                isDecimal: true,
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("E faktur AP Date", "E_faktur"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "E faktur AP Date Creditable",
+                "ap_date_credit",
+                [""],
+              ),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO reject Number", "do_reject_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("ETD Delivery", "etd_del"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("AR FP Number", "AR FP Number", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRowPrecision("Tax Rate", "tax_rate"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PPBJNO", "ppbjno", isTextArea: true),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PO number", "po_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Request Due Date", "req_due_date"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Upload Status", "upload_status", [
+                "",
+                "Yes",
+                "No",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("SO No", "so_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO No", "do_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("PDO No", "pdo_no"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Kode Faktur Pajak", "code_tax"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Area", "area", [""]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Credit Note Number", "Credit_note_numb"),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("AR FP Number E Faktur", "ar_fp_numb"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern(
+                "Number Series Faktur",
+                "numb_s_faktur",
+                [""],
+              ),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("Business Unit ", "business_unit", [
+                "",
+              ]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("DO Receipt Date", "receipt_date"),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("GI Type", "gi_type", [""]),
+              const SizedBox(height: 12),
+              _buildSmallDropdownRowModern("GR Type", "gr_type", [""]),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Customer Code", "cust_cod"),
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
@@ -1538,4 +1676,92 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       ],
     ),
   );
+
+  Widget _buildBpCurrencyRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
+          // SizedBox(
+          //   width: 120,
+          //   child: Text("BP Currency", ...),
+          // ),
+          // const SizedBox(width: 28),
+
+          // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
+          Container(
+            width: 150,
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues["h_curr_type"] ?? "BP Currency",
+                isDense: true,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues["h_curr_type"] = v!),
+                items: ["BP Currency", "Local Currency", "Foreign Currency"]
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 2. Label IDR
+          Container(
+            width: 60,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bgSlate,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderGrey),
+            ),
+            child: const Text(
+              "IDR",
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 3. Input Rate
+          Expanded(
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: bgSlate,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: borderGrey),
+              ),
+              child: TextField(
+                controller: _getCtrl("h_curr_rate", initial: ""),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (val) => _fieldValues["h_curr_rate"] = val,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

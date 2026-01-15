@@ -16,6 +16,7 @@ import 'pages/Business_Partner_Master_Data.dart';
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
+import 'pages/purchasing/good_return_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -178,6 +179,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Purchase Order":
         return const PurchaseOrderPage(key: ValueKey("Purchase Order"));
+
+      case "Goods Return":
+        return const GoodReturnPage(key: ValueKey("Goods Return"));
 
       default:
         return Center(

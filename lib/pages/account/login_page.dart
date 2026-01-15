@@ -36,6 +36,14 @@ class _LoginPageState extends State<LoginPage> {
     "PT. ATMI Duta Engineering",
   ];
 
+  // Mapping Domain untuk validasi login sesuai PT
+  final Map<String, String> companyDomains = {
+    "PT. Dempo Laser Metalindo": "@dempo.co.id",
+    "PT. Duta Laserindo Metal": "@duta.co.id",
+    "PT. Senzo Feinmetal": "@senzo.co.id",
+    "PT. ATMI Duta Engineering": "@atmi.co.id",
+  };
+
   final List<Map<String, dynamic>> features = [
     {
       "icon": Icons.grid_view_rounded,
@@ -101,19 +109,28 @@ class _LoginPageState extends State<LoginPage> {
       _showErrorSnackBar("Please select a Company first.");
       return;
     }
-    if (_userController.text.isEmpty || _passController.text.isEmpty) {
+
+    String email = _userController.text.trim().toLowerCase();
+    String password = _passController.text.trim();
+    String expectedDomain = companyDomains[selectedCompany!]!;
+
+    if (email.isEmpty || password.isEmpty) {
       _showErrorSnackBar("Required fields are empty.");
       return;
     }
 
-    if (!_userController.text.contains('_') ||
-        !_userController.text.endsWith('@gmail.com')) {
-      _showErrorSnackBar("Format login: nama_company@gmail.com");
+    if (!email.endsWith(expectedDomain)) {
+      _showErrorSnackBar("Email harus menggunakan domain $expectedDomain");
       return;
     }
 
-    if (!_passController.text.startsWith('_')) {
-      _showErrorSnackBar("Format password: _nama_divisi");
+    bool startsWithUpper = RegExp(r'^[A-Z]').hasMatch(password);
+    bool hasYear = RegExp(r'\d{4}').hasMatch(password);
+
+    if (!startsWithUpper || !hasYear || password.length < 8) {
+      _showErrorSnackBar(
+        "Password salah format! (Harus: Huruf Besar di awal, ada angka tahun, min 8 char)",
+      );
       return;
     }
 
@@ -132,10 +149,10 @@ class _LoginPageState extends State<LoginPage> {
     try {
       var response = await http
           .post(
-            Uri.parse('http://192.168.40.92:8000/api/test-login'),
+            Uri.parse('http://192.168.0.101:8000/api/test-login'),
             body: {
-              'email': _userController.text.trim(),
-              'password': _passController.text,
+              'email': email,
+              'password': password,
               'target_pt': companyMapping[selectedCompany!]!,
             },
           )
@@ -212,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 30)],
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 30)],
         ),
         child: const Column(
           mainAxisSize: MainAxisSize.min,
@@ -411,6 +428,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildLoginForm({required bool isMobile}) {
+    String expectedDomain = selectedCompany != null
+        ? companyDomains[selectedCompany!]!
+        : "@company.co.id";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -440,7 +461,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 10),
               Text(
-                "Use your registered format: nama_company@gmail.com",
+                "Use your registered company email and password.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
@@ -479,8 +500,6 @@ class _LoginPageState extends State<LoginPage> {
           onChanged: (val) => setState(() => selectedCompany = val),
         ),
         const SizedBox(height: 24),
-
-        // --- EMAIL SECTION (FORMAT DI KANAN) ---
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -492,9 +511,9 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.black87,
               ),
             ),
-            const Text(
-              "(format: nama_company@gmail.com)",
-              style: TextStyle(
+            Text(
+              "(format: name_$expectedDomain)",
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black87,
                 fontWeight: FontWeight.w600,
@@ -506,13 +525,11 @@ class _LoginPageState extends State<LoginPage> {
         TextField(
           controller: _userController,
           decoration: _buildInputDecoration(
-            "indra_dempo@gmail.com",
+            "name$expectedDomain",
             Icons.email_outlined,
           ),
         ),
         const SizedBox(height: 24),
-
-        // --- PASSWORD SECTION (FORMAT DI KANAN) ---
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -525,7 +542,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const Text(
-              "(format: _nama_divisi)",
+              "(format: Name_div_2025)",
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.black87,
@@ -539,7 +556,7 @@ class _LoginPageState extends State<LoginPage> {
           controller: _passController,
           obscureText: true,
           decoration: _buildInputDecoration(
-            "_indra_it",
+            "Start with Uppercase",
             Icons.lock_outline_rounded,
           ),
         ),
@@ -589,57 +606,52 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        const SizedBox(height: 30),
-        Center(
-          child: Column(
+        const SizedBox(height: 25),
+        // --- WARNING BOX KUNING ---
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.amber.shade200),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+              Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Important: Users must register an account first and obtain Admin approval before they can log in to the system.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
                   ),
-                  InkWell(
-                    onTap: widget.onGoToSignUp,
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: AppColors.primaryIndigo,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade200),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.admin_panel_settings_rounded,
-                      size: 16,
-                      color: Colors.amber,
-                    ),
-                    SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        "Note: New registrations require manual Admin approval.",
-                        style: TextStyle(fontSize: 11, color: Colors.black87),
-                      ),
-                    ),
-                  ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 25),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Don't have an account? ",
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              InkWell(
+                onTap: widget.onGoToSignUp,
+                child: const Text(
+                  "Sign Up",
+                  style: TextStyle(
+                    color: AppColors.primaryIndigo,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
@@ -663,7 +675,9 @@ class _LoginPageState extends State<LoginPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 20),
+              ],
             ),
             padding: const EdgeInsets.all(32),
             child: _buildLoginForm(isMobile: true),
@@ -673,25 +687,24 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
-      filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: AppColors.primaryIndigo,
-          width: 1.5,
+  InputDecoration _buildInputDecoration(String hint, IconData icon) =>
+      InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-      ),
-    );
-  }
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: AppColors.primaryIndigo,
+            width: 1.5,
+          ),
+        ),
+      );
 
   Widget _buildStatusBox({
     required Color color,
@@ -710,7 +723,9 @@ class _LoginPageState extends State<LoginPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 30)],
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 30),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

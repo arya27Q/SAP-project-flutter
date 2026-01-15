@@ -42,6 +42,14 @@ class _SignUpPageState extends State<SignUpPage> {
     "HR",
   ];
 
+  // Mapping Domain Email per PT
+  final Map<String, String> companyDomains = {
+    "PT. Dempo Laser Metalindo": "@dempo.co.id",
+    "PT. Duta Laserindo Metal": "@duta.co.id",
+    "PT. Senzo Feinmetal": "@senzo.co.id",
+    "PT. ATMI Duta Engineering": "@atmi.co.id",
+  };
+
   final List<Map<String, dynamic>> features = [
     {
       "icon": Icons.grid_view_rounded,
@@ -103,22 +111,25 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  String _getCompanyAlias(String? companyName) {
-    if (companyName == null) return "company";
-    if (companyName.contains("Dempo")) return "dempo";
-    if (companyName.contains("Duta")) return "duta";
-    if (companyName.contains("Senzo")) return "senzo";
-    if (companyName.contains("ATMI")) return "atmi";
-    return "company";
+  // LOGIC VALIDASI CUSTOM
+  bool _isValidCompanyEmail(String email, String? company) {
+    if (company == null) return false;
+    String? domain = companyDomains[company];
+    return domain != null && email.endsWith(domain);
+  }
+
+  bool _isValidPassword(String pw, String? divisi) {
+    if (divisi == null || pw.isEmpty) return false;
+    bool startsWithUpper = RegExp(r'^[A-Z]').hasMatch(pw);
+    bool containsDivisi = pw.toLowerCase().contains(divisi.toLowerCase());
+    bool containsYear = RegExp(r'\d{4}').hasMatch(pw);
+    return pw.length >= 8 && startsWithUpper && containsDivisi && containsYear;
   }
 
   Future<void> _handleSignUp() async {
     String nameRaw = _nameController.text.trim();
-    String nameClean = nameRaw.toLowerCase().replaceAll(' ', '');
     String email = _emailController.text.trim().toLowerCase();
-    String password = _passwordController.text.trim().toLowerCase();
-    String div = selectedDivisi?.toLowerCase() ?? "";
-    String alias = _getCompanyAlias(selectedCompany);
+    String password = _passwordController.text.trim();
 
     if (selectedCompany == null ||
         selectedDivisi == null ||
@@ -129,19 +140,19 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    String expectedEmail = "${nameClean}_$alias@gmail.com";
-    if (email != expectedEmail) {
-      _showErrorSnackBar("Format Email Salah! Wajib: $expectedEmail");
+    if (!_isValidCompanyEmail(email, selectedCompany)) {
+      String domain = companyDomains[selectedCompany!] ?? "@company.co.id";
+      _showErrorSnackBar("Email must use domain $domain");
       return;
     }
 
-    String expectedPw = "_${nameClean}_$div";
-    if (password != expectedPw) {
-      _showErrorSnackBar("Format Password Salah! Wajib: $expectedPw");
+    if (!_isValidPassword(password, selectedDivisi)) {
+      _showErrorSnackBar(
+        "Format Password: Huruf Besar di awal, mengandung '${selectedDivisi!}', dan angka tahun.",
+      );
       return;
     }
 
-    
     Map<String, String> companyMapping = {
       "PT. Dempo Laser Metalindo": "pt1",
       "PT. Duta Laserindo Metal": "pt2",
@@ -150,19 +161,18 @@ class _SignUpPageState extends State<SignUpPage> {
     };
 
     String targetDatabase = companyMapping[selectedCompany!] ?? "pt1";
-
     setState(() => _isLoading = true);
 
     try {
       var response = await http
           .post(
-            Uri.parse('http://192.168.40.92:8000/api/test-register'),
+            Uri.parse('http://192.168.0.101:8000/api/test-register'),
             body: {
               'name': nameRaw,
               'email': email,
-              'password': _passwordController.text, // Tetap kirim password asli
-              'target_pt': targetDatabase, // Ini yang masuk ke pt1/pt2/dst
-              'divisi': selectedDivisi,
+              'password': password,
+              'target_pt': targetDatabase,
+              'divisi': selectedDivisi!,
             },
           )
           .timeout(const Duration(seconds: 10));
@@ -171,19 +181,17 @@ class _SignUpPageState extends State<SignUpPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Registration Successful! Please Login."),
+              content: Text("Registration Successful!"),
               backgroundColor: Colors.green,
             ),
           );
           widget.onGoToLogin();
         }
       } else {
-        _showErrorSnackBar(
-          "Registration failed. Email might already be in use.",
-        );
+        _showErrorSnackBar("Registration failed. Email may already exist.");
       }
     } catch (e) {
-      _showErrorSnackBar("Connection Error: Server is unreachable.");
+      _showErrorSnackBar("Connection Error: Server unreachable.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -212,110 +220,104 @@ class _SignUpPageState extends State<SignUpPage> {
               );
             },
           ),
-          if (_isLoading)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.05),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 30),
-                      ],
-                    ),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryIndigo,
-                          ),
-                          strokeWidth: 5,
-                        ),
-                        SizedBox(height: 24),
-                        Text(
-                          "Creating Account...",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: AppColors.darkIndigo,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          if (_isLoading) _buildLoadingOverlay(),
         ],
       ),
     );
   }
 
-  Widget _buildMainLayout(BoxConstraints constraints) {
-    if (constraints.maxWidth > 950) {
-      return Row(
-        children: [
-          Expanded(
-            flex: 4,
-            child: Container(
+  Widget _buildLoadingOverlay() {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(0.05),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
               color: Colors.white,
-              child: Stack(
-                children: [
-                  Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 50,
-                        vertical: 40,
-                      ),
-                      child: _buildSignUpForm(isMobile: false),
-                    ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 30),
+              ],
+            ),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryIndigo,
                   ),
-                  Positioned(
-                    top: 20,
-                    left: 20,
-                    child: IconButton(
-                      onPressed: widget.onBackToDashboard,
-                      icon: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: Colors.grey,
-                      ),
-                    ),
+                  strokeWidth: 5,
+                ),
+                SizedBox(height: 24),
+                Text(
+                  "Creating Account...",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: AppColors.darkIndigo,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            flex: 6,
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
-                ),
-              ),
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Container(
-                    width: 620,
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: _buildBrandingContent(),
-                  ),
-                ),
-              ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainLayout(BoxConstraints constraints) {
+    bool isDesktop = constraints.maxWidth > 950;
+    return isDesktop
+        ? Row(
+            children: [
+              Expanded(flex: 4, child: _buildLeftFormSection()),
+              Expanded(flex: 6, child: _buildRightBrandingSection()),
+            ],
+          )
+        : _buildMobileLayout();
+  }
+
+  Widget _buildLeftFormSection() {
+    return Container(
+      color: Colors.white,
+      child: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 40),
+              child: _buildSignUpForm(),
+            ),
+          ),
+          Positioned(
+            top: 20,
+            left: 20,
+            child: IconButton(
+              onPressed: widget.onBackToDashboard,
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.grey),
             ),
           ),
         ],
-      );
-    } else {
-      return _buildMobileLayout();
-    }
+      ),
+    );
+  }
+
+  Widget _buildRightBrandingSection() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.darkIndigo, AppColors.primaryIndigo],
+        ),
+      ),
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Container(width: 620, child: _buildBrandingContent()),
+        ),
+      ),
+    );
   }
 
   Widget _buildBrandingContent() {
@@ -413,47 +415,28 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildSignUpForm({required bool isMobile}) {
+  Widget _buildSignUpForm() {
     String previewName = _nameController.text.isEmpty
-        ? "nama"
+        ? "name"
         : _nameController.text.toLowerCase().replaceAll(' ', '');
-    String previewAlias = _getCompanyAlias(selectedCompany);
-    String previewDiv = selectedDivisi?.toLowerCase() ?? "divisi";
+    String previewDomain = selectedCompany != null
+        ? companyDomains[selectedCompany!]!
+        : "@company.co.id";
+    String previewDiv = selectedDivisi?.toLowerCase() ?? "it";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
       children: [
-        const Center(
-          child: Column(
-            children: [
-              Text(
-                "Create New Account",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.darkIndigo,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Register with the required format to access the system.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 15),
-              ),
-            ],
+        const Text(
+          "Create New Account",
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: AppColors.darkIndigo,
           ),
         ),
         const SizedBox(height: 35),
-        const Text(
-          "Business Unit",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
+        _buildLabel("Business Unit"),
         DropdownButtonFormField<String>(
           value: selectedCompany,
           isExpanded: true,
@@ -465,31 +448,16 @@ class _SignUpPageState extends State<SignUpPage> {
               .map(
                 (s) => DropdownMenuItem(
                   value: s,
-                  child: Text(
-                    s,
-                    style: const TextStyle(fontSize: 13),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: Text(s, style: const TextStyle(fontSize: 13)),
                 ),
               )
               .toList(),
-          onChanged: _isLoading
-              ? null
-              : (val) => setState(() => selectedCompany = val),
+          onChanged: (val) => setState(() => selectedCompany = val),
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Division",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
+        _buildLabel("Division"),
         DropdownButtonFormField<String>(
           value: selectedDivisi,
-          isExpanded: true,
           decoration: _buildInputDecoration(
             "Select Division",
             Icons.groups_outlined,
@@ -502,23 +470,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               )
               .toList(),
-          onChanged: _isLoading
-              ? null
-              : (val) => setState(() => selectedDivisi = val),
+          onChanged: (val) => setState(() => selectedDivisi = val),
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Full Name",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
+        _buildLabel("Full Name"),
         TextField(
           controller: _nameController,
-          enabled: !_isLoading,
           onChanged: (v) => setState(() {}),
           decoration: _buildInputDecoration(
             "Enter your full name",
@@ -526,67 +483,21 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
         const SizedBox(height: 20),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Email Address",
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            Text(
-              "(format: ${previewName}_$previewAlias@gmail.com)",
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+        _buildLabel("Company Email (Format: ${previewName}$previewDomain)"),
         TextField(
           controller: _emailController,
-          enabled: !_isLoading,
           decoration: _buildInputDecoration(
-            "e.g. budi_dempo@gmail.com",
+            "e.g. ${previewName}$previewDomain",
             Icons.email_outlined,
           ),
         ),
         const SizedBox(height: 20),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Password",
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            Text(
-              "(format: _${previewName}_$previewDiv)",
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+        _buildLabel("Password (Format: Name_${previewDiv}_2025)"),
         TextField(
           controller: _passwordController,
-          enabled: !_isLoading,
           obscureText: true,
           decoration: _buildInputDecoration(
-            "e.g. _budi_it",
+            "Min 8 chars, Uppercase start",
             Icons.lock_outline_rounded,
           ),
         ),
@@ -595,7 +506,7 @@ class _SignUpPageState extends State<SignUpPage> {
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: _isLoading ? null : _handleSignUp,
+            onPressed: _handleSignUp,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryIndigo,
               foregroundColor: Colors.white,
@@ -610,61 +521,50 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
         const SizedBox(height: 25),
-        Center(
-          child: Column(
+        // --- WARNING BOX KUNING ---
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.amber.shade200),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Already have an account? ",
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+              Icon(Icons.info_outline_rounded, color: Colors.amber, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Registration will automatically notify the Admin. Users are required to contact the IT Admin for account activation.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
                   ),
-                  InkWell(
-                    onTap: widget.onGoToLogin,
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                        color: AppColors.primaryIndigo,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade200),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 18,
-                      color: Colors.amber,
-                    ),
-                    SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        "Registration requires manual confirmation from the Admin.",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Already have an account? ",
+                style: TextStyle(color: Colors.grey),
+              ),
+              InkWell(
+                onTap: widget.onGoToLogin,
+                child: const Text(
+                  "Login",
+                  style: TextStyle(
+                    color: AppColors.primaryIndigo,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -690,30 +590,40 @@ class _SignUpPageState extends State<SignUpPage> {
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(32),
-            child: _buildSignUpForm(isMobile: true),
+            child: _buildSignUpForm(),
           ),
         ),
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
-      filled: true,
-      fillColor: Colors.grey[100],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: AppColors.primaryIndigo,
-          width: 1.5,
+    ),
+  );
+  InputDecoration _buildInputDecoration(String hint, IconData icon) =>
+      InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-      ),
-    );
-  }
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: AppColors.primaryIndigo,
+            width: 1.5,
+          ),
+        ),
+      );
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart';
 
 class PurchaseOrderPage extends StatefulWidget {
   const PurchaseOrderPage({super.key});
@@ -11,7 +10,7 @@ class PurchaseOrderPage extends StatefulWidget {
 class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _rowCount = 10; // Default row count
+  int _rowCount = 10;
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
@@ -214,7 +213,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                 Row(
                   children: [
                     SizedBox(
-                      width: 100,
+                      width: 100, // KUNCI LURUS: 100
                       child: Text(
                         "No.",
                         style: TextStyle(
@@ -224,7 +223,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 28),
+                    const SizedBox(width: 28), // JARAK PEMISAH: 28
                     Container(
                       width: 60,
                       height: 32,
@@ -302,7 +301,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       child: Row(
         children: [
           SizedBox(
-            width: 100,
+            width: 100, // KUNCI LURUS: 100
             child: Text(
               label,
               style: TextStyle(
@@ -312,7 +311,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
               ),
             ),
           ),
-          const SizedBox(width: 28),
+          const SizedBox(width: 28), // JARAK PEMISAH: 28
           Expanded(
             child: InkWell(
               onTap: () {
@@ -364,7 +363,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     return Row(
       children: [
         SizedBox(
-          width: 100,
+          width: 100, // KUNCI LURUS: 100
           child: Text(
             label,
             style: TextStyle(
@@ -374,7 +373,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
+        const SizedBox(width: 28), // JARAK PEMISAH: 28
         Expanded(
           child: Container(
             height: 32,
@@ -406,7 +405,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     return Row(
       children: [
         SizedBox(
-          width: 100,
+          width: 100, // KUNCI LURUS: 100
           child: Text(
             label,
             style: TextStyle(
@@ -416,7 +415,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
+        const SizedBox(width: 28), // JARAK PEMISAH: 28
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
@@ -577,27 +576,27 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
               child: SingleChildScrollView(
                 controller: _horizontalScroll,
                 scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 30,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    AppColors.darkIndigo,
-                  ),
-                  border: const TableBorder(
-                    verticalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                child: IntrinsicWidth(
+                  child: DataTable(
+                    columnSpacing: 30,
+                    horizontalMargin: 15,
+                    headingRowHeight: 40,
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
+                    border: const TableBorder(
+                      verticalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
+                      horizontalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
                     ),
-                    horizontalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                    columns: _buildStaticColumns(),
+                    rows: List.generate(
+                      _rowCount,
+                      (index) => _buildDataRow(index),
                     ),
-                  ),
-                  columns: _buildStaticColumns(),
-                  rows: List.generate(
-                    _rowCount,
-                    (index) => _buildDataRow(index),
                   ),
                 ),
               ),
@@ -847,11 +846,12 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                       "-No Sales Employee-",
                       "Sales A",
                     ]),
+                    const SizedBox(height: 4),
                     _buildSmallDropdownRowModern("Owner", "f_owner", [
                       "Owner A",
                       "Owner B",
                     ]),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     _buildModernFieldRow(
                       "Remarks",
                       "f_rem",
@@ -863,7 +863,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
               ),
               const SizedBox(width: 60),
               SizedBox(
-                width: 400,
+                width: 450,
                 child: Column(
                   children: [
                     _buildSummaryRowWithAutoValue(
@@ -871,12 +871,13 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                       "f_before_disc",
                       isReadOnly: false,
                     ),
+                    const SizedBox(height: 2),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         children: [
                           const SizedBox(
-                            width: 100,
+                            width: 140, // KUNCI FOOTER
                             child: Text(
                               "Discount",
                               style: TextStyle(
@@ -885,10 +886,11 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                               ),
                             ),
                           ),
+                          const SizedBox(width: 25), // GAP
                           Container(
                             width: 50,
                             height: 24,
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            margin: const EdgeInsets.only(right: 8),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               border: Border.all(color: borderGrey),
@@ -918,6 +920,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                         ],
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -947,33 +950,46 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                         ],
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         children: [
                           SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Checkbox(
-                              value: _checkStates["f_rounding_check"] ?? false,
-                              activeColor: primaryIndigo,
-                              onChanged: (v) => setState(
-                                () => _checkStates["f_rounding_check"] = v!,
-                              ),
+                            width: 140,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: Checkbox(
+                                    value:
+                                        _checkStates["f_rounding_check"] ??
+                                        false,
+                                    activeColor: primaryIndigo,
+                                    onChanged: (v) => setState(
+                                      () =>
+                                          _checkStates["f_rounding_check"] = v!,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Rounding",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const Text(
-                            "Rounding",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                          const SizedBox(width: 80),
+                          const SizedBox(width: 25),
                           Expanded(child: _buildSummaryBox("f_rounding")),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 2),
                     _buildSummaryRowWithAutoValue(
                       "Tax",
                       "f_tax",
@@ -1019,6 +1035,31 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     ),
   );
 
+  Widget _buildSmallDropdown(String key, List<String> items) {
+    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 32,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: borderGrey),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _dropdownValues[key],
+          isDense: true,
+          style: const TextStyle(fontSize: 12, color: Colors.black),
+          icon: const Icon(Icons.arrow_drop_down, size: 20),
+          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          items: items
+              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFooterButton(String label, Color color) {
     return ElevatedButton(
       onPressed: () => debugPrint("Klik $label"),
@@ -1057,13 +1098,13 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       child: Row(
         children: [
           SizedBox(
-            width: 140,
+            width: 140, // KUNCI LURUS: 140
             child: Text(
               label,
               style: TextStyle(fontSize: 12, color: secondarySlate),
             ),
           ),
-          const SizedBox(width: 25),
+          const SizedBox(width: 25), // GAP
           Expanded(
             child: Container(
               height: 28,
@@ -1153,7 +1194,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100,
+          width: 100, // KUNCI LURUS: 100
           child: Text(
             label,
             style: TextStyle(
@@ -1163,7 +1204,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
+        const SizedBox(width: 28), // JARAK PEMISAH: 28
         Expanded(
           child: Container(
             height: isTextArea ? 80 : 32,
@@ -1191,31 +1232,6 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
     ),
   );
 
-  Widget _buildSmallDropdown(String key, List<String> items) {
-    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _dropdownValues[key],
-          isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
-          icon: const Icon(Icons.arrow_drop_down, size: 20),
-          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-          items: items
-              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
-              .toList(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSmallDropdownRowModern(
     String label,
     String key,
@@ -1226,7 +1242,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100,
+          width: 100, // KUNCI LURUS: 100
           child: Text(
             label,
             style: TextStyle(
@@ -1236,8 +1252,32 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
             ),
           ),
         ),
-        const SizedBox(width: 28),
-        Expanded(child: _buildSmallDropdown(key, items)),
+        const SizedBox(width: 28), // JARAK PEMISAH: 28
+        Expanded(
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: borderGrey),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[key],
+                isDense: true,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                icon: const Icon(Icons.arrow_drop_down, size: 20),
+                onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+                items: items
+                    .map(
+                      (val) => DropdownMenuItem(value: val, child: Text(val)),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        ),
       ],
     ),
   );
