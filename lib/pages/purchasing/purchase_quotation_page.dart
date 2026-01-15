@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PurchaseQuotationPage extends StatefulWidget {
   const PurchaseQuotationPage({super.key});
@@ -25,9 +26,17 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   final Map<String, FocusNode> _focusNodes = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -40,27 +49,46 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00", // Default pakai koma
     bool isPercent = false,
     bool isNumeric = true,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        if (!fn.hasFocus && isNumeric) {
+        // Logika jalan saat user meninggalkan input (hasFocus == false)
+        if (!fn.hasFocus && isNumeric && !isReadOnly) {
           final controller = _getCtrl(key);
-          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+          if (controller.text.trim().isEmpty) {
+            controller.text = defaultValue;
+            return;
+          }
+          // 1. Bersihkan semua karakter kecuali angka (titik dan koma lama dibuang)
+          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
           double? parsed = double.tryParse(cleanText);
+
           if (mounted) {
             setState(() {
               if (parsed != null) {
-                controller.text = isPercent
-                    ? parsed.toStringAsFixed(0)
-                    : parsed.toStringAsFixed(2);
+                if (isPercent) {
+                  // 2. Jika Persen: Munculkan angka bulat + simbol % (Contoh: 10%)
+                  controller.text = "${parsed.toStringAsFixed(0)}%";
+                } else {
+                  // 3. Jika Rupiah: Gunakan NumberFormat id_ID (Contoh: 1.000.000,00)
+                  controller.text = NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: '',
+                    decimalDigits: 2,
+                  ).format(parsed);
+                }
               } else {
                 controller.text = defaultValue;
               }
+
               _fieldValues[key] = controller.text;
+
+              _syncTotalBeforeDiscount();
             });
           }
         }
@@ -71,16 +99,22 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   }
 
   double _getGrandTotal() {
-    double parse(String key) {
+    double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+
+      return double.tryParse(cleanVal) ?? 0.0;
     }
 
-    double before = parse("f_before_disc");
-    double discount = parse("f_discount_val");
-    double freight = parse("f_freight");
-    double tax = parse("f_tax");
-    double rounding = parse("f_rounding");
+    double before = parseValue("f_before_disc");
+    double discount = parseValue("f_discount_val");
+    double freight = parseValue("f_freight");
+    double tax = parseValue("f_tax");
+    double rounding = parseValue("f_rounding");
+
     return (before - discount) + freight + tax + rounding;
   }
 
@@ -650,11 +684,11 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
         _buildModernTableCell("req_date_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
         _buildSearchableCell("uom_$index"),
-        _buildSearchableCell("price_$index"),
-        _buildSearchableCell("unit_price_$index"),
-        _buildModernTableCell("disc_$index", initial: "0.00"),
+        _buildModernTableCell("price_$index", initial: "0,00"),
+        _buildModernTableCell("unit_price_$index", initial: "0,00"),
+        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
         _buildDropdownCell("tax_$index", ["VATin11", "VATin12", "Exempt"]),
-        _buildModernTableCell("total_$index", initial: "0.00"),
+        _buildModernTableCell("total_$index", initial: "0,00"),
         _buildSearchableCell("div_$index"),
         _buildDropdownCell("cat_$index", [
           "Alat-alat Kebersihan",
@@ -680,19 +714,30 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
+
     bool isNumeric =
         key.contains("qty") ||
         key.contains("price") ||
         key.contains("total") ||
         key.contains("disc") ||
-        key.contains("info_price");
+        key.contains("info_price") ||
+        key.contains("f_before") ||
+        key.contains("rounding") ||
+        key.contains("Freight") ||
+        key.contains("Tax");
 
+    String defValue = isPercent ? "0%" : "0,00";
     final focusNode = _getFn(
       key,
-      defaultValue: initial.isEmpty ? "0.00" : initial,
+      defaultValue: initial.isEmpty ? defValue : initial,
       isNumeric: isNumeric,
+      isPercent: isPercent,
     );
 
     return DataCell(
@@ -715,11 +760,14 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 ),
               ),
               onChanged: (val) {
+                // Simpan nilai mentah ke fieldValues
                 _fieldValues[key] = val;
+
+                // Jika field ini adalah bagian dari angka (qty, price, dll), hitung ulang total
                 if (isNumeric) {
                   _syncTotalBeforeDiscount();
                 }
-                setState(() {});
+                // Penting: Hapus setState() kosong di sini karena sudah ada di dalam _syncTotalBeforeDiscoun
               },
             ),
           ),
@@ -802,20 +850,45 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
 
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
+
     for (int i = 0; i < _rowCount; i++) {
-      String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows +=
-          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      // GANTI 'index' JADI 'i' DI SINI
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+
+      // PEMBERSIH: Buang titik ribuan, ubah koma desimal jadi titik
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+
+      double parsedRow = double.tryParse(cleanVal) ?? 0.0;
+      totalAllRows += parsedRow;
     }
+
     setState(() {
-      _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
-      _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
+      // FORMAT BALIK KE STANDAR SAP (1.000.000,00)
+      String formatted = NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: '',
+        decimalDigits: 2,
+      ).format(totalAllRows);
+
+      _getCtrl("f_before_disc").text = formatted;
+      _fieldValues["f_before_disc"] = formatted;
     });
   }
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+
+    String formattedTotal = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(grandTotal);
+
+    _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
       children: [
@@ -869,7 +942,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                     _buildSummaryRowWithAutoValue(
                       "Total Before Discount",
                       "f_before_disc",
-                      isReadOnly: false,
+                      isReadOnly: true,
                     ),
                     const SizedBox(height: 2),
                     Padding(
@@ -1035,7 +1108,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     ),
   );
 
-   Widget _buildSmallDropdown(String key, List<String> items) {
+  Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),

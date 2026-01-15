@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 
 class SalesOrderPage extends StatefulWidget {
   const SalesOrderPage({super.key});
@@ -28,9 +29,17 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -43,7 +52,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -71,8 +80,9 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               key.contains("f_rounding");
 
           if (isNumericField) {
+            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
-              RegExp(r'[^0-9.]'),
+              RegExp(r'[^0-9]'),
               '',
             );
             double? parsed = double.tryParse(cleanText);
@@ -80,13 +90,22 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             if (mounted) {
               setState(() {
                 if (parsed != null) {
-                  controller.text = isPercent
-                      ? parsed.toStringAsFixed(0)
-                      : parsed.toStringAsFixed(2);
+                  if (isPercent) {
+                    // UBAH DI SINI: Tambahkan simbol % setelah angka
+                    controller.text = "${parsed.toStringAsFixed(0)}%";
+                  } else {
+                    controller.text = NumberFormat.currency(
+                      locale: 'id_ID',
+                      symbol: '',
+                      decimalDigits: 2,
+                    ).format(parsed);
+                  }
                 } else {
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
+
+                _syncTotalBeforeDiscount();
               });
             }
           } else {
@@ -124,16 +143,23 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   }
 
   double _getGrandTotal() {
-    double parse(String key) {
+    double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', ''); // Tambahkan ini
+
+      return double.tryParse(cleanVal) ?? 0.0;
     }
 
-    double before = parse("f_before_disc");
-    double discVal = parse("f_disc_val");
-    double freight = parse("f_freight");
-    double tax = parse("f_tax");
-    double rounding = parse("f_rounding");
+    double before = parseValue("f_before_disc");
+    double discVal = parseValue("f_disc_val");
+    double freight = parseValue("f_freight");
+    double tax = parseValue("f_tax");
+    double rounding = parseValue("f_rounding");
+
     return (before - discVal) + freight + rounding + tax;
   }
 
@@ -418,15 +444,15 @@ class _SalesOrderPageState extends State<SalesOrderPage>
         _buildModernTableCell("details_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
         _buildModernTableCell("stock_$index", initial: "0"),
-        _buildModernTableCell("price_$index", initial: "0.00"),
-        _buildModernTableCell("p_service_$index", initial: "0.00"),
-        _buildModernTableCell("p_ref_$index", initial: "0.00"),
+        _buildModernTableCell("price_$index", initial: "0,00"),
+        _buildModernTableCell("p_service_$index", initial: "0,00"),
+        _buildModernTableCell("p_ref_$index", initial: "0,00"),
         _buildModernTableCell("uom_$index"),
         _buildModernTableCell("free_text_$index"),
         _buildModernTableCell("proj_$index"),
         _buildModernTableCell("line_$index"),
-        _buildModernTableCell("disc_$index", initial: "0.00"),
-        _buildModernTableCell("total_$index", initial: "0.00"),
+        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
+        _buildModernTableCell("total_$index", initial: "0,00"),
       ],
     );
   }
@@ -454,7 +480,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -464,9 +494,16 @@ class _SalesOrderPageState extends State<SalesOrderPage>
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("p_service") ||
-        key.contains("p_ref");
+        key.contains("p_ref") ||
+        key.contains("f_before") ||
+        key.contains("f_tax") ||
+        key.contains("f_rounding");
 
-    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
+    final focusNode = _getFn(
+      key,
+      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "",
+      isPercent: isPercent,
+    );
 
     return DataCell(
       Padding(
@@ -576,12 +613,22 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     for (int i = 0; i < _rowCount; i++) {
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      totalAllRows +=
-          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+      totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
+
     setState(() {
-      _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
-      _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
+      String formatted = NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: '',
+        decimalDigits: 2,
+      ).format(totalAllRows);
+
+      _getCtrl("f_before_disc").text = formatted;
+      _fieldValues["f_before_disc"] = formatted;
     });
   }
 
@@ -700,7 +747,14 @@ class _SalesOrderPageState extends State<SalesOrderPage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+
+    String formattedTotal = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(grandTotal);
+
+    _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
       children: [

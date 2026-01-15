@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 
 class ReturnPage extends StatefulWidget {
   const ReturnPage({super.key});
@@ -29,9 +30,17 @@ class _ReturnPageState extends State<ReturnPage>
   final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -44,7 +53,7 @@ class _ReturnPageState extends State<ReturnPage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -67,13 +76,14 @@ class _ReturnPageState extends State<ReturnPage>
               key.contains("p_service") ||
               key.contains("p_ref") ||
               key.contains("f_before") ||
-              key.contains("f_wtaxamount") ||
+              key.contains("f_freight") ||
               key.contains("f_tax") ||
               key.contains("f_rounding");
 
           if (isNumericField) {
+            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
-              RegExp(r'[^0-9.]'),
+              RegExp(r'[^0-9]'),
               '',
             );
             double? parsed = double.tryParse(cleanText);
@@ -81,13 +91,22 @@ class _ReturnPageState extends State<ReturnPage>
             if (mounted) {
               setState(() {
                 if (parsed != null) {
-                  controller.text = isPercent
-                      ? parsed.toStringAsFixed(0)
-                      : parsed.toStringAsFixed(2);
+                  if (isPercent) {
+                    // UBAH DI SINI: Tambahkan simbol % setelah angka
+                    controller.text = "${parsed.toStringAsFixed(0)}%";
+                  } else {
+                    controller.text = NumberFormat.currency(
+                      locale: 'id_ID',
+                      symbol: '',
+                      decimalDigits: 2,
+                    ).format(parsed);
+                  }
                 } else {
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
+
+                _syncTotalBeforeDiscount();
               });
             }
           } else {
@@ -297,7 +316,7 @@ class _ReturnPageState extends State<ReturnPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(
-                      AppColors.darkIndigo,
+                      AppColors.primaryIndigo,
                     ),
                     border: const TableBorder(
                       verticalInside: BorderSide(
@@ -336,7 +355,7 @@ class _ReturnPageState extends State<ReturnPage>
         _buildModernTableCell("uom_$index"),
         _buildModernTableCell("whse_$index"),
         _buildModernTableCell("price_$index", initial: "0,00"),
-        _buildModernTableCell("disc_$index", initial: "0"),
+        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
         _buildModernTableCell("tax_code_$index"),
         _buildModernTableCell("wtax_liable_$index"),
         _buildModernTableCell("material_$index"),
@@ -371,7 +390,11 @@ class _ReturnPageState extends State<ReturnPage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+   DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -381,9 +404,16 @@ class _ReturnPageState extends State<ReturnPage>
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("p_service") ||
-        key.contains("p_ref");
+        key.contains("p_ref") ||
+        key.contains("f_before") ||
+        key.contains("f_tax") ||
+        key.contains("f_rounding");
 
-    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
+    final focusNode = _getFn(
+      key,
+      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "",
+      isPercent: isPercent,
+    );
 
     return DataCell(
       Padding(

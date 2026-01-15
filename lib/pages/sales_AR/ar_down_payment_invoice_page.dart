@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 
 class ArDownPaymentInvoicePage extends StatefulWidget {
   const ArDownPaymentInvoicePage({super.key});
@@ -28,9 +28,17 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   final Map<String, FocusNode> _focusNodes = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -71,7 +79,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -94,13 +102,14 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               key.contains("p_service") ||
               key.contains("p_ref") ||
               key.contains("f_before") ||
-              key.contains("f_wtaxamount") ||
+              key.contains("f_freight") ||
               key.contains("f_tax") ||
               key.contains("f_rounding");
 
           if (isNumericField) {
+            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
-              RegExp(r'[^0-9.]'),
+              RegExp(r'[^0-9]'),
               '',
             );
             double? parsed = double.tryParse(cleanText);
@@ -108,13 +117,22 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             if (mounted) {
               setState(() {
                 if (parsed != null) {
-                  controller.text = isPercent
-                      ? parsed.toStringAsFixed(0)
-                      : parsed.toStringAsFixed(2);
+                  if (isPercent) {
+                    // UBAH DI SINI: Tambahkan simbol % setelah angka
+                    controller.text = "${parsed.toStringAsFixed(0)}%";
+                  } else {
+                    controller.text = NumberFormat.currency(
+                      locale: 'id_ID',
+                      symbol: '',
+                      decimalDigits: 2,
+                    ).format(parsed);
+                  }
                 } else {
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
+
+                _syncTotalBeforeDiscount();
               });
             }
           } else {
@@ -132,16 +150,23 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   }
 
   double _getGrandTotal() {
-    double parse(String key) {
+    double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+
+      return double.tryParse(cleanVal) ?? 0.0;
     }
 
-    double before = parse("f_before_disc");
-    double discVal = parse("f_disc_val");
-    double wtaxamount = parse("f_wtaxamount");
-    double tax = parse("f_tax");
-    double rounding = parse("f_rounding");
+    double before = parseValue("f_before_disc");
+    double discVal = parseValue("f_disc_val");
+    double wtaxamount = parseValue("f_wtaxamount");
+    double tax = parseValue("f_tax");
+    double rounding = parseValue("f_rounding");
+
+    // Rumus: (Sebelum Diskon - Diskon) + WTax + Rounding + Pajak
     return (before - discVal) + wtaxamount + rounding + tax;
   }
 
@@ -441,7 +466,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
         _buildModernTableCell("uom_$index"),
         _buildModernTableCell("whse_$index"),
         _buildModernTableCell("price_$index", initial: "0,00"),
-        _buildModernTableCell("disc_$index", initial: "0"),
+        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
         _buildModernTableCell("tax_code_$index"),
         _buildModernTableCell("wtax_liable_$index"),
         _buildModernTableCell("material_$index"),
@@ -476,7 +501,11 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -486,9 +515,18 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("p_service") ||
-        key.contains("p_ref");
+        key.contains("p_ref") ||
+        key.contains("f_before") ||
+        key.contains("wtax") ||
+        key.contains("tax") ||
+        key.contains("rounding");
 
-    final focusNode = _getFn(key, defaultValue: isNumeric ? "0.00" : "");
+    String defValue = isPercent ? "0%" : "0,00";
+    final focusNode = _getFn(
+      key,
+      defaultValue: isNumeric ? defValue : "",
+      isPercent: isPercent,
+    );
 
     return DataCell(
       Padding(
@@ -720,7 +758,12 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+    String formattedTotal = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(grandTotal);
+    _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
       children: [
@@ -1424,7 +1467,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
+          title: Text(" $label", style: const TextStyle(fontSize: 14)),
           content: SizedBox(
             width: 300,
             height: 300,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PurchaseRequestPage extends StatefulWidget {
   const PurchaseRequestPage({super.key});
@@ -25,9 +26,18 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   final Map<String, FocusNode> _focusNodes = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
+
     double parsed = double.tryParse(cleanText) ?? 0.0;
-    return parsed.toStringAsFixed(2);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -40,28 +50,44 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isPercent = false,
-    bool isNumeric = true, // Tambah flag numeric
+    bool isNumeric = true,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        if (!fn.hasFocus && isNumeric) {
-          // Hanya proses jika numeric
+        if (!fn.hasFocus && isNumeric && !isReadOnly) {
           final controller = _getCtrl(key);
-          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9.]'), '');
+
+          if (controller.text.trim().isEmpty) {
+            controller.text = defaultValue;
+            return;
+          }
+          String cleanText = controller.text
+              .replaceAll('.', '')
+              .replaceAll(',', '');
           double? parsed = double.tryParse(cleanText);
+
           if (mounted) {
             setState(() {
               if (parsed != null) {
-                controller.text = isPercent
-                    ? parsed.toStringAsFixed(0)
-                    : parsed.toStringAsFixed(2);
+                if (isPercent) {
+                  controller.text = "${parsed.toStringAsFixed(0)}%";
+                } else {
+                  controller.text = NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: '',
+                    decimalDigits: 2,
+                  ).format(parsed);
+                }
               } else {
                 controller.text = defaultValue;
               }
+
               _fieldValues[key] = controller.text;
+
+              _syncTotalBeforeDiscount();
             });
           }
         }
@@ -72,15 +98,50 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   }
 
   double _getGrandTotal() {
-    double parse(String key) {
+    double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      return double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+      // MEMBERSIHKAN FORMAT INDONESIA KE ANGKA MATEMATIKA
+      String cleanVal = val
+          .replaceAll('.', '') // Buang titik ribuan
+          .replaceAll(',', '.') // Ganti koma jadi titik desimal
+          .replaceAll(RegExp(r'[^0-9.]'), '');
+
+      return double.tryParse(cleanVal) ?? 0.0;
     }
 
-    double before = parse("f_before_disc");
-    double freight = parse("f_freight");
-    double tax = parse("f_tax");
+    double before = parseValue("f_before_disc");
+    double freight = parseValue("f_freight");
+    double tax = parseValue("f_tax");
+
     return before + freight + tax;
+  }
+
+  void _syncTotalBeforeDiscount() {
+    double totalAllRows = 0;
+    for (int i = 0; i < _rowCount; i++) {
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+      // MEMBERSIHKAN HARGA PER BARIS BIAR BISA DITAMBAHIN
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+      totalAllRows += double.tryParse(cleanVal) ?? 0.0;
+    }
+
+    if (mounted) {
+      setState(() {
+        // FORMAT BALIK KE INDONESIA (1.000,00) BIAR GAK BALIK KE NOL
+        String formatted = NumberFormat.currency(
+          locale: 'id_ID',
+          symbol: '',
+          decimalDigits: 2,
+        ).format(totalAllRows);
+
+        _getCtrl("f_before_disc").text = formatted;
+        _fieldValues["f_before_disc"] = formatted;
+      });
+    }
   }
 
   @override
@@ -653,25 +714,27 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
               child: SingleChildScrollView(
                 controller: _horizontalScroll,
                 scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columnSpacing: 30,
-                  horizontalMargin: 15,
-                  headingRowHeight: 40,
-                  headingRowColor: MaterialStateProperty.all(primaryIndigo),
-                  border: const TableBorder(
-                    verticalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                child: IntrinsicWidth(
+                  child: DataTable(
+                    columnSpacing: 30,
+                    horizontalMargin: 15,
+                    headingRowHeight: 40,
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
+                    border: const TableBorder(
+                      verticalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
+                      horizontalInside: BorderSide(
+                        color: Color.fromARGB(208, 166, 164, 164),
+                        width: 0.5,
+                      ),
                     ),
-                    horizontalInside: BorderSide(
-                      color: Color.fromARGB(208, 166, 164, 164),
-                      width: 0.5,
+                    columns: _buildStaticColumns(),
+                    rows: List.generate(
+                      _rowCount,
+                      (index) => _buildDataRow(index),
                     ),
-                  ),
-                  columns: _buildStaticColumns(),
-                  rows: List.generate(
-                    _rowCount,
-                    (index) => _buildDataRow(index),
                   ),
                 ),
               ),
@@ -726,11 +789,11 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         _buildModernTableCell("req_date_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
         _buildSearchableCell("uom_$index"),
-        _buildModernTableCell("price_$index", initial: "0.00"),
-        _buildModernTableCell("info_price_$index", initial: "0.00"),
-        _buildModernTableCell("disc_$index", initial: "0.00"),
+        _buildModernTableCell("price_$index", initial: "0,00"),
+        _buildModernTableCell("info_price_$index", initial: "0,00"),
+        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
         _buildDropdownCell("tax_$index", ["VATin11", "VATin12", "Exempt"]),
-        _buildModernTableCell("total_$index", initial: "0.00"),
+        _buildModernTableCell("total_$index", initial: "0,00"),
         _buildSearchableCell("div_$index"),
         _buildDropdownCell("cat_$index", [
           "Alat-alat Kebersihan",
@@ -756,8 +819,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = ""}) {
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
+
     bool isNumeric =
         key.contains("qty") ||
         key.contains("price") ||
@@ -765,11 +833,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         key.contains("disc") ||
         key.contains("info_price");
 
-    // Perbaikan: isNumeric dikirim agar tidak meriset teks biasa jadi 0.00
+    String defValue = isPercent ? "0%" : "0,00";
     final focusNode = _getFn(
       key,
-      defaultValue: initial.isEmpty ? "0.00" : initial,
+      defaultValue: initial.isEmpty ? defValue : initial,
       isNumeric: isNumeric,
+      isPercent: isPercent,
     );
 
     return DataCell(
@@ -796,7 +865,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 if (isNumeric) {
                   _syncTotalBeforeDiscount();
                 }
-                setState(() {}); // Memperbarui lebar secara real-time
+                setState(() {});
               },
             ),
           ),
@@ -877,22 +946,18 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
-  void _syncTotalBeforeDiscount() {
-    double totalAllRows = 0;
-    for (int i = 0; i < _rowCount; i++) {
-      String val = _controllers["total_$i"]?.text ?? "0";
-      totalAllRows +=
-          double.tryParse(val.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-    }
-    setState(() {
-      _getCtrl("f_before_disc").text = totalAllRows.toStringAsFixed(2);
-      _fieldValues["f_before_disc"] = totalAllRows.toStringAsFixed(2);
-    });
-  }
+
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+
+    String formattedTotal = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(grandTotal);
+
+    _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
       children: [
@@ -930,7 +995,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   ],
                 ),
               ),
-
               const SizedBox(width: 60),
               SizedBox(
                 width: 350,
@@ -939,7 +1003,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     _buildSummaryRowWithAutoValue(
                       "Total Before Discount",
                       "f_before_disc",
-                      isReadOnly: false,
+                      isReadOnly: true, // ReadOnly karena otomatis dari tabel
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -988,27 +1052,22 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: _buildActionButtons(),
+          child: Row(
+            children: [
+              _buildFooterButton("Add", primaryIndigo),
+              const SizedBox(width: 8),
+              _buildFooterButton("Cancel", Colors.red),
+              const Spacer(),
+              _buildFooterButton("Copy From", const Color(0xFF1976D2)),
+              const SizedBox(width: 8),
+              _buildFooterButton("Copy To", Colors.orange),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
       ],
     );
   }
-
-  Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildFooterButton("Add", const Color(0xFF4F46E5)),
-        const SizedBox(width: 8),
-        _buildFooterButton("Cancel", Colors.red),
-        const Spacer(),
-        _buildFooterButton("Copy From", const Color(0xFF1976D2)),
-        const SizedBox(width: 8),
-        _buildFooterButton("Copy To", Colors.orange),
-      ],
-    ),
-  );
 
   Widget _buildFooterButton(String label, Color color) {
     return ElevatedButton(
@@ -1029,14 +1088,11 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   Widget _buildSummaryRowWithAutoValue(
     String label,
     String key, {
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isBold = false,
     bool isReadOnly = false,
   }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
+    final controller = _getCtrl(key, initial: defaultValue);
     final focusNode = _getFn(
       key,
       isReadOnly: isReadOnly,
@@ -1079,9 +1135,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     vertical: 6,
                   ),
                 ),
-                onChanged: (val) {
-                  if (!isReadOnly) setState(() => _fieldValues[key] = val);
-                },
               ),
             ),
           ),
@@ -1092,14 +1145,11 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
   Widget _buildSummaryBox(
     String key, {
-    String defaultValue = "0.00",
+    String defaultValue = "0,00",
     bool isReadOnly = false,
     bool isPercent = false,
   }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
+    final controller = _getCtrl(key, initial: defaultValue);
     final focusNode = _getFn(
       key,
       isReadOnly: isReadOnly,
@@ -1125,13 +1175,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 8),
         ),
-        onChanged: (val) {
-          if (!isReadOnly) {
-            setState(() {
-              _fieldValues[key] = val;
-            });
-          }
-        },
       ),
     );
   }
