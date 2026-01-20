@@ -42,7 +42,6 @@ class _SignUpPageState extends State<SignUpPage> {
     "HR",
   ];
 
-  // Mapping Domain Email per PT
   final Map<String, String> companyDomains = {
     "PT. Dempo Laser Metalindo": "@dempo.co.id",
     "PT. Duta Laserindo Metal": "@duta.co.id",
@@ -111,7 +110,6 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // LOGIC VALIDASI CUSTOM
   bool _isValidCompanyEmail(String email, String? company) {
     if (company == null) return false;
     String? domain = companyDomains[company];
@@ -148,7 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (!_isValidPassword(password, selectedDivisi)) {
       _showErrorSnackBar(
-        "Format Password: Huruf Besar di awal, mengandung '${selectedDivisi!}', dan angka tahun.",
+        "Password format: Uppercase start, contains '${selectedDivisi!}', and year.",
       );
       return;
     }
@@ -188,7 +186,7 @@ class _SignUpPageState extends State<SignUpPage> {
           widget.onGoToLogin();
         }
       } else {
-        _showErrorSnackBar("Registration failed. Email may already exist.");
+        _showErrorSnackBar("Registration failed. Email might already exist.");
       }
     } catch (e) {
       _showErrorSnackBar("Connection Error: Server unreachable.");
@@ -280,13 +278,31 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget _buildLeftFormSection() {
     return Container(
-      color: Colors.white,
+      color: Colors.grey[50],
       child: Stack(
         children: [
           Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 40),
-              child: _buildSignUpForm(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 460),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 32,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: _buildSignUpForm(isMobile: false),
+              ),
             ),
           ),
           Positioned(
@@ -415,27 +431,27 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildSignUpForm() {
+  Widget _buildSignUpForm({bool isMobile = false}) {
     String previewName = _nameController.text.isEmpty
         ? "name"
         : _nameController.text.toLowerCase().replaceAll(' ', '');
     String previewDomain = selectedCompany != null
         ? companyDomains[selectedCompany!]!
         : "@company.co.id";
-    String previewDiv = selectedDivisi?.toLowerCase() ?? "it";
+    String previewDiv = selectedDivisi?.toLowerCase() ?? "division";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Create New Account",
           style: TextStyle(
-            fontSize: 26,
+            fontSize: isMobile ? 22 : 26,
             fontWeight: FontWeight.w800,
             color: AppColors.darkIndigo,
           ),
         ),
-        const SizedBox(height: 35),
+        const SizedBox(height: 24),
         _buildLabel("Business Unit"),
         DropdownButtonFormField<String>(
           value: selectedCompany,
@@ -448,13 +464,17 @@ class _SignUpPageState extends State<SignUpPage> {
               .map(
                 (s) => DropdownMenuItem(
                   value: s,
-                  child: Text(s, style: const TextStyle(fontSize: 13)),
+                  child: Text(
+                    s,
+                    style: const TextStyle(fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               )
               .toList(),
           onChanged: (val) => setState(() => selectedCompany = val),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         _buildLabel("Division"),
         DropdownButtonFormField<String>(
           value: selectedDivisi,
@@ -472,36 +492,39 @@ class _SignUpPageState extends State<SignUpPage> {
               .toList(),
           onChanged: (val) => setState(() => selectedDivisi = val),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         _buildLabel("Full Name"),
         TextField(
           controller: _nameController,
           onChanged: (v) => setState(() {}),
+          style: const TextStyle(fontSize: 14),
           decoration: _buildInputDecoration(
             "Enter your full name",
             Icons.badge_outlined,
           ),
         ),
-        const SizedBox(height: 20),
-        _buildLabel("Company Email (Format: ${previewName}$previewDomain)"),
+        const SizedBox(height: 14),
+        _buildLabel("Company Email (${previewName}$previewDomain)"),
         TextField(
           controller: _emailController,
+          style: const TextStyle(fontSize: 14),
           decoration: _buildInputDecoration(
             "e.g. ${previewName}$previewDomain",
             Icons.email_outlined,
           ),
         ),
-        const SizedBox(height: 20),
-        _buildLabel("Password (Format: Name_${previewDiv}_2025)"),
+        const SizedBox(height: 14),
+        _buildLabel("Password (Name_${previewDiv}_2025)"),
         TextField(
           controller: _passwordController,
           obscureText: true,
+          style: const TextStyle(fontSize: 14),
           decoration: _buildInputDecoration(
             "Min 8 chars, Uppercase start",
             Icons.lock_outline_rounded,
           ),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
           height: 52,
@@ -510,6 +533,7 @@ class _SignUpPageState extends State<SignUpPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryIndigo,
               foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -520,10 +544,9 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
         ),
-        const SizedBox(height: 25),
-        // --- WARNING BOX KUNING ---
+        const SizedBox(height: 20),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.amber.shade50,
             borderRadius: BorderRadius.circular(12),
@@ -533,12 +556,12 @@ class _SignUpPageState extends State<SignUpPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.info_outline_rounded, color: Colors.amber, size: 20),
-              SizedBox(width: 12),
+              SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "Registration will automatically notify the Admin. Users are required to contact the IT Admin for account activation.",
+                  "Admin will be notified. Contact IT Admin for activation.",
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.black87,
                     fontWeight: FontWeight.w500,
                     height: 1.4,
@@ -555,7 +578,7 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               const Text(
                 "Already have an account? ",
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey, fontSize: 13),
               ),
               InkWell(
                 onTap: widget.onGoToLogin,
@@ -564,6 +587,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   style: TextStyle(
                     color: AppColors.primaryIndigo,
                     fontWeight: FontWeight.bold,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -583,14 +607,18 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Container(
+            constraints: const BoxConstraints(maxWidth: 440),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 15),
+              ],
             ),
-            padding: const EdgeInsets.all(32),
-            child: _buildSignUpForm(),
+            padding: const EdgeInsets.all(24),
+            child: _buildSignUpForm(isMobile: true),
           ),
         ),
       ),
@@ -598,22 +626,25 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildLabel(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: 6),
     child: Text(
       text,
       style: const TextStyle(
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
       ),
     ),
   );
+
   InputDecoration _buildInputDecoration(String hint, IconData icon) =>
       InputDecoration(
         hintText: hint,
+        hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
         prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
         filled: true,
         fillColor: Colors.grey[100],
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

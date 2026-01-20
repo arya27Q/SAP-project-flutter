@@ -298,19 +298,32 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
+          // --- BAGIAN KANAN: BOX PEMBUNGKUS FORM ---
           Expanded(
             flex: 4,
             child: Container(
-              color: Colors.white,
+              color: Colors.grey[50], 
               child: Stack(
                 children: [
                   Center(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 50,
-                        vertical: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 35),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24), 
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: _buildLoginForm(isMobile: false),
                       ),
-                      child: _buildLoginForm(isMobile: false),
                     ),
                   ),
                   Positioned(
@@ -448,27 +461,27 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        const Center(
+        Center(
           child: Column(
             children: [
               Text(
                 "Login to Your Account",
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: isMobile ? 22 : 26, // Disesuaikan ukuran mobile
                   fontWeight: FontWeight.w800,
                   color: AppColors.darkIndigo,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 "Use your registered company email and password.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: TextStyle(color: Colors.grey, fontSize: isMobile ? 12 : 14),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 40),
+        SizedBox(height: isMobile ? 20 : 30), 
         const Text(
           "Company",
           style: TextStyle(
@@ -499,7 +512,7 @@ class _LoginPageState extends State<LoginPage> {
               .toList(),
           onChanged: (val) => setState(() => selectedCompany = val),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: isMobile ? 16 : 20), 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -529,7 +542,7 @@ class _LoginPageState extends State<LoginPage> {
             Icons.email_outlined,
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: isMobile ? 16 : 20), 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -560,7 +573,7 @@ class _LoginPageState extends State<LoginPage> {
             Icons.lock_outline_rounded,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -570,6 +583,7 @@ class _LoginPageState extends State<LoginPage> {
                   value: false,
                   onChanged: (v) {},
                   activeColor: AppColors.primaryIndigo,
+                  visualDensity: VisualDensity.compact,
                 ),
                 const Text("Remember me", style: TextStyle(fontSize: 13)),
               ],
@@ -587,7 +601,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: isMobile ? 16 : 25),
         SizedBox(
           width: double.infinity,
           height: 52,
@@ -596,6 +610,7 @@ class _LoginPageState extends State<LoginPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryIndigo,
               foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -606,10 +621,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        const SizedBox(height: 25),
+        SizedBox(height: isMobile ? 16 : 20),
         // --- WARNING BOX KUNING ---
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.amber.shade50,
             borderRadius: BorderRadius.circular(12),
@@ -622,9 +637,9 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Important: Users must register an account first and obtain Admin approval before they can log in to the system.",
+                  "Important: Account must be registered and approved by Admin.",
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.black87,
                     fontWeight: FontWeight.w500,
                     height: 1.4,
@@ -634,7 +649,7 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
-        const SizedBox(height: 25),
+        SizedBox(height: isMobile ? 16 : 20),
         Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -670,16 +685,16 @@ class _LoginPageState extends State<LoginPage> {
       ),
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24), // Outer padding dikurangi
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(color: Colors.black12, blurRadius: 20),
               ],
             ),
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24), // Inner padding dikurangi dari 32 ke 24
             child: _buildLoginForm(isMobile: true),
           ),
         ),
@@ -693,6 +708,7 @@ class _LoginPageState extends State<LoginPage> {
         prefixIcon: Icon(icon, size: 20, color: Colors.grey[600]),
         filled: true,
         fillColor: Colors.grey[100],
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12), // Content padding disesuaikan
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
