@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
-// import 'package:http/http.dart' as http; // ❌ HAPUS: Tidak perlu HTTP lagi
 import '../../constants.dart';
 
 enum AuthMode { login, signup, forgotPassword }
