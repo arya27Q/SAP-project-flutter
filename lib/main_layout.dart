@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
-
 import 'sidebar_widget.dart';
-import 'pages/account/login_page.dart';
-import 'pages/account/signup_page.dart';
-import 'pages/account/forgot_pw_page.dart';
+
+// --- IMPORT AUTH PAGE BARU ---
+import 'pages/account/sap_auth_page.dart'; 
+
+// --- IMPORT HALAMAN DASHBOARD ---
 import 'pages/dashboard.dart';
 import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
@@ -13,11 +14,14 @@ import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'pages/sales_AR/ar_invoice_page.dart';
 import 'pages/sales_AR/ar_credit_memo_page.dart';
 import 'pages/sales_AR/return_page.dart';
+// import 'pages/sales_AR/cancel_read_off_page.dart'; // Uncomment jika file sudah ada
 import 'pages/Business_Partner_Master_Data.dart';
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
 import 'pages/purchasing/good_return_page.dart';
+// import 'pages/data_admin.dart'; // Uncomment jika file sudah ada
+// import 'pages/report.dart'; // Uncomment jika file sudah ada
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -27,9 +31,11 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  String currentView = "Login";
-  bool isLoggedIn = false;
+  // State Awal
+  String currentView = "Dashboard"; 
+  bool isLoggedIn = false; // Default false biar masuk ke Login dulu
 
+  // Data User Dummy
   int userLevel = 1;
   String userName = "Admin SAP";
   String userDiv = "Super User";
@@ -38,84 +44,62 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. HALAMAN FULL SCREEN (LOGIN/SIGNUP/FORGOT PW)
-    if (!isLoggedIn ||
-        currentView == "Login" ||
-        currentView == "Sign Up" ||
-        currentView == "Forgot Password") {
-      switch (currentView) {
-        case "Sign Up":
-          return SignUpPage(
-            onGoToLogin: () => setState(() => currentView = "Login"),
-            onBackToDashboard: () => setState(
-              () => currentView = isLoggedIn ? "Dashboard" : "Login",
-            ),
-          );
-        case "Forgot Password":
-          return ForgotPasswordPage(
-            onGoToLogin: () => setState(() => currentView = "Login"),
-            onBackToDashboard: () => setState(
-              () => currentView = isLoggedIn ? "Dashboard" : "Login",
-            ),
-          );
-        default: // Login Page
-          return LoginPage(
-            onLoginSuccess: () {
-              setState(() {
-                isLoggedIn = true;
-                currentView = "Dashboard";
-              });
-            },
-            onGoToSignUp: () => setState(() => currentView = "Sign Up"),
-            onForgotPassword: () =>
-                setState(() => currentView = "Forgot Password"),
-            onBackToDashboard: () {
-              setState(() => currentView = isLoggedIn ? "Dashboard" : "Login");
-            },
-          );
-      }
+    // 1. CEK STATUS LOGIN
+    // Jika belum login, tampilkan SapAuthPage (Single Page Login/Register)
+    if (!isLoggedIn) {
+      return SapAuthPage(
+        onLoginSuccess: () {
+          setState(() {
+            isLoggedIn = true;
+            currentView = "Dashboard"; // Masuk dashboard setelah login
+          });
+        },
+      );
     }
 
-    // 2. LAYOUT UTAMA (DENGAN SIDEBAR)
+    // 2. LAYOUT UTAMA (DENGAN SIDEBAR) - Hanya muncul jika sudah Login
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 850;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: const Color(0xFFF1F5F9), // Background abu muda
 
+      // Drawer (Sidebar) hanya untuk Mobile
       drawer: isMobile
           ? SidebarWidget(
               currentView: currentView,
-              onViewChanged: (view) {
-                setState(() => currentView = view);
-                Navigator.pop(context);
-              },
+              onViewChanged: (view) => _handleViewChange(view),
             )
           : null,
 
       body: Row(
         children: [
+          // Sidebar untuk Desktop
           if (!isMobile)
             SidebarWidget(
               currentView: currentView,
-              onViewChanged: (view) => setState(() => currentView = view),
+              onViewChanged: (view) => _handleViewChange(view),
             ),
 
+          // Area Konten Utama
           Expanded(
             child: Column(
               children: [
+                // Header Mobile (Tombol Menu)
                 if (isMobile)
                   Container(
                     padding: const EdgeInsets.all(10),
                     alignment: Alignment.centerLeft,
                     color: Colors.white,
                     child: IconButton(
-                      icon: const Icon(Icons.menu, color: AppColors.darkIndigo),
+                      // Hapus const agar tidak error warna
+                      icon: Icon(Icons.menu, color: AppColors.darkIndigo),
                       onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                     ),
                   ),
 
+                // Area Ganti Halaman (Animated Switcher)
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
@@ -130,70 +114,81 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
+  // --- LOGIC GANTI HALAMAN & LOGOUT ---
+  void _handleViewChange(String view) {
+    if (view == "Login") {
+      // Jika Sidebar mengirim sinyal "Login", itu artinya Logout
+      setState(() {
+        isLoggedIn = false; 
+      });
+    } else {
+      // Pindah Halaman Biasa
+      setState(() {
+        currentView = view;
+      });
+    }
+    
+    // Tutup drawer jika sedang di mobile
+    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      Navigator.pop(context);
+    }
+  }
+
+  // Widget Switcher Isi Halaman
   Widget _getContentWidget() {
+    return KeyedSubtree(
+      key: ValueKey(currentView),
+      child: _buildPageContent(),
+    );
+  }
+
+  Widget _buildPageContent() {
     switch (currentView) {
       case "Dashboard":
         return DashboardPage(
-          key: const ValueKey("Dashboard"),
           userLevel: userLevel,
           userName: userName,
           userDivision: userDiv,
-          onLogout: () => setState(() {
-            isLoggedIn = false;
-            currentView = "Login";
-          }),
+          onLogout: () => setState(() => isLoggedIn = false),
         );
 
-      case "Sales Quotation":
-        return const SalesQuotationPage(key: ValueKey("Sales Quotation"));
+      // --- PAGE ROUTING ---
+      case "Sales Quotation": return const SalesQuotationPage();
+      case "Sales Order": return const SalesOrderPage();
+      case "Delivery": return const DeliveryPage();
+      case "A/R Down Payment Invoice": return const ArDownPaymentInvoicePage();
+      case "A/R Invoice": return const ArInvoicePage();
+      case "A/R Credit Memo": return const ArCreditMemoPage();
+      case "Return": return const ReturnPage();
+      // case "Cancel & Read Off": return const CancelReadOffPage(); // Pastikan file ada
+      
+      case "Business Partner Master Data": return const BpMasterDataPage();
 
-      case "Sales Order":
-        return const SalesOrderPage(key: ValueKey("Sales Order"));
-
-      case "Delivery":
-        return const DeliveryPage(key: ValueKey("Delivery"));
-
-      case "A/R Down Payment Invoice":
-        return const ArDownPaymentInvoicePage(
-          key: ValueKey("A/R Down Payment Invoice"),
-        );
-
-      case "A/R Invoice":
-        return const ArInvoicePage(key: ValueKey("A/R Invoice"));
-
-      case "A/R Credit Memo":
-        return const ArCreditMemoPage(key: ValueKey("A/R Credit Memo"));
-
-      case "Business Partner Master Data":
-        return const BpMasterDataPage(
-          key: ValueKey("Business Partner Master Data"),
-        );
-
-      case "Return":
-        return const ReturnPage(key: ValueKey("Return"));
-
-      case "Purchase Request":
-        return const PurchaseRequestPage(key: ValueKey("Purchase Request"));
-
-      case "Purchase Quotation":
-        return const PurchaseQuotationPage(key: ValueKey("Purchase Quotation"));
-
-      case "Purchase Order":
-        return const PurchaseOrderPage(key: ValueKey("Purchase Order"));
-
-      case "Goods Return":
-        return const GoodReturnPage(key: ValueKey("Goods Return"));
+      case "Purchase Request": return const PurchaseRequestPage();
+      case "Purchase Quotation": return const PurchaseQuotationPage();
+      case "Purchase Order": return const PurchaseOrderPage();
+      case "Goods Return": return const GoodReturnPage();
+        
+      // case "Reports": return const ReportPage(); // Pastikan file ada
+      // case "Data Admin": return const DataAdminPage(); // Pastikan file ada
 
       default:
         return Center(
-          key: ValueKey(currentView),
-          child: Text(
-            "Halaman $currentView",
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkIndigo,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Hapus const agar aman
+              Icon(Icons.construction, size: 80, color: Colors.grey),
+              const SizedBox(height: 20),
+              Text(
+                "Halaman '$currentView' belum tersedia.",
+                style: TextStyle( // Hapus const agar aman
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkIndigo,
+                ),
+              ),
+            ],
           ),
         );
     }
