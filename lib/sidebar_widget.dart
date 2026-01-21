@@ -103,7 +103,7 @@ class SidebarWidget extends StatelessWidget {
                   _buildSubMenu("Goods Receipt PO", Icons.inventory_rounded),
                   _buildSubMenu(
                       "Goods Return", Icons.keyboard_return_rounded),
-                  _buildSubMenu("AP Down Payment", Icons.money_outlined),
+                  _buildSubMenu("A/P Down Payment", Icons.money_outlined),
                   _buildSubMenu("A/P Invoice", Icons.description_rounded),
                   _buildSubMenu(
                       "A/P Credit Memo", Icons.assignment_return_rounded),
@@ -139,7 +139,7 @@ class SidebarWidget extends StatelessWidget {
                 _buildSimpleMenu(
                     Icons.admin_panel_settings_outlined, "Data Admin"),
 
-                // --- REPLACEMENT: LOGOUT BUTTON ---
+              
                 const SizedBox(height: 20),
                 const Divider(
                     color: Colors.white24, indent: 20, endIndent: 20),
