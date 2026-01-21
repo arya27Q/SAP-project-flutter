@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http; // ❌ HAPUS: Tidak perlu HTTP lagi
 import '../../constants.dart';
 
 enum AuthMode { login, signup, forgotPassword }
@@ -17,6 +17,7 @@ class SapAuthPage extends StatefulWidget {
 
 class _SapAuthPageState extends State<SapAuthPage> {
   AuthMode _authMode = AuthMode.login;
+  bool _isReverseAnimation = false;
 
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
@@ -28,8 +29,10 @@ class _SapAuthPageState extends State<SapAuthPage> {
 
   String? selectedCompany;
   bool _isLoading = false;
-  bool _isSuccess = false;
-  bool _obscureText = true;
+
+  // Variabel password terpisah
+  bool _obscureText = true; // Untuk Login
+  bool _obscureSignup = true; // Untuk Signup
 
   final List<String> companies = [
     "PT. Dempo Laser Metalindo",
@@ -37,20 +40,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
     "PT. Senzo Feinmetal",
     "PT. ATMI Duta Engineering",
   ];
-
-  final Map<String, String> companyMapping = {
-    "PT. Dempo Laser Metalindo": "pt1",
-    "PT. Duta Laserindo Metal": "pt2",
-    "PT. Senzo Feinmetal": "pt3",
-    "PT. ATMI Duta Engineering": "pt4",
-  };
-
-  final Map<String, String> companyDomains = {
-    "PT. Dempo Laser Metalindo": "@dempo.co.id",
-    "PT. Duta Laserindo Metal": "@duta.co.id",
-    "PT. Senzo Feinmetal": "@senzo.co.id",
-    "PT. ATMI Duta Engineering": "@atmi.co.id",
-  };
 
   final List<Map<String, dynamic>> features = [
     {"title": "Real-time Dashboard Monitoring"},
@@ -70,155 +59,190 @@ class _SapAuthPageState extends State<SapAuthPage> {
     super.dispose();
   }
 
-  // --- LOGIC LOGIN (CONNECT LARAVEL) ---
-  Future<void> handleLogin() async {
-    if (selectedCompany == null) {
-      _showErrorSnackBar("Please select a Company first.");
-      return;
-    }
-
-    String email = _userController.text.trim().toLowerCase();
-    String password = _passController.text.trim();
-    String expectedDomain = companyDomains[selectedCompany!]!;
-
-    if (email.isEmpty || password.isEmpty) {
-      _showErrorSnackBar("Required fields are empty.");
-      return;
-    }
-
-    if (!email.endsWith(expectedDomain)) {
-      _showErrorSnackBar("Email must use domain $expectedDomain");
-      return;
-    }
-
-    // Validasi Password Login
-    bool startsWithUpper = RegExp(r'^[A-Z]').hasMatch(password);
-    bool hasYear = RegExp(r'\d{4}').hasMatch(password);
-
-    if (!startsWithUpper || !hasYear || password.length < 8) {
-      _showErrorSnackBar(
-        "Invalid Password! (Must start with Uppercase, contain Year, min 8 chars)",
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      // ⚠️ GANTI IP INI SESUAI IP LAPTOP KAMU
-      var url = Uri.parse('http://192.168.0.101:8000/api/test-login');
-
-      var response = await http
-          .post(
-            url,
-            body: {
-              'email': email,
-              'password': password,
-              'target_pt': companyMapping[selectedCompany],
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _isLoading = false;
-          _isSuccess = true;
-        });
-        Future.delayed(const Duration(seconds: 1), widget.onLoginSuccess);
-      } else {
-        setState(() => _isLoading = false);
-        _showErrorSnackBar(
-          "Login Failed: Invalid Credentials (${response.statusCode})",
-        );
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-      _showErrorSnackBar("Connection failed. Check IP & Server.");
-    }
-  }
-
-  // --- LOGIC SIGN UP (SUDAH DIPERBAIKI: PAKAI target_pt) ---
-  Future<void> handleSignup() async {
-    if (selectedCompany == null) {
-      _showErrorSnackBar("Please select a Company first.");
-      return;
-    }
-
-    String name = _signupNameController.text.trim();
-    String email = _signupEmailController.text.trim().toLowerCase();
-    String password = _signupPassController.text.trim();
-    String expectedDomain = companyDomains[selectedCompany!]!;
-
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
-      _showErrorSnackBar("All fields are required.");
-      return;
-    }
-
-    if (!email.endsWith(expectedDomain)) {
-      _showErrorSnackBar("Email must use domain $expectedDomain");
-      return;
-    }
-
-    bool startsWithUpper = RegExp(r'^[A-Z]').hasMatch(password);
-    bool hasYear = RegExp(r'\d{4}').hasMatch(password);
-
-    if (!startsWithUpper || !hasYear || password.length < 8) {
-      _showErrorSnackBar(
-        "Password: Start with Uppercase, include Year, min 8 chars",
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      // ⚠️ FIX: URL disesuaikan dengan routes/api.php kamu
-      var url = Uri.parse('http://192.168.0.101:8000/api/test-register');
-
-      var response = await http
-          .post(
-            url,
-            body: {
-              'name': name,
-              'email': email,
-              'password': password,
-              // 👇 INI YANG PENTING: HARUS 'target_pt', BUKAN 'company_code'
-              'target_pt': companyMapping[selectedCompany],
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        setState(() {
-          _isLoading = false;
-          _authMode = AuthMode.login;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Account Created! Please wait for Admin approval."),
-            backgroundColor: Colors.green,
+  // --- 🔥 1. FUNGSI PEMBANTU UTAMA (WAJIB ADA) 🔥 ---
+  void _showCustomDialog({
+    required String title,
+    required String message,
+    required IconData icon,
+    required Color color,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User tidak bisa klik luar
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: color, // Warna background dialog (Merah/Hijau)
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-        );
-      } else {
-        setState(() => _isLoading = false);
-        _showErrorSnackBar("Registration Failed: ${response.body}");
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-      _showErrorSnackBar("Connection failed. Check Server.");
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade800,
-        behavior: SnackBarBehavior.floating,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Ikon dalam lingkaran transparan
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: Colors.white, size: 48),
+              ),
+              const SizedBox(height: 24),
+              // Judul
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Pesan
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Tombol Putih
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: color, // Warna teks mengikuti tema dialog
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "OK, Got it",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  // --- 🔥 2. WRAPPER POPUP ERROR (MERAH) 🔥 ---
+  void _showErrorDialog(String message) {
+    if (!mounted) return;
+    _showCustomDialog(
+      title: "Oops!",
+      message: message,
+      icon: Icons.warning_amber_rounded,
+      color: const Color(0xFFB71C1C), // Merah Gelap
+    );
+  }
+
+  // --- 🔥 3. WRAPPER POPUP SUKSES (HIJAU) 🔥 ---
+  void _showSuccessDialog(String message) {
+    if (!mounted) return;
+    _showCustomDialog(
+      title: "Success!",
+      message: message,
+      icon: Icons.check_circle_outline_rounded,
+      color: const Color(0xFF2E7D32), // Hijau Gelap (Persis Gambar)
+    );
+  }
+
+  // --- LOGIC LOGIN (POPUP HIJAU) ---
+  Future<void> handleLogin() async {
+    if (selectedCompany == null) {
+      _showErrorDialog("Please select a Company first.");
+      return;
+    }
+
+    String email = _userController.text.trim();
+    String password = _passController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorDialog("Please enter your email and password.");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // Simulasi Loading
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+
+      // 🔥 MUNCULIN POPUP HIJAU 🔥
+      _showSuccessDialog("Login Successful! Redirecting...");
+
+      // Tunggu 2 detik, tutup dialog, lalu pindah halaman
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.of(context).pop(); // Tutup Dialog otomatis
+        }
+        widget.onLoginSuccess(); // Pindah ke Dashboard
+      });
+    }
+  }
+
+  // --- LOGIC SIGN UP (POPUP HIJAU) ---
+  Future<void> handleSignup() async {
+    if (selectedCompany == null) {
+      _showErrorDialog("Please select a Company first.");
+      return;
+    }
+
+    if (_signupNameController.text.isEmpty ||
+        _signupEmailController.text.isEmpty ||
+        _signupPassController.text.isEmpty) {
+      _showErrorDialog("Please fill in all fields.");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _isReverseAnimation = true;
+        _authMode = AuthMode.login;
+      });
+
+      // 🔥 MUNCULIN POPUP HIJAU 🔥
+      _showSuccessDialog(
+        "Account created successfully Please Login!",
+      );
+    }
+  }
+
+  void _switchAuthMode(AuthMode mode) {
+    setState(() {
+      _isReverseAnimation = (mode == AuthMode.login);
+      _authMode = mode;
+    });
   }
 
   @override
@@ -280,95 +304,23 @@ class _SapAuthPageState extends State<SapAuthPage> {
             ),
           ),
 
-          if (_isLoading || _isSuccess) _buildStatusOverlay(),
+          // Hanya loading yang overlay, popup sukses pakai Dialog
+          if (_isLoading) _buildStatusOverlay(),
         ],
       ),
     );
   }
 
   Widget _buildStatusOverlay() {
-    if (_isLoading) {
-      return Container(
-        color: Colors.black.withOpacity(0.5),
-        child: const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryIndigo),
-        ),
-      );
-    }
-
-    if (_isSuccess) {
-      return TweenAnimationBuilder<double>(
-        duration: const Duration(milliseconds: 800),
-        tween: Tween(begin: 0.0, end: 1.0),
-        curve: Curves.elasticOut,
-        builder: (context, value, child) {
-          return Stack(
-            children: [
-              Opacity(
-                opacity: value.clamp(0.0, 1.0),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(color: Colors.black.withOpacity(0.3)),
-                ),
-              ),
-              Center(
-                child: Transform.scale(
-                  scale: value,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 30,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF27273E),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black45, blurRadius: 20),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_rounded,
-                            color: Colors.green,
-                            size: 50,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "Login Successful!",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Redirecting to Dashboard...",
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    }
-    return const SizedBox.shrink();
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      child: const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryIndigo),
+      ),
+    );
   }
 
-  // --- DESKTOP LAYOUT (Desain Tetap) ---
+  // --- DESKTOP LAYOUT ---
   Widget _buildDesktopCardLayout() {
     return Container(
       width: 1200,
@@ -403,30 +355,44 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.bolt_rounded,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "SAP Business\nIntegration.",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      height: 1.1,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.bolt_rounded,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      const Text(
+                        "ERP System",
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
-                  Text(
+                  const Text(
+                    "Enterprise System DLM Group",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
                     "Integrated enterprise management platform for maximum efficiency.",
                     style: TextStyle(
                       fontSize: 16,
@@ -472,7 +438,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
             ),
           ),
 
-          // SISI KANAN (GLASSMORPHISM TERANG)
+          // SISI KANAN
           Expanded(
             flex: 1,
             child: ClipRRect(
@@ -484,7 +450,17 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05), // TINT PUTIH
+                    color: Colors.white.withOpacity(0.05),
+                    border: Border(
+                      left: BorderSide(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                      ),
+                      top: BorderSide(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
                   ),
                   child: Stack(
                     children: [
@@ -557,9 +533,30 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
+  // --- ANIMATED FORMS ---
   Widget _buildAnimatedAuthForms({required bool isDark}) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 600),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        final Offset beginOffset = _isReverseAnimation
+            ? const Offset(-0.1, 0.0)
+            : const Offset(0.1, 0.0);
+
+        final slideAnimation =
+            Tween<Offset>(begin: beginOffset, end: Offset.zero).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            );
+
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+
+        return SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
+        );
+      },
       child: _getCurrentView(isDark),
     );
   }
@@ -589,7 +586,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     color: Colors.white,
   );
 
-  // --- FORM WIDGETS ---
+  // --- LOGIN FORM ---
   Widget _buildLoginForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -638,8 +635,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () =>
-                setState(() => _authMode = AuthMode.forgotPassword),
+            onPressed: () => _switchAuthMode(AuthMode.forgotPassword),
             child: const Text(
               "Forgot Password?",
               style: TextStyle(
@@ -679,7 +675,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
 
         Center(
           child: GestureDetector(
-            onTap: () => setState(() => _authMode = AuthMode.signup),
+            onTap: () => _switchAuthMode(AuthMode.signup),
             child: RichText(
               text: TextSpan(
                 text: "Don't have an account? ",
@@ -697,10 +693,19 @@ class _SapAuthPageState extends State<SapAuthPage> {
             ),
           ),
         ),
+
+        const SizedBox(height: 40),
+        const Center(
+          child: Text(
+            "© 2026 PT. DLM Group • Enterprise System v1.0",
+            style: TextStyle(color: Colors.white24, fontSize: 12),
+          ),
+        ),
       ],
     );
   }
 
+  // --- SIGNUP FORM ---
   Widget _buildSignupForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -742,9 +747,24 @@ class _SapAuthPageState extends State<SapAuthPage> {
         _buildLabel("New Password"),
         TextFormField(
           controller: _signupPassController,
-          obscureText: true,
+          obscureText: _obscureSignup,
           style: const TextStyle(color: Colors.white),
-          decoration: _inputDecoration(Icons.lock_outline, "********", isDark),
+          decoration: _inputDecoration(Icons.lock_outline, "********", isDark)
+              .copyWith(
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureSignup
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureSignup = !_obscureSignup;
+                    });
+                  },
+                ),
+              ),
         ),
         const SizedBox(height: 40),
 
@@ -752,7 +772,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: handleSignup, // 🔥 LOGIC REAL DENGAN target_pt 🔥
+            onPressed: handleSignup,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryIndigo,
               foregroundColor: Colors.white,
@@ -771,7 +791,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
         const SizedBox(height: 20),
         Center(
           child: TextButton(
-            onPressed: () => setState(() => _authMode = AuthMode.login),
+            onPressed: () => _switchAuthMode(AuthMode.login),
             child: const Text(
               "Back to Login",
               style: TextStyle(color: Colors.white70),
@@ -782,6 +802,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
+  // --- FORGOT FORM ---
   Widget _buildForgotForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -814,16 +835,12 @@ class _SapAuthPageState extends State<SapAuthPage> {
           child: ElevatedButton(
             onPressed: () {
               if (selectedCompany == null) {
-                _showErrorSnackBar("Please select a Company first.");
+                _showErrorDialog("Please select a Company first.");
                 return;
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Link Sent!"),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              setState(() => _authMode = AuthMode.login);
+              // 🔥 GANTI: Pakai Dialog Sukses Kotak Hijau
+              _showSuccessDialog("Link Sent (Simulation)! Please check email.");
+              _switchAuthMode(AuthMode.login);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryIndigo,
@@ -841,7 +858,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
         const SizedBox(height: 20),
         Center(
           child: TextButton(
-            onPressed: () => setState(() => _authMode = AuthMode.login),
+            onPressed: () => _switchAuthMode(AuthMode.login),
             child: const Text(
               "Back to Login",
               style: TextStyle(color: Colors.white70),
@@ -886,13 +903,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
 
   InputDecoration _inputDecoration(IconData icon, String hint, bool isDark) {
     return InputDecoration(
-      // Ikon Putih
       prefixIcon: Icon(icon, size: 20, color: Colors.white),
-
       hintText: hint,
-      // 👇👇 GANTI INI JADI Colors.white (JANGAN white54) 👇👇
       hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
-
       filled: true,
       fillColor: Colors.white.withOpacity(0.1),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
