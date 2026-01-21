@@ -866,6 +866,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
       isExpanded: true,
       dropdownColor: const Color(0xFF2E2E48),
       style: const TextStyle(color: Colors.white),
+      hint: const Text("Select Company", style: TextStyle(color: Colors.white)),
       decoration: _inputDecoration(
         Icons.business_rounded,
         "Select Company",
@@ -885,9 +886,13 @@ class _SapAuthPageState extends State<SapAuthPage> {
 
   InputDecoration _inputDecoration(IconData icon, String hint, bool isDark) {
     return InputDecoration(
-      prefixIcon: Icon(icon, size: 20, color: Colors.white70),
+      // Ikon Putih
+      prefixIcon: Icon(icon, size: 20, color: Colors.white),
+
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+      // 👇👇 GANTI INI JADI Colors.white (JANGAN white54) 👇👇
+      hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
+
       filled: true,
       fillColor: Colors.white.withOpacity(0.1),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
