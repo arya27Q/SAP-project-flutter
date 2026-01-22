@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 
-class JournalEntryPage extends StatefulWidget {
-  const JournalEntryPage({super.key});
+class OutgoingPaymentPage extends StatefulWidget {
+  const OutgoingPaymentPage({super.key});
 
   @override
-  State<JournalEntryPage> createState() => _JournalEntryPageState();
+  State<OutgoingPaymentPage> createState() => _OutgoingPaymentPageState();
 }
 
-class _JournalEntryPageState extends State<JournalEntryPage>
+class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
     with SingleTickerProviderStateMixin {
   bool showSidePanel = false;
   late TabController _tabController;
@@ -29,18 +29,18 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
-    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cleanText.isEmpty) return "0,00";
-    double parsed = double.tryParse(cleanText) ?? 0.0;
+  String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+  if (cleanText.isEmpty) return "0,00";
+  double parsed = double.tryParse(cleanText) ?? 0.0;
 
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: '',
-      decimalDigits: 2,
-    );
-
-    return formatter.format(parsed);
-  }
+  final formatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: '', 
+    decimalDigits: 2,
+  );
+  
+  return formatter.format(parsed);
+}
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
     return _controllers.putIfAbsent(
@@ -49,10 +49,10 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
-  FocusNode _getFn(
+FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0,00",
+    String defaultValue = "0,00", 
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -80,16 +80,15 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               key.contains("f_rounding");
 
           if (isNumericField) {
-            String cleanText = controller.text.replaceAll(
-              RegExp(r'[^0-9]'),
-              '',
-            );
+            // Bersihkan semua karakter non-angka termasuk % lama
+            String cleanText = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
             double? parsed = double.tryParse(cleanText);
 
             if (mounted) {
               setState(() {
                 if (parsed != null) {
                   if (isPercent) {
+                    // UBAH DI SINI: Tambahkan simbol % setelah angka
                     controller.text = "${parsed.toStringAsFixed(0)}%";
                   } else {
                     controller.text = NumberFormat.currency(
@@ -102,7 +101,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
-
+                
                 _syncTotalBeforeDiscount();
               });
             }
@@ -128,7 +127,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       lastDate: DateTime(2101),
     );
     if (picked != null) {
-      String formattedDate = DateFormat('dd.MMMM.yyyy').format(picked);
+      String day = picked.day.toString().padLeft(2, '0');
+      String month = picked.month.toString().padLeft(2, '0');
+      String year = picked.year.toString();
+      String formattedDate = "$day/$month/$year";
+
       setState(() {
         _getCtrl(key).text = formattedDate;
         _fieldValues[key] = formattedDate;
@@ -136,13 +139,15 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     }
   }
 
-  double _getGrandTotal() {
+double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
+      
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
-          .replaceAll('%', '');
+          .replaceAll('%', ''); // Tambahkan ini
+      
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
@@ -181,19 +186,10 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                // 1. HEADER UTAMA
                 RepaintBoundary(child: _buildModernHeader()),
                 const SizedBox(height: 16),
-
-                // 2. MIDDLE SECTION (CONTAINER "FOTO KETIGA")
-                RepaintBoundary(child: _buildMiddleHeader()),
-                const SizedBox(height: 16),
-
-                // 3. TABS
                 _buildTabSection(),
                 const SizedBox(height: 16),
-
-                // 4. FOOTER
                 _buildModernFooter(),
               ],
             ),
@@ -210,7 +206,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
-  // --- HEADER UTAMA (UPDATED: REF 1 & 3 SEJAJAR DATE) ---
   Widget _buildModernHeader() => Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     padding: const EdgeInsets.all(24),
@@ -231,399 +226,52 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // --- KOLOM KIRI (70%) ---
         Expanded(
-          flex: 7,
+          flex: 6,
           child: Column(
             children: [
-              // Row 1: Series & No | Posting Date
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernNoFieldRow(
-                      "Series",
-                      "h_series",
-                      ["26S", "25S"],
-                      "h_no",
-                      initialNo: "263301173",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Posting Date",
-                      "h_post",
-                      "21.January.2026",
-                    ),
-                  ),
-                ],
-              ),
+              _buildModernFieldRow("Customer", "h_cust"),
               const SizedBox(height: 12),
-
-              // Row 2: Origin | Due Date
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: Text(
-                            "Origin",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: secondarySlate,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 28),
-                        Expanded(
-                          child: _buildSmallDropdown("h_origin", [
-                            "IN",
-                            "OUT",
-                            "CN",
-                          ]),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildSimpleTextField(
-                            "h_origin_no",
-                            initial: "261300204",
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Due Date",
-                      "h_due",
-                      "20.February.2026",
-                    ),
-                  ),
-                ],
-              ),
+              _buildModernFieldRow("Name", "h_name"),
               const SizedBox(height: 12),
-
-              // Row 3: Trans No | Doc Date
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernFieldRow(
-                      "Trans. No.",
-                      "h_trans_no",
-                      initial: "241251",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Doc. Date",
-                      "h_doc_date",
-                      "21.January.2026",
-                    ),
-                  ),
-                ],
-              ),
+              _buildModernFieldRow("Contact Person", "h_cont"),
               const SizedBox(height: 12),
-
-              // Row 4: Trans Code (Kiri) | Ref 1 (Kanan - Lurus dengan Date)
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: Text(
-                            "Trans. Code",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: secondarySlate,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 28),
-                        Expanded(
-                          child: _buildSmallDropdown("h_trans_code", [
-                            "",
-                            "Code 1",
-                            "Code 2",
-                          ]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    // Ref 1 disini, pakai label width 120 biar sejajar sama Date labels
-                    child: _buildModernFieldRow(
-                      "Ref. 1",
-                      "h_ref1",
-                      initial: "261300204",
-                      labelWidth: 90,
-                    ),
-                  ),
-                ],
-              ),
+              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
               const SizedBox(height: 12),
-
-              // Row 5: Ref 2 (Kiri) | Ref 3 (Kanan - Lurus dengan Ref 1 & Date)
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernFieldRow(
-                      "Ref. 2",
-                      "h_ref2",
-                      initial: "7100003678",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    // Ref 3 disini, pakai label width 120 biar sejajar sama Ref 1 & Date
-                    child: _buildModernFieldRow(
-                      "Ref. 3",
-                      "h_ref3",
-                      labelWidth: 90,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Row 6: Blanket Agreement
-              _buildModernFieldRow("Blanket Agreement", "h_blanket"),
+              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
+                "IDR",
+                "USD",
+                "EUR",
+              ]),
             ],
           ),
         ),
-        const SizedBox(width: 40),
-
-        // --- KOLOM KANAN (30%) ---
+        const SizedBox(width: 60),
         Expanded(
-          flex: 3,
+          flex: 4,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Remarks",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: secondarySlate,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF9C4),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: borderGrey),
-                    ),
-                    child: TextField(
-                      controller: _getCtrl(
-                        "h_remarks",
-                        initial: "A/R Invoices - C-01058",
-                      ),
-                      style: const TextStyle(fontSize: 12),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              _buildModernNoFieldRow(
+                "No.",
+                "h_no_series",
+                ["2025-COM", "2024-REG"],
+                "h_no_val",
+                initialNo: "256100727",
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSmallDropdown("h_temp_type", [
-                      "Template Type",
-                    ]),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildSmallDropdown("h_template", ["Template"]),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSmallDropdown("h_indicator", ["Indicator"]),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildSimpleTextField("h_project", hint: "Project"),
-                  ),
-                ],
-              ),
+              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
               const SizedBox(height: 12),
-              _buildCompactCheckbox(
-                "Revaluation Reporting Exch. Rate",
-                "cb_reval",
-              ),
-              _buildCompactCheckbox("Automatic Tax", "cb_auto_tax"),
-              _buildCompactCheckbox("Manage Deferred Tax", "cb_def_tax"),
-              _buildCompactCheckbox("Manage WTax", "cb_wtax"),
+              _buildHeaderDate("Posting Date", "h_post_date", ""),
+              const SizedBox(height: 12),
+              _buildHeaderDate("Delivery Date", "h_deliv", ""),
+              const SizedBox(height: 12),
+              _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
         ),
       ],
     ),
   );
-
-  // --- MIDDLE HEADER (FOTO KETIGA - DIRAPIKAN) ---
- Widget _buildMiddleHeader() => Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(24),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white, width: 3.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 18,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- KOLOM KIRI (Flex 1) ---
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _buildModernFieldRow("G/L Acct/BP Code", "h_bp_code", initial: "C-01058"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("G/L Acct/BP Name", "h_bp_name", initial: "PT REKAINDO GLOBAL JASA"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 1", "h_ref1", initial: "261300204"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 2", "h_ref2", initial: "7100003678"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 3", "h_ref3", initial: "1"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Offset Account", "h_offset", initial: "4111101-1-1-02"),
-                  ],
-                ),
-              ),
-              
-              // Jarak horizontal antar kolom
-              const SizedBox(width: 40),
-
-            
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _buildHeaderDate("Posting Date", "h_post", "21.January.2026"),
-                    const SizedBox(height: 12),
-                    _buildHeaderDate("Due Date", "h_due", "20.February.2026"),
-                    const SizedBox(height: 12),
-                    _buildHeaderDate("Doc. Date", "h_doc_date", "21.January.2026"),
-                    const SizedBox(height: 12),
-                    _buildField("Project", "h_project", initial: ""),
-                    const SizedBox(height: 12),
-                    _buildField("Tax Group", "h_tax_group", initial: ""),
-                    const SizedBox(height: 12),
-                    _buildField("Distr. Rule", "h_distr_rule", initial: ""),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Baris terakhir memanjang penuh di bawah
-          _buildModernFieldRow("Primary Form Item", "h_primary_form", initial: ""),
-        ],
-      ),
-    );
-  // Helper Widget: Label di Atas, Dropdown di Bawah (Style SAMA dengan Header)
-  
-  // --- WIDGET HELPER LAINNYA ---
-
-  Widget _buildSimpleTextField(
-    String key, {
-    String initial = "",
-    String? hint,
-  }) {
-    return Container(
-      height: 30,
-      decoration: BoxDecoration(
-        color: bgSlate,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: borderGrey),
-      ),
-      child: TextField(
-        controller: _getCtrl(key, initial: initial),
-        style: const TextStyle(fontSize: 12),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(fontSize: 11, color: Colors.grey.shade400),
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 8,
-          ),
-        ),
-        onChanged: (val) => _fieldValues[key] = val,
-      ),
-    );
-  }
-
-  Widget _buildCompactCheckbox(String label, String key) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: Checkbox(
-            value: _checkStates[key] ?? false,
-            activeColor: primaryIndigo,
-            onChanged: (val) => setState(() => _checkStates[key] = val!),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 11, color: secondarySlate),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildTabSection() {
     return Container(
@@ -828,12 +476,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       ],
     );
   }
-
-  DataCell _buildModernTableCell(
-    String key, {
-    String initial = "",
-    bool isPercent = false,
-  }) {
+  
+ DataCell _buildModernTableCell(String key, {String initial = "", bool isPercent = false}) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -848,10 +492,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         key.contains("f_tax") ||
         key.contains("f_rounding");
 
+  
     final focusNode = _getFn(
-      key,
-      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "",
-      isPercent: isPercent,
+      key, 
+      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "", 
+      isPercent: isPercent
     );
 
     return DataCell(
@@ -960,15 +605,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      String val =
-          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String val = _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+      String cleanVal = val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
       totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
-
+    
     setState(() {
       String formatted = NumberFormat.currency(
         locale: 'id_ID',
@@ -1071,7 +712,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           ),
         ),
         const SizedBox(width: 60),
-        
         Expanded(
           child: Column(
             children: [
@@ -1097,7 +737,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-
+    
     String formattedTotal = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
@@ -1213,7 +853,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     return Row(
       children: [
         SizedBox(
-          width: 90, // Lebar label seragam agar kotak input sejajar
+          width: 120, // Lebar label seragam agar kotak input sejajar
           child: Text(
             label,
             style: TextStyle(
@@ -1440,7 +1080,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     bool isTextArea = false,
     String initial = "",
     bool isDecimal = false,
-    double? labelWidth,
   }) {
     String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
     final controller = _getCtrl(key, initial: effectiveInitial);
@@ -1452,7 +1091,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: labelWidth ?? 120, // Bisa custom lebar label
+            width: 120, // Lebar label seragam agar kotak input sejajar
             child: Text(
               label,
               style: TextStyle(
@@ -1498,72 +1137,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       ),
     );
   }
-  
-   Widget _buildField(
-    String label,
-    String key, {
-    bool isTextArea = false,
-    String initial = "",
-    bool isDecimal = false,
-    double? labelWidth,
-  }) {
-    String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
-    final controller = _getCtrl(key, initial: effectiveInitial);
-    FocusNode? focusNode = isDecimal ? _getFn(key, defaultValue: "0.00") : null;
-
-    return Padding(
-      padding: EdgeInsets.zero,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: labelWidth ?? 90, // Bisa custom lebar label
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: secondarySlate,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
-          Expanded(
-            child: Container(
-              height: isTextArea ? 80 : 32,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: bgSlate,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: Center(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  maxLines: isTextArea ? 3 : 1,
-                  textAlign: TextAlign.left,
-                  keyboardType: isDecimal
-                      ? const TextInputType.numberWithOptions(decimal: true)
-                      : TextInputType.text,
-                  style: const TextStyle(fontSize: 12, color: Colors.black),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  onChanged: (val) {
-                    _fieldValues[key] = val;
-                  },
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   Widget _buildModernNoFieldRow(
     String label,
@@ -1598,7 +1171,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             child: Row(
               children: [
                 Container(
-                  width: 70,
+                  width: 110,
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(

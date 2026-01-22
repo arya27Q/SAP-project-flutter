@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
+
 import 'pages/account/sap_auth_page.dart';
+
 import 'pages/dashboard.dart';
+
 import 'pages/sales_AR/sales_order_page.dart';
 import 'pages/sales_AR/sales_quotation_page.dart';
 import 'pages/sales_AR/delivery_page.dart';
@@ -10,7 +13,9 @@ import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'pages/sales_AR/ar_invoice_page.dart';
 import 'pages/sales_AR/ar_credit_memo_page.dart';
 import 'pages/sales_AR/return_page.dart';
+
 import 'pages/Business_Partner_Master_Data.dart';
+
 import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
@@ -18,6 +23,11 @@ import 'pages/purchasing/good_return_page.dart';
 import 'pages/purchasing/ap_down_payment_page.dart';
 import 'pages/purchasing/ap_invoice_page.dart';
 import 'pages/purchasing/ap_credit_memo_page.dart';
+
+import 'pages/banking/incoming_payments/incoming_payment_page.dart';
+import 'pages/banking/outgoing_payments/outgoing_payment_page.dart';
+
+import 'pages/financials/journal_entry_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -27,11 +37,8 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  // State Awal
   String currentView = "Dashboard";
-  bool isLoggedIn = false; // Default false biar masuk ke Login dulu
-
-  // Data User Dummy
+  bool isLoggedIn = false; 
   int userLevel = 1;
   String userName = "Admin SAP";
   String userDiv = "Super User";
@@ -45,20 +52,19 @@ class _MainLayoutState extends State<MainLayout> {
         onLoginSuccess: () {
           setState(() {
             isLoggedIn = true;
-            currentView = "Dashboard"; 
+            currentView = "Dashboard";
           });
         },
       );
     }
 
-    
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 850;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF1F5F9), 
-      
+      backgroundColor: const Color(0xFFF1F5F9),
+
       drawer: isMobile
           ? SidebarWidget(
               currentView: currentView,
@@ -165,18 +171,25 @@ class _MainLayoutState extends State<MainLayout> {
       case "A/P Credit Memo":
         return const ApCreditMemoPage();
 
+      case "Incoming Payments":
+        return const IncomingPaymentPage();
+
+      case "Outgoing Payments":
+        return const OutgoingPaymentPage(); 
+
+      case "Journal Entry":
+        return const JournalEntryPage();
+
       default:
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Hapus const agar aman
               Icon(Icons.construction, size: 80, color: Colors.grey),
               const SizedBox(height: 20),
               Text(
                 "Halaman '$currentView' belum tersedia.",
                 style: TextStyle(
-                  // Hapus const agar aman
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.darkIndigo,
