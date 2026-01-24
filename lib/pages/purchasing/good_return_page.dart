@@ -976,7 +976,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1088,7 +1088,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1132,15 +1132,19 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0), 
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
@@ -1206,7 +1210,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1272,7 +1276,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1423,7 +1427,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1739,7 +1743,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1764,7 +1768,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1784,7 +1788,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),

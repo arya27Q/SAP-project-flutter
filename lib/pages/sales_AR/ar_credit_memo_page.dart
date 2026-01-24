@@ -26,7 +26,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
- String formatPrice(String value) {
+  String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
@@ -165,8 +165,10 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     double tax = parseValue("f_tax");
     double rounding = parseValue("f_rounding");
 
+    // Rumus: (Sebelum Diskon - Diskon) + WTax + Rounding + Pajak
     return (before - discVal) + wtaxamount + rounding + tax;
   }
+
   Future<void> _selectDate(BuildContext context, String key) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -497,6 +499,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       ],
     );
   }
+
   DataCell _buildModernTableCell(
     String key, {
     String initial = "",
@@ -1085,7 +1088,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1129,19 +1132,24 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0), // Border tipis biasa
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black, // Hitam biar kontras
+          // Pakai w600: Lebih tebel dari biasa, tapi ga se-gemuk bold
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          border: InputBorder.none, // Penting biar ga rusak tampilannya
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1203,7 +1211,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1269,7 +1277,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1420,7 +1428,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1463,7 +1471,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
+          title: Text(" $label", style: const TextStyle(fontSize: 14)),
           content: SizedBox(
             width: 300,
             height: 300,
@@ -1723,20 +1731,13 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
-          // SizedBox(
-          //   width: 120,
-          //   child: Text("BP Currency", ...),
-          // ),
-          // const SizedBox(width: 28),
-
           // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
           Container(
             width: 150,
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1761,7 +1762,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1781,7 +1782,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),

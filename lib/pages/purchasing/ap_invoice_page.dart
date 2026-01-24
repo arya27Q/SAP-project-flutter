@@ -10,7 +10,7 @@ class ApInvoicePage extends StatefulWidget {
 }
 
 class _ApInvoicePageState extends State<ApInvoicePage>
-    with SingleTickerProviderStateMixin {
+     with SingleTickerProviderStateMixin {
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
@@ -977,7 +977,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1089,7 +1089,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1133,8 +1133,8 @@ class _ApInvoicePageState extends State<ApInvoicePage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey,width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
@@ -1207,7 +1207,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1273,7 +1273,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1424,7 +1424,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1727,20 +1727,13 @@ class _ApInvoicePageState extends State<ApInvoicePage>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
-          // SizedBox(
-          //   width: 120,
-          //   child: Text("BP Currency", ...),
-          // ),
-          // const SizedBox(width: 28),
-
           // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
           Container(
             width: 150,
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1758,14 +1751,13 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             ),
           ),
           const SizedBox(width: 8),
-
           // 2. Label IDR
           Container(
             width: 60,
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1785,7 +1777,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),

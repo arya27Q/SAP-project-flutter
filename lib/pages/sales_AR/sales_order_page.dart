@@ -1002,7 +1002,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1046,37 +1046,29 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+      color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
             setState(() {
               _fieldValues[key] = val;
-              if (key == "f_disc_pct") {
-                double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
-                      _getCtrl(
-                        "f_before_disc",
-                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ??
-                    0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
-                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
-              }
             });
           }
         },
@@ -1117,7 +1109,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1185,7 +1177,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1336,7 +1328,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1447,7 +1439,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),

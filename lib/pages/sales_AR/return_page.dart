@@ -820,7 +820,7 @@ class _ReturnPageState extends State<ReturnPage>
             height: isTextArea ? 80 : 32,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -879,7 +879,7 @@ class _ReturnPageState extends State<ReturnPage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1026,7 +1026,7 @@ class _ReturnPageState extends State<ReturnPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1135,7 +1135,7 @@ class _ReturnPageState extends State<ReturnPage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
 
+import 'main.dart';
+
 class SidebarWidget extends StatelessWidget {
   final String currentView;
   final Function(String) onViewChanged;
@@ -35,6 +37,8 @@ class SidebarWidget extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
+                    // Border putih tebal di logo
+                    border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: const Icon(
                     Icons.bolt,
@@ -79,7 +83,6 @@ class SidebarWidget extends StatelessWidget {
                   ],
                 ),
 
-                // --- FINANCIAL ---
                 _buildExpansionMenu(
                   context,
                   Icons.account_balance_wallet_rounded,
@@ -100,7 +103,6 @@ class SidebarWidget extends StatelessWidget {
                     ),
                     _buildSubMenu("Cost Accounting", Icons.calculate_outlined),
 
-                    // Financial Report
                     _buildSubExpansionMenu(
                       context,
                       "Financial Report",
@@ -200,13 +202,11 @@ class SidebarWidget extends StatelessWidget {
                   ],
                 ),
 
-                // --- BANKING ---
                 _buildExpansionMenu(
                   context,
                   Icons.account_balance_rounded,
                   "Banking",
                   [
-                    // 1. Incoming Payments (Folder)
                     _buildSubExpansionMenu(
                       context,
                       "Incoming Payments",
@@ -227,11 +227,7 @@ class SidebarWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                    // 2. Deposits
                     _buildSubMenu("Deposits", Icons.folder_open_outlined),
-
-                    // 3. Outgoing Payments (Folder)
                     _buildSubExpansionMenu(
                       context,
                       "Outgoing Payments",
@@ -255,8 +251,6 @@ class SidebarWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                    // 4. Bank Statements (Folder)
                     _buildSubExpansionMenu(
                       context,
                       "Bank Statements & Recon.",
@@ -324,77 +318,63 @@ class SidebarWidget extends StatelessWidget {
 
   // --- HELPER WIDGETS ---
 
-  Widget _buildSimpleMenu(IconData icon, String title) {
+  Widget _buildSimpleMenu(IconData icon, String title, {VoidCallback? onTap}) {
     bool isActive = currentView == title;
-    return InkWell(
-      onTap: () => onViewChanged(title),
-      child: Container(
-        // Perubahan disini: constraints & padding
-        constraints: const BoxConstraints(minHeight: 50),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white.withOpacity(0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 24,
-              child: Center(
-                child: Icon(
-                  icon,
-                  color: Colors.white.withOpacity(isActive ? 1.0 : 0.7),
-                  size: 22,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      child: InkWell(
+        onTap: onTap ?? () => onViewChanged(title),
+        hoverColor: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 50),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive
+                ? Colors.white.withOpacity(0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isActive ? Colors.white : Colors.transparent,
+              width: 2.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 24,
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: Colors.white.withOpacity(isActive ? 1.0 : 0.7),
+                    size: 22,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                // overflow dihapus
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLogoutMenu() {
-    return InkWell(
+    return _buildSimpleMenu(
+      Icons.logout_rounded,
+      "Logout",
       onTap: () => onViewChanged("Login"),
-      child: Container(
-        height: 50,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        child: Row(
-          children: const [
-            SizedBox(width: 12),
-            SizedBox(
-              width: 24,
-              child: Center(
-                child: Icon(
-                  Icons.logout_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ),
-            SizedBox(width: 16),
-            Text(
-              "Logout",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -416,7 +396,11 @@ class SidebarWidget extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         iconColor: Colors.white,
         collapsedIconColor: Colors.white70,
@@ -425,7 +409,6 @@ class SidebarWidget extends StatelessWidget {
     );
   }
 
-  // Sub-Menu Bertingkat (Level 2 & 3)
   Widget _buildSubExpansionMenu(
     BuildContext context,
     String title,
@@ -441,7 +424,6 @@ class SidebarWidget extends StatelessWidget {
         title: Text(
           title,
           style: const TextStyle(color: Colors.white60, fontSize: 13),
-          // Perubahan: overflow dihapus agar teks membungkus (wrap)
         ),
         iconColor: Colors.white,
         collapsedIconColor: Colors.white60,
@@ -451,45 +433,49 @@ class SidebarWidget extends StatelessWidget {
     );
   }
 
-  // Helper untuk Item Menu Biasa (Anak Menu)
   Widget _buildSubMenu(String title, IconData subIcon) {
     bool isSubActive = currentView == title;
-    return InkWell(
-      onTap: () => onViewChanged(title),
-      child: Container(
-        // PERBAIKAN DI SINI:
-        // 1. Gunakan constraints minHeight biar bisa memanjang
-        constraints: const BoxConstraints(minHeight: 40),
-        // 2. Tambah padding vertikal agar tulisan tidak kejepit
-        padding: const EdgeInsets.symmetric(vertical: 8),
-
-        margin: const EdgeInsets.only(left: 20, right: 16, bottom: 2),
-        decoration: BoxDecoration(
-          color: isSubActive
-              ? Colors.white.withOpacity(0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 32),
-            Icon(
-              subIcon,
-              size: 16,
-              color: isSubActive ? Colors.white : Colors.white60,
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 16, bottom: 2),
+      child: InkWell(
+        onTap: () => onViewChanged(title),
+        hoverColor: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSubActive
+                ? Colors.white.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSubActive
+                  ? Colors.white.withOpacity(0.5)
+                  : Colors.transparent,
+              width: 1.5,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isSubActive ? Colors.white : Colors.white60,
-                  fontSize: 13,
-                ),
-                // 3. Overflow dihapus agar teks turun ke bawah
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 32),
+              Icon(
+                subIcon,
+                size: 16,
+                color: isSubActive ? Colors.white : Colors.white60,
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isSubActive ? Colors.white : Colors.white60,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

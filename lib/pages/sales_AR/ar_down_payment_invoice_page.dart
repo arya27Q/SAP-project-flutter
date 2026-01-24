@@ -1089,7 +1089,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1133,19 +1133,24 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0), // Border tipis biasa
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black, // Hitam biar kontras
+          // Pakai w600: Lebih tebel dari biasa, tapi ga se-gemuk bold
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          border: InputBorder.none, // Penting biar ga rusak tampilannya
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1207,7 +1212,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1273,7 +1278,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1424,7 +1429,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1727,20 +1732,13 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
-          // SizedBox(
-          //   width: 120,
-          //   child: Text("BP Currency", ...),
-          // ),
-          // const SizedBox(width: 28),
-
           // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
           Container(
             width: 150,
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1765,7 +1763,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1785,7 +1783,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),

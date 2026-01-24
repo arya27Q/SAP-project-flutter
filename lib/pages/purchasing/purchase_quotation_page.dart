@@ -263,7 +263,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       height: 32,
                       margin: const EdgeInsets.only(right: 4),
                       decoration: BoxDecoration(
-                        color: bgSlate,
+                        color: Colors.white,
                         border: Border.all(color: borderGrey),
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -284,7 +284,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       child: Container(
                         height: 32,
                         decoration: BoxDecoration(
-                          color: bgSlate,
+                          color: Colors.white,
                           border: Border.all(color: borderGrey),
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -355,7 +355,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
               child: Container(
                 height: 32,
                 decoration: BoxDecoration(
-                  color: bgSlate,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: borderGrey),
                 ),
@@ -412,7 +412,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
           child: Container(
             height: 32,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1182,7 +1182,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1234,8 +1234,8 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
@@ -1243,7 +1243,11 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
         focusNode: focusNode,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
@@ -1283,7 +1287,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
             height: isTextArea ? 80 : 32,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),

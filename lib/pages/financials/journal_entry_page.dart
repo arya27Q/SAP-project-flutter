@@ -496,80 +496,107 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   );
 
   // --- MIDDLE HEADER (FOTO KETIGA - DIRAPIKAN) ---
- Widget _buildMiddleHeader() => Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(24),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white, width: 3.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 18,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- KOLOM KIRI (Flex 1) ---
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _buildModernFieldRow("G/L Acct/BP Code", "h_bp_code", initial: "C-01058"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("G/L Acct/BP Name", "h_bp_name", initial: "PT REKAINDO GLOBAL JASA"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 1", "h_ref1", initial: "261300204"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 2", "h_ref2", initial: "7100003678"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Ref. 3", "h_ref3", initial: "1"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow("Offset Account", "h_offset", initial: "4111101-1-1-02"),
-                  ],
-                ),
+  Widget _buildMiddleHeader() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.all(24),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(color: Colors.white, width: 3.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 18,
+          spreadRadius: 2,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- KOLOM KIRI (Flex 1) ---
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  _buildModernFieldRow(
+                    "G/L Acct/BP Code",
+                    "h_bp_code",
+                    initial: "C-01058",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "G/L Acct/BP Name",
+                    "h_bp_name",
+                    initial: "PT REKAINDO GLOBAL JASA",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Ref. 1",
+                    "h_ref1",
+                    initial: "261300204",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Ref. 2",
+                    "h_ref2",
+                    initial: "7100003678",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Ref. 3", "h_ref3", initial: "1"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Offset Account",
+                    "h_offset",
+                    initial: "4111101-1-1-02",
+                  ),
+                ],
               ),
-              
-              // Jarak horizontal antar kolom
-              const SizedBox(width: 40),
+            ),
 
-            
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _buildHeaderDate("Posting Date", "h_post", "21.January.2026"),
-                    const SizedBox(height: 12),
-                    _buildHeaderDate("Due Date", "h_due", "20.February.2026"),
-                    const SizedBox(height: 12),
-                    _buildHeaderDate("Doc. Date", "h_doc_date", "21.January.2026"),
-                    const SizedBox(height: 12),
-                    _buildField("Project", "h_project", initial: ""),
-                    const SizedBox(height: 12),
-                    _buildField("Tax Group", "h_tax_group", initial: ""),
-                    const SizedBox(height: 12),
-                    _buildField("Distr. Rule", "h_distr_rule", initial: ""),
-                  ],
-                ),
+            // Jarak horizontal antar kolom
+            const SizedBox(width: 40),
+
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  _buildHeaderDate("Posting Date", "h_post", "21.January.2026"),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("Due Date", "h_due", "20.February.2026"),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate(
+                    "Doc. Date",
+                    "h_doc_date",
+                    "21.January.2026",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildField("Project", "h_project", initial: ""),
+                  const SizedBox(height: 12),
+                  _buildField("Tax Group", "h_tax_group", initial: ""),
+                  const SizedBox(height: 12),
+                  _buildField("Distr. Rule", "h_distr_rule", initial: ""),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Baris terakhir memanjang penuh di bawah
-          _buildModernFieldRow("Primary Form Item", "h_primary_form", initial: ""),
-        ],
-      ),
-    );
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Baris terakhir memanjang penuh di bawah
+        _buildModernFieldRow(
+          "Primary Form Item",
+          "h_primary_form",
+          initial: "",
+        ),
+      ],
+    ),
+  );
   // Helper Widget: Label di Atas, Dropdown di Bawah (Style SAMA dengan Header)
-  
+
   // --- WIDGET HELPER LAINNYA ---
 
   Widget _buildSimpleTextField(
@@ -580,7 +607,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     return Container(
       height: 30,
       decoration: BoxDecoration(
-        color: bgSlate,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: borderGrey),
       ),
@@ -785,7 +812,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
           ),
         ),
-        _buildSearchableCell("item_no_$index"),
+        _buildSearchableCell("G/L/Acc/Bp_$index"),
         _buildModernTableCell("jenis_brg_$index"),
         _buildModernTableCell("desc_$index"),
         _buildModernTableCell("jenis_item_$index"),
@@ -902,19 +929,19 @@ class _JournalEntryPageState extends State<JournalEntryPage>
 
     return [
       centeredHeader("#"),
-      centeredHeader("Item No."),
-      centeredHeader("Jenis Barang dan Jasa"),
-      centeredHeader("Item Description"),
-      centeredHeader("Jenis Item"),
-      centeredHeader("Klasifikasi Orbit"),
-      centeredHeader("Item Details"),
-      centeredHeader("Quantity"),
-      centeredHeader("Quantity Stock"),
-      centeredHeader("Unit Price"),
-      centeredHeader("Price Service"),
-      centeredHeader("Price Reference"),
-      centeredHeader("UoM Name"),
-      centeredHeader("Free Text"),
+      centeredHeader("G/L Acc/BP code."),
+      centeredHeader("G/L Acc/BP Name"),
+      centeredHeader("Debit"),
+      centeredHeader("Credit"),
+      centeredHeader("Remarks Template"),
+      centeredHeader("Tax Group"),
+      centeredHeader("Federal Tax ID"),
+      centeredHeader("Tax Amount"),
+      centeredHeader("receipt number"),
+      centeredHeader("Gross Value"),
+      centeredHeader("Base Amount"),
+      centeredHeader("Primary From Item"),
+      centeredHeader("Dimension 1"),
       centeredHeader("Project Line"),
       centeredHeader("LineID"),
       centeredHeader("Discount %"),
@@ -1071,7 +1098,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           ),
         ),
         const SizedBox(width: 60),
-        
+
         Expanded(
           child: Column(
             children: [
@@ -1283,23 +1310,26 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 height: 24,
                 child: Checkbox(
                   value: _checkStates["cb_rounding"] ?? false,
+                  activeColor: primaryIndigo,
                   onChanged: (v) =>
                       setState(() => _checkStates["cb_rounding"] = v!),
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              // --- TULISAN ROUNDING GANTI KE SINI BIAR MUNCUL ---
+              Text(
                 "Rounding",
                 style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF64748B),
+                  // Pake variabel secondarySlate biar warnanya balik normal (abu gelap/hitam)
+                  color: secondarySlate, 
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 28), // Samakan jarak spasi
+        const SizedBox(width: 28), 
         Expanded(
           child: _buildSummaryBox(
             "f_rounding",
@@ -1310,6 +1340,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     ),
   );
 
+  
   Widget _buildActionButtons() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Row(
@@ -1352,7 +1383,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1383,7 +1414,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
-  Widget _buildSummaryBox(
+ Widget _buildSummaryBox(
     String key, {
     String defaultValue = "0.00",
     bool isReadOnly = false,
@@ -1393,22 +1424,28 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       key,
       initial: _fieldValues[key] ?? defaultValue,
     );
+
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white, // Tetap putih bersih
+        // --- BORDER BIASA (UKURAN 1.0) ---
+        border: Border.all(color: borderGrey, width: 1.0), 
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12, 
+          color: Colors.black, 
+          fontWeight: FontWeight.w600
+        ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          border: InputBorder.none, // Penting biar gak ada garis item di bawah
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1416,15 +1453,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               _fieldValues[key] = val;
               if (key == "f_disc_pct") {
                 double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
-                      _getCtrl(
-                        "f_before_disc",
-                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ??
-                    0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
+                double before = double.tryParse(
+                      _getCtrl("f_before_disc")
+                          .text.replaceAll(RegExp(r'[^0-9.]'), ''),
+                    ) ?? 0;
+                _getCtrl("f_disc_val").text = (before * pct / 100).toStringAsFixed(2);
                 _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
               }
             });
@@ -1452,7 +1485,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: labelWidth ?? 120, // Bisa custom lebar label
+            width: labelWidth ?? 120,
             child: Text(
               label,
               style: TextStyle(
@@ -1462,15 +1495,17 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               ),
             ),
           ),
-          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                border: Border.all(
+                  color: borderGrey,
+                ), // Border tetep ada biar keliatan batasnya
               ),
               child: Center(
                 child: TextField(
@@ -1498,8 +1533,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       ),
     );
   }
-  
-   Widget _buildField(
+
+  Widget _buildField(
     String label,
     String key, {
     bool isTextArea = false,
@@ -1533,7 +1568,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1563,7 +1598,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       ),
     );
   }
-
 
   Widget _buildModernNoFieldRow(
     String label,
@@ -1602,7 +1636,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),

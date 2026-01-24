@@ -26,7 +26,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
- String formatPrice(String value) {
+  String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
     double parsed = double.tryParse(cleanText) ?? 0.0;
@@ -75,7 +75,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     return _focusNodes[key]!;
   }
 
-   FocusNode _getFn(
+  FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
     String defaultValue = "0,00",
@@ -155,13 +155,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           .replaceAll('.', '')
           .replaceAll(',', '.')
           .replaceAll('%', '');
-      
+
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
     double before = parseValue("f_before_disc");
     double discVal = parseValue("f_disc_val");
-    double wtaxamount = parseValue("f_wtaxamount"); 
+    double wtaxamount = parseValue("f_wtaxamount");
     double tax = parseValue("f_tax");
     double rounding = parseValue("f_rounding");
 
@@ -500,7 +500,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     );
   }
 
-  DataCell _buildModernTableCell(String key, {String initial = "", bool isPercent = false}) {
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -512,16 +516,15 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         key.contains("p_service") ||
         key.contains("p_ref") ||
         key.contains("f_before") ||
-        key.contains("wtax") || 
+        key.contains("wtax") ||
         key.contains("tax") ||
         key.contains("rounding");
 
-    
     String defValue = isPercent ? "0%" : "0,00";
     final focusNode = _getFn(
-      key, 
-      defaultValue: isNumeric ? defValue : "", 
-      isPercent: isPercent
+      key,
+      defaultValue: isNumeric ? defValue : "",
+      isPercent: isPercent,
     );
 
     return DataCell(
@@ -754,7 +757,12 @@ class _ArInvoicePageState extends State<ArInvoicePage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    _getCtrl("f_total_final").text = "IDR ${grandTotal.toStringAsFixed(2)}";
+    String formattedTotal = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(grandTotal);
+    _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
       children: [
@@ -1080,7 +1088,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1124,19 +1132,23 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+        color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0), 
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black, 
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          border: InputBorder.none, // Penting biar ga rusak tampilannya
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1198,7 +1210,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1264,7 +1276,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1415,7 +1427,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1458,7 +1470,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text("Pilih $label", style: const TextStyle(fontSize: 14)),
+          title: Text(" $label", style: const TextStyle(fontSize: 14)),
           content: SizedBox(
             width: 300,
             height: 300,
@@ -1718,20 +1730,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
-          // SizedBox(
-          //   width: 120,
-          //   child: Text("BP Currency", ...),
-          // ),
-          // const SizedBox(width: 28),
-
           // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
           Container(
             width: 150,
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1756,7 +1761,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: bgSlate,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
@@ -1776,7 +1781,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),

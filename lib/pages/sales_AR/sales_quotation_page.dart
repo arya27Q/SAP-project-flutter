@@ -29,18 +29,18 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
-  String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
-  if (cleanText.isEmpty) return "0,00";
-  double parsed = double.tryParse(cleanText) ?? 0.0;
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
+    double parsed = double.tryParse(cleanText) ?? 0.0;
 
-  final formatter = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: '', 
-    decimalDigits: 2,
-  );
-  
-  return formatter.format(parsed);
-}
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
+  }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
     return _controllers.putIfAbsent(
@@ -49,10 +49,10 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-FocusNode _getFn(
+  FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0,00", 
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -81,7 +81,10 @@ FocusNode _getFn(
 
           if (isNumericField) {
             // Bersihkan semua karakter non-angka termasuk % lama
-            String cleanText = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+            String cleanText = controller.text.replaceAll(
+              RegExp(r'[^0-9]'),
+              '',
+            );
             double? parsed = double.tryParse(cleanText);
 
             if (mounted) {
@@ -101,7 +104,7 @@ FocusNode _getFn(
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
-                
+
                 _syncTotalBeforeDiscount();
               });
             }
@@ -139,15 +142,15 @@ FocusNode _getFn(
     }
   }
 
-double _getGrandTotal() {
+  double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      
+
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
           .replaceAll('%', ''); // Tambahkan ini
-      
+
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
@@ -476,8 +479,12 @@ double _getGrandTotal() {
       ],
     );
   }
-  
- DataCell _buildModernTableCell(String key, {String initial = "", bool isPercent = false}) {
+
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -492,11 +499,10 @@ double _getGrandTotal() {
         key.contains("f_tax") ||
         key.contains("f_rounding");
 
-  
     final focusNode = _getFn(
-      key, 
-      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "", 
-      isPercent: isPercent
+      key,
+      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "",
+      isPercent: isPercent,
     );
 
     return DataCell(
@@ -605,11 +611,15 @@ double _getGrandTotal() {
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      String val = _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      String cleanVal = val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
       totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
-    
+
     setState(() {
       String formatted = NumberFormat.currency(
         locale: 'id_ID',
@@ -737,7 +747,7 @@ double _getGrandTotal() {
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    
+
     String formattedTotal = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
@@ -992,7 +1002,7 @@ double _getGrandTotal() {
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isReadOnly ? bgSlate : Colors.white,
+                color: isReadOnly ? Colors.white : Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1036,37 +1046,29 @@ double _getGrandTotal() {
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
+       color: Colors.white,
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
         controller: controller,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
+
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
             setState(() {
               _fieldValues[key] = val;
-              if (key == "f_disc_pct") {
-                double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
-                      _getCtrl(
-                        "f_before_disc",
-                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ??
-                    0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
-                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
-              }
             });
           }
         },
@@ -1107,7 +1109,7 @@ double _getGrandTotal() {
               height: isTextArea ? 80 : 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: borderGrey),
               ),
@@ -1175,7 +1177,7 @@ double _getGrandTotal() {
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: bgSlate,
+                    color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(5),
                     ),
@@ -1326,7 +1328,7 @@ double _getGrandTotal() {
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -1437,7 +1439,7 @@ double _getGrandTotal() {
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: bgSlate,
+                color: Colors.white,
                 border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
