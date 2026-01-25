@@ -18,7 +18,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -1046,7 +1046,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     return Container(
       height: 24,
       decoration: BoxDecoration(
-       color: Colors.white,
+        color: Colors.white,
         border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),

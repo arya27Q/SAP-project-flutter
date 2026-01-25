@@ -25,7 +25,12 @@ class _DashboardPageState extends State<DashboardPage> {
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color darkSlate = const Color(0xFF0F172A);
   final Color borderWhite = Colors.white; // Border Putih Bersih
-  final Color softBg = const Color(0xFFF1F5F9);
+  final Color softBg = const Color.fromARGB(
+    255,
+    255,
+    255,
+    255,
+  ); // BODY TETEP PUTIH
 
   // --- UTILS ---
   Color parseStatusColor(int id) {
@@ -54,6 +59,25 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  // --- ANIMATION WRAPPER BIAR MUNCUL HALUS ---
+  Widget _appearAnimation({required Widget child, int delayMs = 0}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 800 + delayMs),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -68,85 +92,102 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildGlobalDatabaseHeader(screenWidth),
+            _appearAnimation(child: _buildGlobalDatabaseHeader(screenWidth)),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Group Subsidiary Sync Status"),
             const SizedBox(height: 16),
-            _buildBranchSyncStatusRow(),
+            _appearAnimation(child: _buildBranchSyncStatusRow(), delayMs: 100),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Critical Alerts & Approvals"),
             const SizedBox(height: 16),
-            _buildApprovalAlertGrid(screenWidth),
+            _appearAnimation(
+              child: _buildApprovalAlertGrid(screenWidth),
+              delayMs: 200,
+            ),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Financials Summary"),
             const SizedBox(height: 16),
-            _buildFinancialGrid(),
+            _appearAnimation(child: _buildFinancialGrid(), delayMs: 300),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Strategic Intelligence Hub"),
             const SizedBox(height: 16),
-            screenWidth < 600
-                ? Column(
-                    children: [
-                      _buildYearlyComparisonChart(),
-                      const SizedBox(height: 20),
-                      _buildModuleDistributionPie(),
-                    ],
-                  )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 3, child: _buildYearlyComparisonChart()),
-                      const SizedBox(width: 20),
-                      Expanded(flex: 2, child: _buildModuleDistributionPie()),
-                    ],
-                  ),
+            _appearAnimation(
+              delayMs: 400,
+              child: screenWidth < 600
+                  ? Column(
+                      children: [
+                        _buildYearlyComparisonChart(),
+                        const SizedBox(height: 20),
+                        _buildModuleDistributionPie(),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 3, child: _buildYearlyComparisonChart()),
+                        const SizedBox(width: 20),
+                        Expanded(flex: 2, child: _buildModuleDistributionPie()),
+                      ],
+                    ),
+            ),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Inventory & Warehouse Monitoring"),
             const SizedBox(height: 16),
-            _buildInventoryWarehouseGrid(screenWidth),
+            _appearAnimation(
+              child: _buildInventoryWarehouseGrid(screenWidth),
+              delayMs: 500,
+            ),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Operational Aging & Pipeline"),
             const SizedBox(height: 16),
-            screenWidth < 600
-                ? Column(
-                    children: [
-                      _buildAgingReportCard(),
-                      const SizedBox(height: 20),
-                      _buildSupplyChainCard(
-                        "Operational Pipeline",
-                        Icons.shopping_bag,
-                        Colors.indigoAccent,
-                      ),
-                    ],
-                  )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _buildAgingReportCard()),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: _buildSupplyChainCard(
+            _appearAnimation(
+              delayMs: 600,
+              child: screenWidth < 600
+                  ? Column(
+                      children: [
+                        _buildAgingReportCard(),
+                        const SizedBox(height: 20),
+                        _buildSupplyChainCard(
                           "Operational Pipeline",
                           Icons.shopping_bag,
                           Colors.indigoAccent,
                         ),
+                      ],
+                    )
+                  : IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: _buildAgingReportCard()),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: _buildSupplyChainCard(
+                              "Operational Pipeline",
+                              Icons.shopping_bag,
+                              Colors.indigoAccent,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+            ),
             const SizedBox(height: 32),
 
             _buildSectionHeader("Operational Monthly Revenue vs Expense"),
             const SizedBox(height: 16),
-            _buildMonthlyDualChart(screenWidth),
+            _appearAnimation(
+              child: _buildMonthlyDualChart(screenWidth),
+              delayMs: 700,
+            ),
             const SizedBox(height: 32),
 
-            _buildAuditTerminal(),
+            _appearAnimation(child: _buildAuditTerminal(), delayMs: 800),
           ],
         ),
       ),
@@ -165,12 +206,12 @@ class _DashboardPageState extends State<DashboardPage> {
           colors: [darkSlate, const Color(0xFF334155)],
         ),
         borderRadius: BorderRadius.circular(24),
-        // Bordernya ditebelin Bro (3.0) biar kerasa misah
-        border: Border.all(color: borderWhite.withOpacity(0.4), width: 3.0),
+        border: Border.all(color: borderWhite.withOpacity(0.5), width: 5.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 25,
+            spreadRadius: 2,
             offset: const Offset(0, 12),
           ),
         ],
@@ -237,31 +278,30 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     return SizedBox(
-      height: 70,
+      height: 75,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: branchSyncData.length,
         itemBuilder: (context, index) {
           int sId = branchSyncData[index]['status_id'];
           return Container(
-            margin: const EdgeInsets.only(right: 12, bottom: 8),
+            margin: const EdgeInsets.only(right: 14, bottom: 12, left: 4),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              // Border ditebelin (3.0) biar efeknya dapet
-              border: Border.all(color: borderWhite, width: 3.0),
+              border: Border.all(color: borderWhite, width: 4.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
             child: Row(
               children: [
-                CircleAvatar(radius: 4, backgroundColor: parseStatusColor(sId)),
+                CircleAvatar(radius: 5, backgroundColor: parseStatusColor(sId)),
                 const SizedBox(width: 12),
                 Text(
                   branchSyncData[index]['name'],
@@ -291,10 +331,11 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildApprovalAlertGrid(double width) {
     return GridView.count(
       shrinkWrap: true,
+      padding: const EdgeInsets.only(bottom: 15),
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: width < 600 ? 1 : 3,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
       childAspectRatio: width < 600 ? 4 : 2.5,
       children: [
         _alertCard(
@@ -320,19 +361,18 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
-        // Border putih tebel (3.0) biar misah dari body
-        border: Border.all(color: borderWhite.withOpacity(0.5), width: 3.0),
+        border: Border.all(color: borderWhite.withOpacity(0.6), width: 5.0),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: color.withOpacity(0.45),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 22),
+          Icon(icon, color: Colors.white, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -364,66 +404,57 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildFinancialGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: constraints.maxWidth < 600 ? 2 : 4,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.4,
-          children: [
-            _kpiSmallCard("Profit", "Rp 2.1B", Icons.insights, Colors.teal),
-            _kpiSmallCard(
-              "Income",
-              "Rp 8.4B",
-              Icons.file_download,
-              Colors.indigo,
-            ),
-            _kpiSmallCard(
-              "Expense",
-              "Rp 6.3B",
-              Icons.file_upload,
-              Colors.redAccent,
-            ),
-            _kpiSmallCard(
-              "Assets",
-              "Rp 42B",
-              Icons.account_balance,
-              const Color(0xFF0F172A),
-            ),
-          ],
-        );
-      },
+    return GridView.count(
+      shrinkWrap: true,
+      padding: const EdgeInsets.only(bottom: 15),
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 2.2,
+      children: [
+        _kpiSmallCard("Profit", "Rp 2.1B", Icons.insights, Colors.teal),
+        _kpiSmallCard("Income", "Rp 8.4B", Icons.file_download, Colors.indigo),
+        _kpiSmallCard(
+          "Expense",
+          "Rp 6.3B",
+          Icons.file_upload,
+          Colors.redAccent,
+        ),
+        _kpiSmallCard(
+          "Assets",
+          "Rp 42B",
+          Icons.account_balance,
+          const Color(0xFF0F172A),
+        ),
+      ],
     );
   }
 
   Widget _kpiSmallCard(String title, String val, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        // Border putih tebel (4.0) biar efek "kedalaman" kyk gambar form lo makin kuat
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: borderWhite, width: 5.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 18),
+          Icon(icon, color: color, size: 20),
           const Spacer(),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 9,
+              fontSize: 10,
               color: Colors.black54,
               fontWeight: FontWeight.w900,
             ),
@@ -432,7 +463,7 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Text(
               val,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 color: color,
                 fontWeight: FontWeight.w900,
               ),
@@ -449,14 +480,13 @@ class _DashboardPageState extends State<DashboardPage> {
       height: 280,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        // Ditebelin bordernya Bro (4.0) biar gagah
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderWhite, width: 5.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
@@ -480,40 +510,48 @@ class _DashboardPageState extends State<DashboardPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: List.generate(5, (idx) {
-                    double ratio = [0.4, 0.6, 0.7, 0.85, 1.0][idx];
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 24,
-                          height: (chartHeight * ratio).clamp(
-                            0,
-                            double.infinity,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                primaryIndigo,
-                                primaryIndigo.withOpacity(0.4),
-                              ],
+                    double targetRatio = [0.4, 0.6, 0.7, 0.85, 1.0][idx];
+                    return TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: targetRatio),
+                      duration: Duration(milliseconds: 1500 + (idx * 200)),
+                      curve: Curves.easeOutBack,
+                      builder: (context, animValue, child) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 28,
+                              // Clamp biar aman
+                              height: (chartHeight * animValue).clamp(
+                                0,
+                                chartHeight,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    primaryIndigo,
+                                    primaryIndigo.withOpacity(0.4),
+                                  ],
+                                ),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(8),
+                                ),
+                              ),
                             ),
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(6),
+                            const SizedBox(height: 4),
+                            Text(
+                              (2021 + idx).toString(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.black87,
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          (2021 + idx).toString(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     );
                   }),
                 );
@@ -526,111 +564,180 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildInventoryWarehouseGrid(double width) {
-    Widget criticalStock = Container(
+    Widget _card(Widget content, Color bg, {bool dark = false}) => Container(
       padding: const EdgeInsets.all(20),
       height: 180,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bg,
         borderRadius: BorderRadius.circular(24),
-        // Border putih tebel (4.0)
-        border: Border.all(color: borderWhite, width: 4.0),
+        border: Border.all(
+          color: dark ? borderWhite.withOpacity(0.3) : borderWhite,
+          width: 5.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(dark ? 0.3 : 0.12),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.warning, color: Colors.red, size: 18),
-              const SizedBox(width: 10),
-              Text(
-                "Critical Stock",
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                  color: Colors.red.shade900,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          _stockLine("Plat Besi 5mm", "3 U", Colors.black),
-          _stockLine("Oxygen Gas", "12 U", Colors.black),
-          _stockLine("Hydraulic Oil", "5 L", Colors.black),
-        ],
-      ),
-    );
-
-    Widget warehouse = Container(
-      padding: const EdgeInsets.all(20),
-      height: 180,
-      decoration: BoxDecoration(
-        color: darkSlate,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite.withOpacity(0.4), width: 3.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Warehouse A",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 13,
-            ),
-          ),
-          const Spacer(),
-          const Text(
-            "85% Occupied",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: 0.85,
-            backgroundColor: Colors.white10,
-            color: Colors.tealAccent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          const Spacer(),
-          const Text(
-            "Safe Zone",
-            style: TextStyle(
-              color: Colors.tealAccent,
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
+      child: content,
     );
 
     return width < 600
         ? Column(
-            children: [criticalStock, const SizedBox(height: 20), warehouse],
+            children: [
+              _card(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.warning, color: Colors.red, size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Critical Stock",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
+                            color: Colors.red.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    _stockLine("Plat Besi 5mm", "3 U", Colors.black),
+                    _stockLine("Oxygen Gas", "12 U", Colors.black),
+                    _stockLine("Hydraulic Oil", "5 L", Colors.black),
+                  ],
+                ),
+                Colors.white,
+              ),
+              const SizedBox(height: 20),
+              _card(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Warehouse A",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const Spacer(),
+                    const Text(
+                      "85% Occupied",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: 0.85,
+                      backgroundColor: Colors.white10,
+                      color: Colors.tealAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    const Spacer(),
+                    const Text(
+                      "Safe Zone",
+                      style: TextStyle(
+                        color: Colors.tealAccent,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+                darkSlate,
+                dark: true,
+              ),
+            ],
           )
         : Row(
             children: [
-              Expanded(child: criticalStock),
+              Expanded(
+                child: _card(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.warning,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Critical Stock",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                              color: Colors.red.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      _stockLine("Plat Besi 5mm", "3 U", Colors.black),
+                      _stockLine("Oxygen Gas", "12 U", Colors.black),
+                      _stockLine("Hydraulic Oil", "5 L", Colors.black),
+                    ],
+                  ),
+                  Colors.white,
+                ),
+              ),
               const SizedBox(width: 20),
-              Expanded(child: warehouse),
+              Expanded(
+                child: _card(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Warehouse A",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Text(
+                        "85% Occupied",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: 0.85,
+                        backgroundColor: Colors.white10,
+                        color: Colors.tealAccent,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      const Spacer(),
+                      const Text(
+                        "Safe Zone",
+                        style: TextStyle(
+                          color: Colors.tealAccent,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  darkSlate,
+                  dark: true,
+                ),
+              ),
             ],
           );
   }
@@ -667,8 +774,15 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderWhite, width: 5.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,7 +812,7 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Row(
             children: [
-              CircleAvatar(radius: 3, backgroundColor: color),
+              CircleAvatar(radius: 4, backgroundColor: color),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -728,15 +842,22 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderWhite, width: 5.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 18),
+              Icon(icon, color: color, size: 20),
               const SizedBox(width: 10),
               Text(
                 title,
@@ -762,8 +883,15 @@ class _DashboardPageState extends State<DashboardPage> {
       height: 280,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderWhite, width: 5.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 25,
+            offset: const Offset(0, 15),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -780,11 +908,11 @@ class _DashboardPageState extends State<DashboardPage> {
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width: 100,
-                height: 100,
+                width: 110,
+                height: 110,
                 child: CircularProgressIndicator(
                   value: 0.82,
-                  strokeWidth: 12,
+                  strokeWidth: 14,
                   backgroundColor: Colors.grey.shade200,
                   color: Colors.teal,
                 ),
@@ -859,7 +987,6 @@ class _DashboardPageState extends State<DashboardPage> {
       0.8,
       0.7,
     ]);
-
     return width < 600
         ? Column(children: [rev, const SizedBox(height: 20), exp])
         : Row(
@@ -878,13 +1005,19 @@ class _DashboardPageState extends State<DashboardPage> {
     List<double> values,
   ) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      height: 220,
+      padding: const EdgeInsets.all(24),
+      height: 240,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        // Ditebelin jadi 4.0 Bro biar kyk gambar ke-5
-        border: Border.all(color: borderWhite, width: 4.0),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderWhite, width: 5.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -897,40 +1030,52 @@ class _DashboardPageState extends State<DashboardPage> {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          // --- WRAP DENGAN EXPANDED + CLIP BIAR GAK OVERFLOW KUNING ---
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 double availableHeight = constraints.maxHeight - 20;
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(
-                    labels.length,
-                    (i) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: (availableHeight * values[i]).clamp(
-                            0.0,
-                            availableHeight,
+                return ClipRRect(
+                  // Potong bagian yang luber pas animasi
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(
+                      labels.length,
+                      (i) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: values[i]),
+                            duration: Duration(milliseconds: 1200 + (i * 100)),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, animVal, child) {
+                              return Container(
+                                width: 8,
+                                // Paksa clamp biar gak bisa ngelebihi batas tinggi sisa
+                                height: (availableHeight * animVal).clamp(
+                                  0.0,
+                                  availableHeight,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              );
+                            },
                           ),
-                          decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(4),
+                          const SizedBox(height: 6),
+                          Text(
+                            labels[i],
+                            style: const TextStyle(
+                              fontSize: 7,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          labels[i],
-                          style: const TextStyle(
-                            fontSize: 7,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -948,8 +1093,15 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderWhite.withOpacity(0.1), width: 3.0),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: borderWhite.withOpacity(0.15), width: 5.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 25,
+            offset: const Offset(0, 15),
+          ),
+        ],
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -989,22 +1141,22 @@ class _DashboardPageState extends State<DashboardPage> {
     return Row(
       children: [
         Container(
-          width: 5,
-          height: 20,
+          width: 7,
+          height: 24,
           decoration: BoxDecoration(
             color: primaryIndigo,
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Expanded(
           child: Text(
             title.toUpperCase(),
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1E293B),
-              letterSpacing: 1.2,
+              letterSpacing: 1.5,
             ),
           ),
         ),
@@ -1014,20 +1166,17 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _statusBadge(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: color,
-          width: 2.0,
-        ), // Border badge juga dipertegas
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color, width: 3.0),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: color,
-          fontSize: 8,
+          fontSize: 9,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -1036,7 +1185,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _statusLine(String label, String val) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

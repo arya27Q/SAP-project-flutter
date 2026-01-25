@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
 
-import 'main.dart';
+
 
 class SidebarWidget extends StatelessWidget {
   final String currentView;

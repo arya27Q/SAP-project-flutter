@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import '../../constants.dart';
+import '../splash_page.dart'; // 🔥 PASTIKAN IMPORT INI ADA UNTUK BALIK KE SPLASH
 
 enum AuthMode { login, signup, forgotPassword }
 
@@ -29,9 +30,8 @@ class _SapAuthPageState extends State<SapAuthPage> {
   String? selectedCompany;
   bool _isLoading = false;
 
-  // Variabel password terpisah
-  bool _obscureText = true; // Untuk Login
-  bool _obscureSignup = true; // Untuk Signup
+  bool _obscureText = true;
+  bool _obscureSignup = true;
 
   final List<String> companies = [
     "PT. Dempo Laser Metalindo",
@@ -58,7 +58,31 @@ class _SapAuthPageState extends State<SapAuthPage> {
     super.dispose();
   }
 
-  // --- 🔥 1. FUNGSI PEMBANTU UTAMA (WAJIB ADA) 🔥 ---
+  // 🔥 FUNGSI KEMBALI KE SPLASH DENGAN ANIMASI GESER KIRI 🔥
+  void _backToSplash() {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const SplashPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(-1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOutQuart;
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 800),
+      ),
+    );
+  }
+
   void _showCustomDialog({
     required String title,
     required String message,
@@ -67,16 +91,15 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }) {
     showDialog(
       context: context,
-      barrierDismissible: false, // User tidak bisa klik luar
+      barrierDismissible: false,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(20),
         child: Container(
           width: double.infinity,
           constraints: const BoxConstraints(maxWidth: 400),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           decoration: BoxDecoration(
-            color: color, // Warna background dialog (Merah/Hijau)
+            color: color,
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
@@ -89,7 +112,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Ikon dalam lingkaran transparan
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -99,7 +121,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 child: Icon(icon, color: Colors.white, size: 48),
               ),
               const SizedBox(height: 24),
-              // Judul
               Text(
                 title,
                 style: const TextStyle(
@@ -109,7 +130,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Pesan
               Text(
                 message,
                 textAlign: TextAlign.center,
@@ -120,7 +140,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Tombol Putih
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -128,11 +147,10 @@ class _SapAuthPageState extends State<SapAuthPage> {
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: color, // Warna teks mengikuti tema dialog
+                    foregroundColor: color,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 0,
                   ),
                   child: const Text(
                     "OK, Got it",
@@ -147,92 +165,63 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
-  // --- 🔥 2. WRAPPER POPUP ERROR (MERAH) 🔥 ---
-  void _showErrorDialog(String message) {
-    if (!mounted) return;
-    _showCustomDialog(
-      title: "Oops!",
-      message: message,
-      icon: Icons.warning_amber_rounded,
-      color: const Color(0xFFB71C1C), // Merah Gelap
-    );
-  }
+  void _showErrorDialog(String message) => _showCustomDialog(
+    title: "Oops!",
+    message: message,
+    icon: Icons.warning_amber_rounded,
+    color: const Color(0xFFB71C1C),
+  );
+  void _showSuccessDialog(String message) => _showCustomDialog(
+    title: "Success!",
+    message: message,
+    icon: Icons.check_circle_outline_rounded,
+    color: const Color(0xFF2E7D32),
+  );
 
-  // --- 🔥 3. WRAPPER POPUP SUKSES (HIJAU) 🔥 ---
-  void _showSuccessDialog(String message) {
-    if (!mounted) return;
-    _showCustomDialog(
-      title: "Success!",
-      message: message,
-      icon: Icons.check_circle_outline_rounded,
-      color: const Color(0xFF2E7D32), // Hijau Gelap (Persis Gambar)
-    );
-  }
-
-  // --- LOGIC LOGIN (POPUP HIJAU) ---
   Future<void> handleLogin() async {
     if (selectedCompany == null) {
       _showErrorDialog("Please select a Company first.");
       return;
     }
-
     String email = _userController.text.trim();
     String password = _passController.text.trim();
-
     if (email.isEmpty || password.isEmpty) {
       _showErrorDialog("Please enter your email and password.");
       return;
     }
-
     setState(() => _isLoading = true);
-
-    // Simulasi Loading
     await Future.delayed(const Duration(seconds: 2));
-
     if (mounted) {
       setState(() => _isLoading = false);
-
-      // 🔥 MUNCULIN POPUP HIJAU 🔥
       _showSuccessDialog("Login Successful! Redirecting...");
-
-      // Tunggu 2 detik, tutup dialog, lalu pindah halaman
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && Navigator.canPop(context)) {
-          Navigator.of(context).pop(); // Tutup Dialog otomatis
-        }
-        widget.onLoginSuccess(); // Pindah ke Dashboard
+        if (mounted && Navigator.canPop(context)) Navigator.of(context).pop();
+        widget.onLoginSuccess();
       });
     }
   }
 
-  // --- LOGIC SIGN UP (POPUP HIJAU) ---
   Future<void> handleSignup() async {
     if (selectedCompany == null) {
       _showErrorDialog("Please select a Company first.");
       return;
     }
-
     if (_signupNameController.text.isEmpty ||
         _signupEmailController.text.isEmpty ||
         _signupPassController.text.isEmpty) {
       _showErrorDialog("Please fill in all fields.");
       return;
     }
-
     setState(() => _isLoading = true);
-
     await Future.delayed(const Duration(seconds: 2));
-
     if (mounted) {
       setState(() {
         _isLoading = false;
         _isReverseAnimation = true;
         _authMode = AuthMode.login;
       });
-
-      // 🔥 MUNCULIN POPUP HIJAU 🔥
       _showSuccessDialog(
-        "Account created successfully Please Login!",
+        "Account created successfully! Please wait for admin approval.",
       );
     }
   }
@@ -247,10 +236,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E), // Background Gelap
+      backgroundColor: const Color(0xFF1A1A2E),
       body: Stack(
         children: [
-          // Background Decoration
           Positioned(
             top: -100,
             right: -100,
@@ -287,39 +275,31 @@ class _SapAuthPageState extends State<SapAuthPage> {
               ),
             ),
           ),
-
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth > 950) {
+                  if (constraints.maxWidth > 950)
                     return _buildDesktopCardLayout();
-                  } else {
-                    return _buildMobileLayout();
-                  }
+                  return _buildMobileLayout();
                 },
               ),
             ),
           ),
-
-          // Hanya loading yang overlay, popup sukses pakai Dialog
           if (_isLoading) _buildStatusOverlay(),
         ],
       ),
     );
   }
 
-  Widget _buildStatusOverlay() {
-    return Container(
-      color: Colors.black.withOpacity(0.5),
-      child: const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryIndigo),
-      ),
-    );
-  }
+  Widget _buildStatusOverlay() => Container(
+    color: Colors.black.withOpacity(0.5),
+    child: const Center(
+      child: CircularProgressIndicator(color: AppColors.primaryIndigo),
+    ),
+  );
 
-  // --- DESKTOP LAYOUT ---
   Widget _buildDesktopCardLayout() {
     return Container(
       width: 1200,
@@ -338,7 +318,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
-          // SISI KIRI
           Expanded(
             flex: 1,
             child: Container(
@@ -436,8 +415,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
               ),
             ),
           ),
-
-          // SISI KANAN
           Expanded(
             flex: 1,
             child: ClipRRect(
@@ -463,23 +440,28 @@ class _SapAuthPageState extends State<SapAuthPage> {
                   ),
                   child: Stack(
                     children: [
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: IconButton(
-                          onPressed: () => SystemNavigator.pop(),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: Colors.white70,
-                            size: 24,
-                          ),
-                          tooltip: "Close App",
-                        ),
-                      ),
+                      // 🔥 KONTEN FORM (Z-INDEX BAWAH)
                       Center(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(60),
                           child: _buildAnimatedAuthForms(isDark: true),
+                        ),
+                      ),
+                      // 🔥 TOMBOL KEMBALI (Z-INDEX ATAS)
+                      Positioned(
+                        top: 20,
+                        right: 20,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: IconButton(
+                            onPressed: _backToSplash,
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white70,
+                              size: 24,
+                            ),
+                            tooltip: "Back to Splash",
+                          ),
                         ),
                       ),
                     ],
@@ -493,7 +475,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
-  // --- MOBILE LAYOUT ---
   Widget _buildMobileLayout() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
@@ -518,11 +499,19 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 child: _buildAnimatedAuthForms(isDark: true),
               ),
               Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  onPressed: () => SystemNavigator.pop(),
-                  icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                top: 15,
+                right: 15,
+                child: Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    onPressed: _backToSplash,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
+                    tooltip: "Back",
+                  ),
                 ),
               ),
             ],
@@ -532,7 +521,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
-  // --- ANIMATED FORMS ---
   Widget _buildAnimatedAuthForms({required bool isDark}) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 600),
@@ -540,17 +528,14 @@ class _SapAuthPageState extends State<SapAuthPage> {
         final Offset beginOffset = _isReverseAnimation
             ? const Offset(-0.1, 0.0)
             : const Offset(0.1, 0.0);
-
         final slideAnimation =
             Tween<Offset>(begin: beginOffset, end: Offset.zero).animate(
               CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
             );
-
         final fadeAnimation = Tween<double>(
           begin: 0.0,
           end: 1.0,
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
-
         return SlideTransition(
           position: slideAnimation,
           child: FadeTransition(opacity: fadeAnimation, child: child),
@@ -571,7 +556,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
     }
   }
 
-  // --- STYLING HELPERS ---
   TextStyle get _headerStyle => const TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.bold,
@@ -585,21 +569,19 @@ class _SapAuthPageState extends State<SapAuthPage> {
     color: Colors.white,
   );
 
-  // --- LOGIN FORM ---
   Widget _buildLoginForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 25),
         Text("Welcome Back!", style: _headerStyle),
         const SizedBox(height: 8),
         Text("Please login to continue.", style: _subHeaderStyle),
         const SizedBox(height: 40),
-
         _buildLabel("Select Company"),
         _buildCompanyDropdown(isDark),
         const SizedBox(height: 20),
-
         _buildLabel("Email Address"),
         TextFormField(
           controller: _userController,
@@ -611,7 +593,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 20),
-
         _buildLabel("Password"),
         TextFormField(
           controller: _passController,
@@ -630,7 +611,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 ),
               ),
         ),
-
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -645,7 +625,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 30),
-
         SizedBox(
           width: double.infinity,
           height: 55,
@@ -665,13 +644,11 @@ class _SapAuthPageState extends State<SapAuthPage> {
             ),
           ),
         ),
-
         const SizedBox(height: 20),
         _buildWarningBox(
           "Important: Ensure your account is approved by an administrator before logging in.",
         ),
-        const SizedBox(height: 20),
-
+        const SizedBox(height: 40),
         Center(
           child: GestureDetector(
             onTap: () => _switchAuthMode(AuthMode.signup),
@@ -692,33 +669,23 @@ class _SapAuthPageState extends State<SapAuthPage> {
             ),
           ),
         ),
-
-        const SizedBox(height: 40),
-        const Center(
-          child: Text(
-            "© 2026 PT. DLM Group • Enterprise System v1.0",
-            style: TextStyle(color: Colors.white24, fontSize: 12),
-          ),
-        ),
       ],
     );
   }
 
-  // --- SIGNUP FORM ---
   Widget _buildSignupForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 25),
         Text("Create Account", style: _headerStyle),
         const SizedBox(height: 8),
         Text("Fill in details to request access.", style: _subHeaderStyle),
         const SizedBox(height: 40),
-
         _buildLabel("Select Company"),
         _buildCompanyDropdown(isDark),
         const SizedBox(height: 20),
-
         _buildLabel("Full Name"),
         TextFormField(
           controller: _signupNameController,
@@ -730,7 +697,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 20),
-
         _buildLabel("Work Email"),
         TextFormField(
           controller: _signupEmailController,
@@ -742,7 +708,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 20),
-
         _buildLabel("New Password"),
         TextFormField(
           controller: _signupPassController,
@@ -757,16 +722,12 @@ class _SapAuthPageState extends State<SapAuthPage> {
                         : Icons.visibility_off_outlined,
                     color: Colors.white70,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureSignup = !_obscureSignup;
-                    });
-                  },
+                  onPressed: () =>
+                      setState(() => _obscureSignup = !_obscureSignup),
                 ),
               ),
         ),
-        const SizedBox(height: 40),
-
+        const SizedBox(height: 30),
         SizedBox(
           width: double.infinity,
           height: 55,
@@ -786,7 +747,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 20),
-        _buildWarningBox("Note: Account requests require manual approval."),
+        _buildWarningBox(
+          "Important: Your registration request will be reviewed by the system administrator.",
+        ),
         const SizedBox(height: 20),
         Center(
           child: TextButton(
@@ -801,21 +764,19 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
-  // --- FORGOT FORM ---
   Widget _buildForgotForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 25),
         Text("Reset Password", style: _headerStyle),
         const SizedBox(height: 8),
         Text("Enter email to get reset link.", style: _subHeaderStyle),
         const SizedBox(height: 40),
-
         _buildLabel("Select Company"),
         _buildCompanyDropdown(isDark),
         const SizedBox(height: 20),
-
         _buildLabel("Registered Email"),
         TextFormField(
           controller: _emailResetController,
@@ -827,7 +788,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 40),
-
         SizedBox(
           width: double.infinity,
           height: 55,
@@ -837,8 +797,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 _showErrorDialog("Please select a Company first.");
                 return;
               }
-              // 🔥 GANTI: Pakai Dialog Sukses Kotak Hijau
-              _showSuccessDialog("Link Sent (Simulation)! Please check email.");
+              _showSuccessDialog(
+                "Reset link sent! Please check your work email inbox.",
+              );
               _switchAuthMode(AuthMode.login);
             },
             style: ElevatedButton.styleFrom(
@@ -855,6 +816,10 @@ class _SapAuthPageState extends State<SapAuthPage> {
           ),
         ),
         const SizedBox(height: 20),
+        _buildWarningBox(
+          "Important: The reset link is only valid for 15 minutes. Ensure you have access to your inbox.",
+        ),
+        const SizedBox(height: 20),
         Center(
           child: TextButton(
             onPressed: () => _switchAuthMode(AuthMode.login),
@@ -868,84 +833,80 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
-  // --- REUSABLE COMPONENTS ---
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10, left: 2),
-      child: Text(text, style: _labelStyle),
-    );
-  }
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 10, left: 2),
+    child: Text(text, style: _labelStyle),
+  );
 
-  Widget _buildCompanyDropdown(bool isDark) {
-    return DropdownButtonFormField<String>(
-      value: selectedCompany,
-      isExpanded: true,
-      dropdownColor: const Color(0xFF2E2E48),
-      style: const TextStyle(color: Colors.white),
-      hint: const Text("Select Company", style: TextStyle(color: Colors.white)),
-      decoration: _inputDecoration(
-        Icons.business_rounded,
-        "Select Company",
-        isDark,
-      ),
-      items: companies
-          .map(
-            (e) => DropdownMenuItem(
-              value: e,
-              child: Text(e, style: const TextStyle(color: Colors.white)),
-            ),
-          )
-          .toList(),
-      onChanged: (v) => setState(() => selectedCompany = v),
-    );
-  }
+  Widget _buildCompanyDropdown(bool isDark) => DropdownButtonFormField<String>(
+    value: selectedCompany,
+    isExpanded: true,
+    dropdownColor: const Color(0xFF2E2E48),
+    style: const TextStyle(color: Colors.white),
+    hint: const Text("Select Company", style: TextStyle(color: Colors.white)),
+    decoration: _inputDecoration(
+      Icons.business_rounded,
+      "Select Company",
+      isDark,
+    ),
+    items: companies
+        .map(
+          (e) => DropdownMenuItem(
+            value: e,
+            child: Text(e, style: const TextStyle(color: Colors.white)),
+          ),
+        )
+        .toList(),
+    onChanged: (v) => setState(() => selectedCompany = v),
+  );
 
-  InputDecoration _inputDecoration(IconData icon, String hint, bool isDark) {
-    return InputDecoration(
-      prefixIcon: Icon(icon, size: 20, color: Colors.white),
-      hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
-      filled: true,
-      fillColor: Colors.white.withOpacity(0.1),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: AppColors.primaryIndigo,
-          width: 1.5,
-        ),
-      ),
-    );
-  }
+  InputDecoration _inputDecoration(
+    IconData icon,
+    String hint,
+    bool isDark,
+  ) => InputDecoration(
+    prefixIcon: Icon(icon, size: 20, color: Colors.white),
+    hintText: hint,
+    hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
+    filled: true,
+    fillColor: Colors.white.withOpacity(0.1),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.primaryIndigo, width: 1.5),
+    ),
+  );
 
-  Widget _buildWarningBox(String message) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.amber),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(fontSize: 13, color: Colors.amberAccent),
+  Widget _buildWarningBox(String message) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.amber.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.amber.withOpacity(0.3)),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            message,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.amberAccent,
+              height: 1.3,
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }

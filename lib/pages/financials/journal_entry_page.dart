@@ -18,7 +18,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -812,23 +812,20 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
           ),
         ),
-        _buildSearchableCell("G/L/Acc/Bp_$index"),
-        _buildModernTableCell("jenis_brg_$index"),
-        _buildModernTableCell("desc_$index"),
-        _buildModernTableCell("jenis_item_$index"),
-        _buildModernTableCell("orbit_$index"),
-        _buildModernTableCell("details_$index"),
-        _buildModernTableCell("qty_$index", initial: "0"),
-        _buildModernTableCell("stock_$index", initial: "0"),
-        _buildModernTableCell("price_$index", initial: "0,00"),
-        _buildModernTableCell("p_service_$index", initial: "0,00"),
-        _buildModernTableCell("p_ref_$index", initial: "0,00"),
-        _buildModernTableCell("uom_$index"),
-        _buildModernTableCell("free_text_$index"),
-        _buildModernTableCell("proj_$index"),
-        _buildModernTableCell("line_$index"),
-        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
-        _buildModernTableCell("total_$index", initial: "0,00"),
+        _buildSearchableCell("G_L_Acc_Bp_code_$index"),
+        _buildModernTableCell("G_L_Acc_Bp_name_$index"),
+        _buildModernTableCell("debit-$index", initial: "0,00"),
+        _buildModernTableCell("credit_$index", initial: "0,00"),
+        _buildModernTableCell("remarks_template_$index"),
+        _buildModernTableCell("tax_group_$index"),
+        _buildModernTableCell("Federal_tax_id_$index", initial: "0,00"),
+        _buildModernTableCell("tax_amount_$index"),
+        _buildModernTableCell("receipt_number_$index"),
+        _buildModernTableCell("gross_value_$index", initial: "0"),
+        _buildModernTableCell("base_amount_$index", initial: "0,00"),
+        _buildModernTableCell("primary_from_item_$index"),
+        _buildModernTableCell("dimension_1_$index"),
+        _buildModernTableCell("dimension_2_$index"),
       ],
     );
   }
@@ -942,10 +939,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       centeredHeader("Base Amount"),
       centeredHeader("Primary From Item"),
       centeredHeader("Dimension 1"),
-      centeredHeader("Project Line"),
-      centeredHeader("LineID"),
-      centeredHeader("Discount %"),
-      centeredHeader("Total (LC)"),
+      centeredHeader("Dimension 2"),
     ];
   }
 
@@ -1322,14 +1316,14 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 style: TextStyle(
                   fontSize: 12,
                   // Pake variabel secondarySlate biar warnanya balik normal (abu gelap/hitam)
-                  color: secondarySlate, 
+                  color: secondarySlate,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 28), 
+        const SizedBox(width: 28),
         Expanded(
           child: _buildSummaryBox(
             "f_rounding",
@@ -1340,7 +1334,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     ),
   );
 
-  
   Widget _buildActionButtons() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Row(
@@ -1414,7 +1407,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
- Widget _buildSummaryBox(
+  Widget _buildSummaryBox(
     String key, {
     String defaultValue = "0.00",
     bool isReadOnly = false,
@@ -1430,7 +1423,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       decoration: BoxDecoration(
         color: Colors.white, // Tetap putih bersih
         // --- BORDER BIASA (UKURAN 1.0) ---
-        border: Border.all(color: borderGrey, width: 1.0), 
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
@@ -1438,9 +1431,9 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
         style: const TextStyle(
-          fontSize: 12, 
-          color: Colors.black, 
-          fontWeight: FontWeight.w600
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
         ),
         decoration: const InputDecoration(
           isDense: true,
@@ -1453,11 +1446,15 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               _fieldValues[key] = val;
               if (key == "f_disc_pct") {
                 double pct = double.tryParse(val) ?? 0;
-                double before = double.tryParse(
-                      _getCtrl("f_before_disc")
-                          .text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ?? 0;
-                _getCtrl("f_disc_val").text = (before * pct / 100).toStringAsFixed(2);
+                double before =
+                    double.tryParse(
+                      _getCtrl(
+                        "f_before_disc",
+                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
+                    ) ??
+                    0;
+                _getCtrl("f_disc_val").text = (before * pct / 100)
+                    .toStringAsFixed(2);
                 _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
               }
             });

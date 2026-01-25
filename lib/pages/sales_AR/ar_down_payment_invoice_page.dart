@@ -15,10 +15,10 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
   late TabController _tabController;
   int _rowCount = 10;
 
-  final Color primaryIndigo = const Color(0xFF4F46E5);
-  final Color secondarySlate = const Color(0xFF64748B);
-  final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color primaryIndigo = const Color(0xFF4F46E5); 
+  final Color secondarySlate = const Color(0xFF64748B); 
+  final Color bgSlate = const Color(0xFFF8FAFC); 
+  final Color borderGrey = const Color(0xFFD0D5DC); 
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -1789,7 +1789,7 @@ class _ArDownPaymentInvoicePageState extends State<ArDownPaymentInvoicePage>
               ),
               child: TextField(
                 controller: _getCtrl("h_curr_rate", initial: ""),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.start,
                 style: const TextStyle(fontSize: 11, color: Colors.black),
                 decoration: const InputDecoration(
                   border: InputBorder.none,

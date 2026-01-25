@@ -16,8 +16,8 @@ class _ArInvoicePageState extends State<ArInvoicePage>
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
-  final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
+  final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -1133,7 +1133,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       height: 24,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0), 
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
@@ -1142,7 +1142,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         textAlign: TextAlign.right,
         style: const TextStyle(
           fontSize: 12,
-          color: Colors.black, 
+          color: Colors.black,
           fontWeight: FontWeight.w600,
         ),
         decoration: const InputDecoration(
@@ -1787,7 +1787,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               ),
               child: TextField(
                 controller: _getCtrl("h_curr_rate", initial: ""),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.start,
                 style: const TextStyle(fontSize: 11, color: Colors.black),
                 decoration: const InputDecoration(
                   border: InputBorder.none,

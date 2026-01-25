@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
-import 'main_layout.dart';
+ // Ini harus diimpor karena nanti dipakai di Navigator
+import 'pages/splash_page.dart';
 
 void main() {
   runApp(const SAPModernApp());
@@ -18,7 +19,8 @@ class SAPModernApp extends StatelessWidget {
         fontFamily: 'Segoe UI',
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
-      home: const MainLayout(),
+      // 🔥 PINTU MASUK UTAMA ADALAH SPLASH
+      home: const SplashPage(), 
     );
   }
 }

@@ -16,7 +16,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color(0xFFD0D5DC);
 
   final ScrollController _horizontalScroll = ScrollController();
   final Map<String, TextEditingController> _controllers = {};
@@ -330,7 +330,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 _buildHeaderField(
                   "E-Mail Address",
                   "h_email",
-                  isReadOnly: true,
+                  isReadOnly: false,
                   initial: "",
                 ),
               ],
@@ -408,7 +408,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   "Status",
                   "h_status",
                   initial: "",
-                  isReadOnly: true,
+                  isReadOnly: false,
                 ),
                 const SizedBox(height: 12),
                 _buildHeaderDate("Posting Date", "h_post_date", ""),

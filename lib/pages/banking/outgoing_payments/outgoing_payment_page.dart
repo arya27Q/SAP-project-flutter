@@ -14,33 +14,34 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
+  String? _selectedCategory = 'Customer'; // Nilai default
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
-  final Map<String, bool> _checkStates = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String?> _formValues = {};
+  final Map<String, bool> _checkStates = {};
 
   String formatPrice(String value) {
-  String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
-  if (cleanText.isEmpty) return "0,00";
-  double parsed = double.tryParse(cleanText) ?? 0.0;
+    String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return "0,00";
+    double parsed = double.tryParse(cleanText) ?? 0.0;
 
-  final formatter = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: '', 
-    decimalDigits: 2,
-  );
-  
-  return formatter.format(parsed);
-}
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    );
+
+    return formatter.format(parsed);
+  }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
     return _controllers.putIfAbsent(
@@ -49,10 +50,10 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
     );
   }
 
-FocusNode _getFn(
+  FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0,00", 
+    String defaultValue = "0,00",
     bool isPercent = false,
   }) {
     if (!_focusNodes.containsKey(key)) {
@@ -81,7 +82,10 @@ FocusNode _getFn(
 
           if (isNumericField) {
             // Bersihkan semua karakter non-angka termasuk % lama
-            String cleanText = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+            String cleanText = controller.text.replaceAll(
+              RegExp(r'[^0-9]'),
+              '',
+            );
             double? parsed = double.tryParse(cleanText);
 
             if (mounted) {
@@ -101,7 +105,7 @@ FocusNode _getFn(
                   controller.text = defaultValue;
                 }
                 _fieldValues[key] = controller.text;
-                
+
                 _syncTotalBeforeDiscount();
               });
             }
@@ -139,15 +143,15 @@ FocusNode _getFn(
     }
   }
 
-double _getGrandTotal() {
+  double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      
+
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
           .replaceAll('%', ''); // Tambahkan ini
-      
+
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
@@ -163,7 +167,15 @@ double _getGrandTotal() {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    // Paksa inisialisasi dengan length yang baru
+    _tabController = TabController(length: 2, vsync: this);
+
+    // Tambahkan listener ini buat mastiin dia refresh pas ganti tab
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -229,20 +241,40 @@ double _getGrandTotal() {
         Expanded(
           flex: 6,
           child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Tambahkan ini biar rapi
             children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
+              _buildModernFieldRow("Code", "p_code"),
+              const SizedBox(height: 8),
               _buildModernFieldRow("Name", "h_name"),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Contact Person", "h_cont"),
+              _buildModernNoFieldRow(
+                "Bill to",
+                "p_no_series",
+                [""],
+                "p_no_val",
+                initialNo: "xxx.xxx",
+              ),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+              _buildModernFieldRow("Contact Person", "h_contact"),
               const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
+              _buildModernFieldRow("blanket agreement", "p_blanket"),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 148,
+                ), // 120 (label) + 28 (jarak)
+                child: Row(
+                  children: [
+                    _buildCategoryRadio("Customer"),
+                    const SizedBox(width: 16),
+                    _buildCategoryRadio("Vendor"),
+                    const SizedBox(width: 16),
+                    _buildCategoryRadio("Account"),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -302,6 +334,8 @@ double _getGrandTotal() {
               ),
             ),
             child: TabBar(
+              // --- TAMBAHKAN KEY INI BIAR ERROR NYA HILANG ---
+              key: ValueKey(_tabController.length),
               controller: _tabController,
               dividerColor: Colors.transparent,
               labelColor: primaryIndigo,
@@ -317,8 +351,6 @@ double _getGrandTotal() {
               ),
               tabs: const [
                 Tab(text: "Contents"),
-                Tab(text: "Logistics"),
-                Tab(text: "Accounting"),
                 Tab(text: "Attachments"),
               ],
               onTap: (index) => setState(() {}),
@@ -330,8 +362,6 @@ double _getGrandTotal() {
               index: _tabController.index,
               children: [
                 _buildContentsTab(),
-                _buildLogisticsTab(),
-                _buildAccountingTab(),
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40),
@@ -426,30 +456,65 @@ double _getGrandTotal() {
   }
 
   DataRow _buildDataRow(int index) {
+    bool isSelected = _checkStates["row_sel_$index"] ?? false;
+
     return DataRow(
+      selected: isSelected,
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (isSelected) return const Color(0xFFFFF29D); // Kuning SAP
+        return null;
+      }),
       cells: [
         DataCell(
           Center(
-            child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
+            child: Checkbox(
+              value: isSelected,
+              onChanged: (bool? value) {
+                setState(() {
+                  _checkStates["row_sel_$index"] = value ?? false;
+                });
+              },
+            ),
           ),
         ),
-        _buildSearchableCell("item_no_$index"),
-        _buildModernTableCell("jenis_brg_$index"),
-        _buildModernTableCell("desc_$index"),
-        _buildModernTableCell("jenis_item_$index"),
-        _buildModernTableCell("orbit_$index"),
-        _buildModernTableCell("details_$index"),
-        _buildModernTableCell("qty_$index", initial: "0"),
-        _buildModernTableCell("stock_$index", initial: "0"),
-        _buildModernTableCell("price_$index", initial: "0,00"),
-        _buildModernTableCell("p_service_$index", initial: "0,00"),
-        _buildModernTableCell("p_ref_$index", initial: "0,00"),
-        _buildModernTableCell("uom_$index"),
-        _buildModernTableCell("free_text_$index"),
-        _buildModernTableCell("proj_$index"),
-        _buildModernTableCell("line_$index"),
-        _buildModernTableCell("disc_$index", initial: "0%", isPercent: true),
-        _buildModernTableCell("total_$index", initial: "0,00"),
+        // 2. Document No (Dikosongkan untuk data Database)
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_right_alt, color: Colors.orange, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                _fieldValues["doc_no_$index"] ?? "",
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        // 3. Kolom Data Lainnya (Dikosongkan / "")
+        _buildModernTableCell("install_$index", initial: ""),
+        _buildModernTableCell("doc_type_$index", initial: ""),
+        _buildModernTableCell("doc_date_$index", initial: ""),
+        _buildModernTableCell("star_$index", initial: ""),
+        _buildModernTableCell("overdue_$index", initial: ""),
+        _buildModernTableCell("total_val_$index", initial: ""),
+        _buildModernTableCell("wtax_$index", initial: ""),
+        _buildModernTableCell("balance_$index", initial: ""),
+        _buildModernTableCell("blocked_$index", initial: ""),
+        _buildModernTableCell("cash_disc_$index", initial: ""),
+        _buildModernTableCell("rounding_$index", initial: ""),
+        _buildModernTableCell("total_pay_$index", initial: ""),
+        _buildModernTableCell("dim1_$index", initial: ""),
+        // 4. Checkbox Payment Order (Paling Kanan)
+        DataCell(
+          Center(
+            child: Checkbox(
+              value: _checkStates["pay_order_$index"] ?? false,
+              onChanged: (v) =>
+                  setState(() => _checkStates["pay_order_$index"] = v!),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -476,8 +541,12 @@ double _getGrandTotal() {
       ],
     );
   }
-  
- DataCell _buildModernTableCell(String key, {String initial = "", bool isPercent = false}) {
+
+  DataCell _buildModernTableCell(
+    String key, {
+    String initial = "",
+    bool isPercent = false,
+  }) {
     final controller = _getCtrl(key, initial: initial);
 
     bool isNumeric =
@@ -492,11 +561,10 @@ double _getGrandTotal() {
         key.contains("f_tax") ||
         key.contains("f_rounding");
 
-  
     final focusNode = _getFn(
-      key, 
-      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "", 
-      isPercent: isPercent
+      key,
+      defaultValue: isNumeric ? (isPercent ? "0%" : "0,00") : "",
+      isPercent: isPercent,
     );
 
     return DataCell(
@@ -537,79 +605,56 @@ double _getGrandTotal() {
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
-    DataColumn centeredHeader(String label) {
+
+    // Helper buat header biar gak ngetik berulang
+    DataColumn sapHeader(String label, {bool isCenter = true}) {
+      // Set default ke true
       return DataColumn(
-        label: Expanded(
-          child: Center(child: Text(label, style: headerStyle)),
-        ),
+        label: isCenter
+            ? Expanded(
+                // Pake Expanded biar dia ngambil semua ruang kosong
+                child: Text(
+                  label,
+                  style: headerStyle,
+                  textAlign: TextAlign.center, // Teks di tengah secara internal
+                ),
+              )
+            : Text(label, style: headerStyle),
       );
     }
 
     return [
-      centeredHeader("#"),
-      centeredHeader("Item No."),
-      centeredHeader("Jenis Barang dan Jasa"),
-      centeredHeader("Item Description"),
-      centeredHeader("Jenis Item"),
-      centeredHeader("Klasifikasi Orbit"),
-      centeredHeader("Item Details"),
-      centeredHeader("Quantity"),
-      centeredHeader("Quantity Stock"),
-      centeredHeader("Unit Price"),
-      centeredHeader("Price Service"),
-      centeredHeader("Price Reference"),
-      centeredHeader("UoM Name"),
-      centeredHeader("Free Text"),
-      centeredHeader("Project Line"),
-      centeredHeader("LineID"),
-      centeredHeader("Discount %"),
-      centeredHeader("Total (LC)"),
+      sapHeader("Selected", isCenter: true), // Paling kiri sesuai gambar
+      sapHeader("Document No."), // Sesuai urutan di gambar SAP lo
+      sapHeader("Installment"),
+      sapHeader("Document Type"),
+      sapHeader("Date"),
+      sapHeader("*"),
+      sapHeader("Overdue Days"),
+      sapHeader("Total"),
+      sapHeader("WTax Amount"),
+      sapHeader("Balance Due"),
+      sapHeader("Blocked"),
+      sapHeader("Cash Discount %"),
+      sapHeader("Total Rounding Amount"),
+      sapHeader("Total Payment"),
+      sapHeader("Dimension 1"),
+      sapHeader("Payment Or...", isCenter: true),
     ];
-  }
-
-  DataCell _buildSearchableCell(String key) {
-    return DataCell(
-      InkWell(
-        onTap: () {
-          List<String> dummyData = [
-            "Option A",
-            "Option B",
-            "Option C",
-            "Option D",
-          ];
-          _showSearchDialog("Select Item", key, dummyData);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Container(
-            width: 120,
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
-                    style: const TextStyle(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      String val = _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      String cleanVal = val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
       totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
-    
+
     setState(() {
       String formatted = NumberFormat.currency(
         locale: 'id_ID',
@@ -622,122 +667,9 @@ double _getGrandTotal() {
     });
   }
 
-  Widget _buildLogisticsTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
-                "",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildModernCheckbox("Print Picking Sheet", "cb_print"),
-              _buildModernCheckbox(
-                "Proc. Doc. For Non Drop-Ship",
-                "cb_non_drop",
-              ),
-              _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
-              _buildModernCheckbox("Approved", "cb_approved"),
-              _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
-              const SizedBox(height: 20),
-              _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "BP Channel Contact",
-                "log_bp_cont",
-                [""],
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _buildAccountingTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Journal Remark", "acc_journal"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "Central Bank Ind.",
-                "acc_central_bank",
-                [""],
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Manually\nRecalculate Due Date",
-                "acc_manual_due",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Cash Discount\nDate Offset",
-                "acc_cash_disc",
-              ),
-              const SizedBox(height: 12),
-              _buildModernCheckbox(
-                "Use Shipped Goods Account",
-                "cb_shipped_acc",
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("BP Project", "acc_bp_proj"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Required Date", "acc_req_date"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Order Number", "acc_order_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-    
+
     String formattedTotal = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
@@ -1233,22 +1165,6 @@ double _getGrandTotal() {
     ),
   );
 
-  Widget _buildModernCheckbox(String label, String key) => Row(
-    children: [
-      SizedBox(
-        width: 24,
-        height: 32,
-        child: Checkbox(
-          value: _checkStates[key] ?? false,
-          activeColor: primaryIndigo,
-          onChanged: (val) => setState(() => _checkStates[key] = val!),
-        ),
-      ),
-      const SizedBox(width: 8),
-      Text(label, style: const TextStyle(fontSize: 12)),
-    ],
-  );
-
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
@@ -1652,4 +1568,34 @@ double _getGrandTotal() {
       ],
     ),
   );
+
+  Widget _buildCategoryRadio(String title) {
+    return InkWell(
+      onTap: () => setState(() => _selectedCategory = title),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Radio<String>(
+              value: title,
+              groupValue: _selectedCategory,
+              activeColor: primaryIndigo,
+              onChanged: (v) => setState(() => _selectedCategory = v!),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

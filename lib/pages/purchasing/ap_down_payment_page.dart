@@ -5,8 +5,7 @@ class ApDownPaymentPage extends StatefulWidget {
   const ApDownPaymentPage({super.key});
 
   @override
-  State<ApDownPaymentPage> createState() =>
-      _ApDownPaymentPageState();
+  State<ApDownPaymentPage> createState() => _ApDownPaymentPageState();
 }
 
 class _ApDownPaymentPageState extends State<ApDownPaymentPage>
@@ -18,7 +17,7 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -1134,7 +1133,7 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
       height: 24,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey,width: 1.0),
+        border: Border.all(color: borderGrey, width: 1.0),
         borderRadius: BorderRadius.circular(4),
       ),
       child: TextField(
@@ -1783,7 +1782,7 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
               ),
               child: TextField(
                 controller: _getCtrl("h_curr_rate", initial: ""),
-                textAlign: TextAlign.right,
+                textAlign: TextAlign.start,
                 style: const TextStyle(fontSize: 11, color: Colors.black),
                 decoration: const InputDecoration(
                   border: InputBorder.none,

@@ -18,9 +18,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
 
   int _contactRowCount = 10;
   final Color primaryIndigo = const Color(0xFF4F46E5);
-  final Color bgSlate = const Color(0xFFF8FAFC);
+  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
   final Color secondarySlate = const Color(0xFF64748B);
-  final Color borderGrey = const Color(0xFFE2E8F0);
+  final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
 
   void initState() {
     super.initState();
@@ -249,6 +249,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           width: 32,
           child: Radio<String>(
             value: label,
+            activeColor: primaryIndigo,
             visualDensity: const VisualDensity(
               horizontal: VisualDensity.minimumDensity,
               vertical: VisualDensity.minimumDensity,
@@ -302,6 +303,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            
                             _buildStatusRadioSmall("Accrual", "wtax_type"),
                             _buildStatusRadioSmall("Cash", "wtax_type"),
                           ],
@@ -1140,8 +1142,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               height: 30,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFF),
-                border: Border.all(color: const Color(0xFFE0E6F0)),
+                color: const Color.fromARGB(255, 255, 255, 255),
+                border: Border.all(color: borderGrey),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: DropdownButtonHideUnderline(
@@ -1399,7 +1401,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 height: 30,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: Color(0xFFF8FAFC),
+                  color: Color.fromARGB(255, 255, 255, 255),
                   border: Border.all(color: Color(0xFFD1D9E6)),
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -1411,7 +1413,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         style: TextStyle(
                           fontSize: 12,
                           color: _dropdownValues[key] == null
-                              ? Colors.grey
+                              ? const Color.fromARGB(255, 255, 255, 255)
                               : Colors.black,
                         ),
                       ),
@@ -2098,6 +2100,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           height: 28,
           child: Radio<String>(
             value: label,
+            activeColor: primaryIndigo,
             groupValue: _dropdownValues["status_main"] ?? "Active",
             onChanged: (v) =>
                 setState(() => _dropdownValues["status_main"] = v.toString()),
