@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 
 class SalesQuotationPage extends StatefulWidget {
@@ -26,7 +25,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
-  final Map<String, String?> _formValues = {};
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
@@ -1301,70 +1299,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     ),
   );
 
-  Widget _buildChooseFromListField(
-    String label,
-    String key,
-    List<String> data,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
-        Expanded(
-          child: InkWell(
-            onTap: () => _showSearchDialog(label, key, data),
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _getCtrl(key).text.isEmpty
-                              ? (data.isNotEmpty ? data.first : "")
-                              : _getCtrl(key).text,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 10),
-                    child: Icon(Icons.search, size: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
     showDialog(
@@ -1410,73 +1344,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
       ),
     );
   }
-
-  Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 
   Widget _buildSAPActionButton(
     String label, {
@@ -1570,9 +1437,11 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               const SizedBox(height: 12),
               _buildModernFieldRow("Do Receipt Date", "Do receipt date"),
               const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Status TTF", "cfg_status_ttf", [""]),
+              _buildSmallDropdownRowModern("Status TTF", "cfg_status_ttf", [
+                "",
+              ]),
               const SizedBox(height: 12),
-               _buildModernFieldRow(
+              _buildModernFieldRow(
                 "project Name",
                 "cf_project_name",
                 isTextArea: true,

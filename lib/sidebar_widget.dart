@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
 
-
-
 class SidebarWidget extends StatelessWidget {
   final String currentView;
   final Function(String) onViewChanged;
@@ -163,6 +161,14 @@ class SidebarWidget extends StatelessWidget {
                     _buildSubMenu(
                       "Cancel & Read Off",
                       Icons.cancel_presentation_rounded,
+                    ),
+                    _buildSubMenu(
+                      "open lock DO",
+                      Icons.lock_open_rounded,
+                    ),
+                      _buildSubMenu(
+                      "serah terima DO",
+                      Icons.assignment_turned_in_rounded,
                     ),
                   ],
                 ),
