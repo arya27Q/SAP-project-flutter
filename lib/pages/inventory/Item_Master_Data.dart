@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class BpMasterDataPage extends StatefulWidget {
-  const BpMasterDataPage({super.key});
+class ItemMasterDataPage extends StatefulWidget {
+  const ItemMasterDataPage({super.key});
 
   @override
-  State<BpMasterDataPage> createState() => _BpMasterDataPageState();
+  State<ItemMasterDataPage> createState() => _ItemMasterDataPageState();
 }
 
-class _BpMasterDataPageState extends State<BpMasterDataPage>
+class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final Map<String, TextEditingController> _controllers = {};
@@ -22,9 +22,15 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
 
+  @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 9, vsync: this);
+    _tabController = TabController(length: 8, vsync: this);
+
+    // Default Checkbox values for Header Item Master Data
+    _checkStates['is_inv_item'] = true;
+    _checkStates['is_sales_item'] = true;
+    _checkStates['is_purch_item'] = true;
   }
 
   TextEditingController _getCtrl(String key, {String initial = ""}) {
@@ -54,9 +60,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           children: [
             _buildHeaderSection(),
             const SizedBox(height: 24),
-
             _buildTabSection(),
-
             const SizedBox(height: 20),
             _buildActionArea(),
           ],
@@ -65,124 +69,115 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
-  Widget _buildAccountingTab() {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Container(
-            width: 300,
-            alignment: Alignment.center,
-            child: const TabBar(
-              isScrollable: false,
-              labelColor: Color.fromARGB(255, 72, 0, 255),
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Color.fromRGBO(74, 47, 255, 1),
-              indicatorSize: TabBarIndicatorSize.tab,
-              tabs: [
-                Tab(child: Text("General", style: TextStyle(fontSize: 12))),
-                Tab(child: Text("Tax", style: TextStyle(fontSize: 12))),
-              ],
-            ),
-          ),
-          const Divider(height: 1, thickness: 0.5),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildAccountingGeneralSubTab(),
-                _buildAccountingTaxSubTab(),
-              ],
-            ),
+  // --- HEADER SECTION (UPDATED: ITEM MASTER DATA STYLE) ---
+  Widget _buildHeaderSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white, width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAccountingGeneralSubTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Consolidating BP
-          _buildSearchField("Consolidating BP", "acc_con_bp", []),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const SizedBox(width: 145),
-              _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
-              const SizedBox(width: 20),
-              _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          Row(
-            children: [
-              const SizedBox(
-                width: 140,
-                child: Text(
-                  "Control Accounts",
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          // SISI KIRI (Item Info)
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                _buildModernNoFieldRow(
+                  "Item No.",
+                  "item_series",
+                  ["Manual", "Primary"],
+                  "item_code",
+                  initialNo: "A00001",
                 ),
-              ),
-              _buildSmallIconButton(Icons.more_horiz),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          _buildAccountFieldRow(
-            "Accounts Payable",
-            "acc_payable",
-            "2113102-0-0-00",
-            "Hutang Dagang (Lokal) Pembelian Non Material (GN, GN, GN)",
-          ),
-          _buildAccountFieldRow(
-            "Down Payment Clearing",
-            "acc_dp_clear",
-            "1171101-0-0-00",
-            "Uang Muka Pembelian Lokal (GN, GN, GN)",
-          ),
-          _buildAccountFieldRow(
-            "Down Payment Interim",
-            "acc_dp_interim",
-            "1171101-0-0-00",
-            "Uang Muka Pembelian Lokal (GN, GN, GN)",
-          ),
-
-          const SizedBox(height: 24),
-
-          // Connected Customer
-          _buildSearchField("Connected Customer", "acc_conn_cust", []),
-          const SizedBox(height: 24),
-
-          // Planning Group
-          _buildModernFieldRow("Planning Group", "acc_plan_grp"),
-
-          const SizedBox(height: 32),
-
-          // Affiliate Checkbox
-          Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["acc_affiliate"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["acc_affiliate"] = v!),
+                _buildModernFieldRow(
+                  "Description",
+                  "item_desc",
+                  initial: "IBM Infoprint 1312",
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Text("Affiliate", style: TextStyle(fontSize: 12)),
-            ],
+                _buildModernFieldRow("Foreign Name", "item_frgn_name"),
+                _buildSmallDropdownRowModern("Item Type", "item_type", [
+                  "Items",
+                  "Labor",
+                  "Travel",
+                ]),
+                _buildSmallDropdownRowModern("Item Group", "item_group", [
+                  "Printers",
+                  "Servers",
+                  "PC",
+                ]),
+                _buildSmallDropdownRowModern("Price List", "item_price_list", [
+                  "Base Price",
+                  "Discount Price",
+                ]),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 60),
+
+          // SISI KANAN (Checkboxes: Inventory, Sales, Purchased)
+          Expanded(
+            flex: 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildRightCheckbox("Inventory Item", "is_inv_item"),
+                const SizedBox(height: 8),
+                _buildRightCheckbox("Sales Item", "is_sales_item"),
+                const SizedBox(height: 8),
+                _buildRightCheckbox("Purchased Item", "is_purch_item"),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  // Helper untuk Checkbox di Header Kanan
+  Widget _buildRightCheckbox(String label, String key) {
+    return Row(
+      children: [
+        SizedBox(
+          height: 24,
+          width: 24,
+          child: Checkbox(
+            value: _checkStates[key] ?? false,
+            onChanged: (v) => setState(() => _checkStates[key] = v!),
+            activeColor: primaryIndigo,
+            side: const BorderSide(color: Colors.grey, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- EXISTING CODE BELOW (TIDAK DIUBAH) ---
 
   Widget _buildAccountFieldRow(
     String label,
@@ -220,14 +215,12 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ),
             ),
           ),
-
           const SizedBox(width: 6),
           const Text(
             "=",
             style: TextStyle(fontSize: 11, color: Colors.black54),
           ),
           const SizedBox(width: 6),
-
           Expanded(
             child: Text(
               accName,
@@ -260,124 +253,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         ),
         Text(label, style: const TextStyle(fontSize: 11)),
       ],
-    );
-  }
-
-  Widget _buildAccountingTaxSubTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- SISI KIRI (TAX STATUS & WTAX) ---
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSmallDropdownRowModern("Tax Status", "tax_status", [
-                      "Liable",
-                      "Exempt",
-                    ]),
-                    // Layout Akun (Panah -> Box -> = -> Deskripsi)
-                    _buildAccountFieldRow("Tax Group", "tax_group", "", ""),
-
-                    const SizedBox(height: 20),
-
-                    // --- Bagian WTax Sejajar Horizontal ---
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          width: 130,
-                          child: Text(
-                            "WTax Codes Allowed",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                        _buildSmallIconButton(Icons.more_horiz),
-                        const SizedBox(width: 12),
-                        // Opsi Accrual & Cash disusun vertikal di samping tombol
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildStatusRadioSmall("Accrual", "wtax_type"),
-                            _buildStatusRadioSmall("Cash", "wtax_type"),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 40),
-
-              // --- SISI KANAN (WITHHOLDING TAX INFO) ---
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: Checkbox(
-                            value: _checkStates["tax_subject_wht"] ?? true,
-                            onChanged: (v) => setState(
-                              () => _checkStates["tax_subject_wht"] = v!,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          "Subject to Withholding Tax",
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    // Field dengan input box putih
-                    _buildModernFieldRow("Certificate No.", "tax_cert_no"),
-                    _buildModernFieldRow("Expiration Date", "tax_exp_date"),
-                    _buildModernFieldRow("NI Number", "tax_ni_no"),
-
-                    const SizedBox(height: 30),
-
-                    _buildSmallDropdownRowModern(
-                      "Type for WTax Rpt",
-                      "tax_rpt_type",
-                      ["Company", "Individual"],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 60),
-
-          // --- BAGIAN BAWAH ---
-          Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["tax_deferred"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["tax_deferred"] = v!),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text("Deferred Tax", style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -428,7 +303,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ],
             ),
           ),
-
           const SizedBox(width: 40),
           Expanded(
             child: SingleChildScrollView(
@@ -565,7 +439,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     : const BoxConstraints(maxHeight: 0),
                 child: Column(
                   children: [
-                    // --- HUBUNGKAN DISINI ---
                     _buildAddressSubRow(
                       "Define New",
                       onTap: () {
@@ -594,7 +467,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- SISI KIRI: HOUSE BANK ---
                 Expanded(
                   flex: 2,
                   child: SingleChildScrollView(
@@ -653,10 +525,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 40),
-
-                // --- SISI KANAN: PAYMENT METHODS TABLE ---
                 Expanded(
                   flex: 3,
                   child: Column(
@@ -726,21 +595,11 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
             ),
             child: Row(
               children: [
-                _simpleCell(
-                  "$index",
-                  30,
-                  isHeader: true,
-                ), // Nomor urut teks saja
+                _simpleCell("$index", 30, isHeader: true),
                 _simpleCell("", 80, key: "pm_code_$index"),
                 _simpleCell("", 200, key: "pm_desc_$index"),
-                _buildSpecialInputCell(
-                  60,
-                  "pm_inc_$index",
-                ), // Kotak putih interaktif
-                _buildSpecialInputCell(
-                  60,
-                  "pm_act_$index",
-                ), // Kotak putih interaktif
+                _buildSpecialInputCell(60, "pm_inc_$index"),
+                _buildSpecialInputCell(60, "pm_act_$index"),
               ],
             ),
           );
@@ -815,7 +674,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           height: 28,
           width: 28,
           child: Checkbox(
-            // Menggunakan _checkStates yang sudah ada di class kamu
             value: _checkStates[key] ?? false,
             onChanged: (v) => setState(() => _checkStates[key] = v!),
           ),
@@ -841,80 +699,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         ),
       ),
       child: Text(label, style: const TextStyle(fontSize: 11)),
-    );
-  }
-
-  Widget _buildHeaderSection() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white,
-          width: 2.5, // Border lebih tebel
-        ),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 15,
-            spreadRadius: 2,
-            offset: const Offset(0, 8), // Bayangan jatuh ke bawah
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                _buildModernNoFieldRow(
-                  "Code",
-                  "bp_series",
-                  ["Manual", "System"],
-                  "bp_code_val",
-                  initialNo: "VJS-481",
-                ),
-                _buildModernFieldRow(
-                  "Name",
-                  "bp_name",
-                  initial: "Dinamika Polimerindo, PT",
-                ),
-                _buildModernFieldRow("Foreign Name", "bp_f_name"),
-                _buildSmallDropdownRowModern("Group", "bp_group", [
-                  "General",
-                  "Suppliers",
-                  "Customers",
-                ]),
-                _buildSmallDropdownRowModern("Currency", "bp_curr", [
-                  "Indonesian Rupiah",
-                  "USD",
-                  "EUR",
-                ]),
-                _buildModernFieldRow("Federal Tax ID", "bp_tax_id"),
-              ],
-            ),
-          ),
-          const SizedBox(width: 60),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                _buildSmallDropdownRowModern("BP Currency", "bp_curr_view", [
-                  "All Currencies",
-                ]),
-                _buildSummaryRowWithArrow("Account Balance", ""),
-                _buildSummaryRowWithArrow("Goods Receipt POs", ""),
-                _buildSummaryRowWithArrow("Purchase Orders", ""),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -961,11 +745,10 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               labelPadding: const EdgeInsets.symmetric(horizontal: 12),
               tabs: const [
                 Tab(text: "General"),
-                Tab(text: "Contact Persons"),
-                Tab(text: "Addresses"),
-                Tab(text: "Payment Terms"),
-                Tab(text: "Payment Run"),
-                Tab(text: "Accounting"),
+                Tab(text: "Purchasing Data"),
+                Tab(text: "Sales Data"),
+                Tab(text: "Inventory Data"),
+                Tab(text: "Production Data"),
                 Tab(text: "Properties"),
                 Tab(text: "Remarks"),
                 Tab(text: "Attachments"),
@@ -986,7 +769,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 _buildAddressesTab(),
                 _buildPaymentTermTab(),
                 _buildPaymentRunTab(),
-                _buildAccountingTab(),
+
                 const Center(child: Text("BP Properties")),
                 const Center(child: Text("Internal Remarks")),
                 const Center(child: Text("Document Attachments")),
@@ -1050,7 +833,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ),
             ),
           ),
-          // 2. TextField Tengah (VJS-481)
+          // 2. TextField Tengah
           Expanded(
             child: Container(
               height: 30,
@@ -1059,6 +842,10 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 border: Border(
                   top: BorderSide(color: borderGrey),
                   bottom: BorderSide(color: borderGrey),
+                  right: BorderSide(color: borderGrey), // Ditutup kanan juga
+                ),
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(6), // Rounded kanan
                 ),
               ),
               child: TextField(
@@ -1072,45 +859,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     vertical: 8,
                   ),
                 ),
-              ),
-            ),
-          ),
-          Container(
-            width: 100,
-            height: 30,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: borderGrey),
-              borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(6),
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues["bp_type_header"] ?? "Vendor",
-                isDense: true,
-                isExpanded: true,
-                // PERBAIKAN: Warna teks hitam dan icon terlihat
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                onChanged: (v) =>
-                    setState(() => _dropdownValues["bp_type_header"] = v!),
-                items: ["Vendor", "Customer"]
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 8,
-                          ), // Sesuaikan padding agar tidak terlalu ke kanan
-                          child: Text(
-                            e,
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
               ),
             ),
           ),
@@ -1400,8 +1148,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 height: 30,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  border: Border.all(color: Color(0xFFD1D9E6)),
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                  border: Border.all(color: const Color(0xFFD1D9E6)),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -1976,115 +1724,190 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- SISI KIRI (Sesuai Gambar 2) ---
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildModernFieldRow("Telp 1", "gen_telp1"),
-                    _buildModernFieldRow("Telp 2", "gen_telp2"),
-                    _buildModernFieldRow("Mobile Phone", "gen_hp"),
-                    _buildModernFieldRow("Fax", "gen_fax"),
-                    _buildModernFieldRow("E-Mail", "gen_email"),
-                    _buildModernFieldRow("Web Site", "gen_web"),
-                    _buildSmallDropdownRowModern("Shipping Type", "gen_ship", [
-                      "",
-                    ]),
-                    _buildModernFieldRow("Password", "gen_pass"),
-                    _buildModernFieldRow("BP Project", "gen_proj"),
-                    _buildSmallDropdownRowModern("Industry", "gen_ind", [""]),
-                    _buildSmallDropdownRowModern("BP Type", "gen_type", [
-                      "Company",
-                      "Private",
-                    ]),
-                    _buildSearchField("Export", "gen_export", ["", ""]),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 40),
-              Expanded(
-                child: Column(
-                  children: [
-                    _buildModernFieldRow("Contact Person", "gen_cp"),
-                    _buildModernFieldRow("Passport", "gen_passp"),
-                    _buildModernFieldRow("No. NIK", "gen_nik"),
-                    const SizedBox(height: 12),
-                    _buildModernFieldRow(
-                      "Remarks / Kategori Vendor",
-                      "gen_rem_kat",
-                      isTextArea: true,
+                    // Checkbox 1
+                    _buildCheckboxRow(
+                      "Withholding Tax Liable",
+                      "gen_wtax_liable",
                     ),
-                    _buildSmallDropdownRowModern("Buyer", "gen_buyer", [
-                      "-No Sales Employee-",
+
+                    const SizedBox(height: 16), // Jarak pemisah
+                    // Checkbox 2
+                    _buildCheckboxRow(
+                      "Do Not Apply Discount Groups",
+                      "gen_no_disc",
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Manufacturer
+                    _buildSmallDropdownRowModern("Manufacturer", "gen_manuf", [
+                      "- No Manufacturer -",
+                      "Samsung",
+                      "Apple",
                     ]),
-                    _buildSmallDropdownRowModern("Territory", "gen_territory", [
-                      "",
-                    ]),
+
+                    // Additional Identifier
+                    _buildModernFieldRow("Additional Identifier", "gen_add_id"),
+
+                    // Shipping Type
+                    _buildSmallDropdownRowModern(
+                      "Shipping Type",
+                      "gen_ship_type",
+                      ["", "Air Cargo", "Sea Freight", "Land"],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Header Text: Serial and Batch Numbers
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        "Serial and Batch Numbers",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+
+                    // Manage Item by
+                    _buildSmallDropdownRowModern(
+                      "Manage Item by",
+                      "gen_manage_by",
+                      ["None", "Serial Numbers", "Batches"],
+                    ),
                   ],
                 ),
               ),
+
+              const SizedBox(width: 40),
+
+              // --- SISI KANAN (Dikosongkan sesuai Gambar 2) ---
+              const Expanded(child: Column(children: [])),
             ],
           ),
           _buildBottomStatusArea(),
+
           const SizedBox(height: 20),
         ],
       ),
     );
   }
 
+  // --- Helper Checkbox Modern (Tambahkan ini di dalam class) ---
+  Widget _buildCheckboxRow(String label, String key) {
+    return Row(
+      children: [
+        SizedBox(
+          height: 20,
+          width: 20,
+          child: Checkbox(
+            value: _checkStates[key] ?? false,
+            onChanged: (v) => setState(() => _checkStates[key] = v!),
+            activeColor: primaryIndigo,
+            side: const BorderSide(color: Colors.grey, width: 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.black87),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBottomStatusArea() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
         children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            children: [
+              SizedBox(width: 130, child: _buildStatusRadio("Active")),
+              Expanded(
+                child: Row(
                   children: [
-                    _buildStatusRadio("Active"),
-                    const SizedBox(width: 20),
-                    const Text("From", style: TextStyle(fontSize: 11)),
+                    const Text("From", style: TextStyle(fontSize: 12)),
                     const SizedBox(width: 8),
+
                     _buildSmallBox("act_from", width: 80),
-                    const SizedBox(width: 8),
-                    const Text("To", style: TextStyle(fontSize: 11)),
+
+                    const SizedBox(width: 12),
+                    const Text("To", style: TextStyle(fontSize: 12)),
                     const SizedBox(width: 8),
                     _buildSmallBox("act_to", width: 80),
+
+                    const Spacer(), // Dorong Remarks ke Kanan
+
+                    const Text("Remarks", style: TextStyle(fontSize: 12)),
                     const SizedBox(width: 8),
-                    const Text("Remarks", style: TextStyle(fontSize: 11)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildSmallBox("act_rem")),
+                    SizedBox(width: 150, child: _buildSmallBox("act_rem")),
                   ],
                 ),
-                _buildStatusRadio("Inactive"),
-                _buildStatusRadio("Advanced"),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 40),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                _buildModernFieldRow("ID ke 2", "id_ke_2"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Checkbox(
-                      value: _checkStates["block_marketing"] ?? false,
-                      onChanged: (v) =>
-                          setState(() => _checkStates["block_marketing"] = v!),
-                    ),
-                    const Text(
-                      "Block Sending Marketing Content",
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ],
+
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              SizedBox(width: 130, child: _buildStatusRadio("Inactive")),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              SizedBox(width: 130, child: _buildStatusRadio("Advanced")),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              const SizedBox(
+                width: 130,
+                child: Text(
+                  "Advanced Rule Type",
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                 ),
-              ],
-            ),
+              ),
+              Container(
+                width: 150,
+                height: 25,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: borderGrey),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _dropdownValues["adv_rule"] ?? "General",
+                    isDense: true,
+                    style: const TextStyle(fontSize: 11, color: Colors.black),
+                    icon: const Icon(Icons.arrow_drop_down, size: 20),
+                    onChanged: (v) =>
+                        setState(() => _dropdownValues["adv_rule"] = v!),
+                    items: ["General", "Warehouse", "Item Group"]
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

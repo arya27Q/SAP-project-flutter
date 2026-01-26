@@ -29,6 +29,8 @@ import 'pages/banking/outgoing_payments/outgoing_payment_page.dart';
 
 import 'pages/financials/journal_entry_page.dart';
 
+import 'pages/inventory/item_master_data.dart';
+
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -179,6 +181,10 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Journal Entry":
         return const JournalEntryPage();
+
+      case "Item Master Data":
+        return const ItemMasterDataPage();
+        
 
       default:
         return Center(

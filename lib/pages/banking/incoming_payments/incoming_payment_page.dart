@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 
 class IncomingPaymentPage extends StatefulWidget {
@@ -15,18 +14,17 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   late TabController _tabController;
   int _rowCount = 10;
   String? _selectedCategory = 'Customer'; // Nilai default
-  
+
   final Color primaryIndigo = const Color(0xFF4F46E5);
+  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
   final Color secondarySlate = const Color(0xFF64748B);
-  final Color bgSlate = const Color(0xFFF8FAFC);
-  final Color borderGrey = const Color(0xFFD0D5DC);
+  final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
-  final Map<String, String?> _formValues = {};
   final Map<String, bool> _checkStates = {};
 
   String formatPrice(String value) {
@@ -67,21 +65,30 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             return;
           }
 
+          // 🔥 PERBAIKAN DI SINI: Pastikan semua kata kunci kolom angka lo ada
           bool isNumericField =
               key.contains("qty") ||
               key.contains("stock") ||
               key.contains("price") ||
               key.contains("total") ||
               key.contains("disc") ||
-              key.contains("p_service") ||
-              key.contains("p_ref") ||
+              key.contains("wtax") ||
+              key.contains("overdue") ||
+              key.contains("balance") || // ✅ Biar Balance Due otomatis IDR
+              key.contains(
+                "rounding",
+              ) || // ✅ Biar Total Rounding Amount otomatis IDR
+              key.contains("pay") || // ✅ Biar Total Payment otomatis IDR
+              key.contains("val") ||
               key.contains("f_before") ||
               key.contains("f_freight") ||
               key.contains("f_tax") ||
-              key.contains("f_rounding");
+              key.contains(
+                "Net_Total",
+              ); // ✅ Biar Net Total di footer otomatis IDR
 
           if (isNumericField) {
-            // Bersihkan semua karakter non-angka termasuk % lama
+            // Bersihkan karakter non-angka
             String cleanText = controller.text.replaceAll(
               RegExp(r'[^0-9]'),
               '',
@@ -92,9 +99,9 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
               setState(() {
                 if (parsed != null) {
                   if (isPercent) {
-                    // UBAH DI SINI: Tambahkan simbol % setelah angka
                     controller.text = "${parsed.toStringAsFixed(0)}%";
                   } else {
+                    // Format ke standar IDR: 1.000,00
                     controller.text = NumberFormat.currency(
                       locale: 'id_ID',
                       symbol: '',
@@ -106,6 +113,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                 }
                 _fieldValues[key] = controller.text;
 
+                // Update perhitungan footer otomatis
                 _syncTotalBeforeDiscount();
               });
             }
@@ -146,22 +154,18 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
-          .replaceAll('%', ''); // Tambahkan ini
-
+          .replaceAll('IDR', '')
+          .trim();
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
-    double before = parseValue("f_before_disc");
-    double discVal = parseValue("f_disc_val");
-    double freight = parseValue("f_freight");
-    double tax = parseValue("f_tax");
-    double rounding = parseValue("f_rounding");
+    double netTotal = parseValue("Net_Total");
+    double tax = parseValue("f_freight"); // Sesuai key yang lo pake di UI
 
-    return (before - discVal) + freight + rounding + tax;
+    return netTotal + tax;
   }
 
   @override
@@ -241,8 +245,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
         Expanded(
           flex: 6,
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Tambahkan ini biar rapi
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildModernFieldRow("Code", "p_code"),
               const SizedBox(height: 8),
@@ -253,7 +256,8 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                 "p_no_series",
                 [""],
                 "p_no_val",
-                initialNo: "xxx.xxx",
+                initialNo: "",
+                isAddress: true,
               ),
               const SizedBox(height: 12),
               _buildModernFieldRow("Contact Person", "h_contact"),
@@ -283,21 +287,21 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
           flex: 4,
           child: Column(
             children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["2025-COM", "2024-REG"],
-                "h_no_val",
-                initialNo: "256100727",
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
+              _buildModernFieldRow("No", "h_no", initial: ""),
               const SizedBox(height: 12),
               _buildHeaderDate("Posting Date", "h_post_date", ""),
               const SizedBox(height: 12),
               _buildHeaderDate("Delivery Date", "h_deliv", ""),
               const SizedBox(height: 12),
               _buildHeaderDate("Document Date", "h_doc", ""),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Refrence", "ref", initial: ""),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Transaction No", "Trans_No", initial: ""),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Wtax Code", "Wtax_code", initial: ""),
+              const SizedBox(height: 12),
+              _buildModernFieldRow("Wtax Base Sum", "Wtax_sum", initial: ""),
             ],
           ),
         ),
@@ -491,21 +495,25 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             ],
           ),
         ),
-        // 3. Kolom Data Lainnya (Dikosongkan / "")
+
         _buildModernTableCell("install_$index", initial: ""),
         _buildModernTableCell("doc_type_$index", initial: ""),
-        _buildModernTableCell("doc_date_$index", initial: ""),
+        _buildDateCell(index, "doc_date"),
         _buildModernTableCell("star_$index", initial: ""),
         _buildModernTableCell("overdue_$index", initial: ""),
         _buildModernTableCell("total_val_$index", initial: ""),
         _buildModernTableCell("wtax_$index", initial: ""),
         _buildModernTableCell("balance_$index", initial: ""),
         _buildModernTableCell("blocked_$index", initial: ""),
-        _buildModernTableCell("cash_disc_$index", initial: ""),
+        _buildModernTableCell(
+          "cash_disc_$index",
+          initial: "0%",
+          isPercent: true,
+        ),
         _buildModernTableCell("rounding_$index", initial: ""),
         _buildModernTableCell("total_pay_$index", initial: ""),
         _buildModernTableCell("dim1_$index", initial: ""),
-        // 4. Checkbox Payment Order (Paling Kanan)
+
         DataCell(
           Center(
             child: Checkbox(
@@ -516,6 +524,42 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
           ),
         ),
       ],
+    );
+  }
+
+  DataCell _buildDateCell(int index, String key) {
+    return DataCell(
+      InkWell(
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+          if (picked != null) {
+            setState(() {
+              String formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+              _getCtrl("${key}_$index").text = formattedDate;
+              _fieldValues["${key}_$index"] = formattedDate;
+            });
+          }
+        },
+        child: Container(
+          width: 100, // Sesuaikan lebar kolom Date
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: TextField(
+            controller: _getCtrl("${key}_$index"),
+            enabled: false, // Matikan input ketik manual biar lewat picker aja
+            style: const TextStyle(fontSize: 12, color: Colors.black),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              hintText: "Select Date",
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -554,12 +598,13 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
-        key.contains("disc") ||
-        key.contains("p_service") ||
-        key.contains("p_ref") ||
-        key.contains("f_before") ||
-        key.contains("f_tax") ||
-        key.contains("f_rounding");
+        key.contains("wtax") ||
+        key.contains("overdue") ||
+        key.contains("balance") ||
+        key.contains("cash") ||
+        key.contains("rounding") ||
+        key.contains("val") ||
+        key.contains("pay");
 
     final focusNode = _getFn(
       key,
@@ -624,7 +669,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     }
 
     return [
-      sapHeader("Selected", isCenter: true), // Paling kiri sesuai gambar
+      sapHeader("Selected", isCenter: true),
       sapHeader("Document No."), // Sesuai urutan di gambar SAP lo
       sapHeader("Installment"),
       sapHeader("Document Type"),
@@ -646,12 +691,18 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
+      // Ambil nilai dari kolom Total di tabel
       String val =
-          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+          _controllers["total_val_$i"]?.text ??
+          _fieldValues["total_val_$i"] ??
+          "0";
+
+      // Bersihkan format (titik/koma) biar bisa dihitung
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
-          .replaceAll('%', '');
+          .replaceAll('IDR', '')
+          .trim();
       totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
 
@@ -662,8 +713,9 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
         decimalDigits: 2,
       ).format(totalAllRows);
 
-      _getCtrl("f_before_disc").text = formatted;
-      _fieldValues["f_before_disc"] = formatted;
+      // 🔥 Update otomatis ke box Net Total di footer
+      _getCtrl("Net_Total").text = formatted;
+      _fieldValues["Net_Total"] = formatted;
     });
   }
 
@@ -703,13 +755,54 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
               Expanded(
                 child: Column(
                   children: [
-                    _buildSmallDropdownRowModern("Sales Employee", "f_employ", [
+                    _buildSmallDropdownRowModern("Journal Remark", "f_employ", [
                       "",
                     ]),
                     const SizedBox(height: 12),
-                    _buildModernFieldRow("Owner", "f_owner"),
-                    const SizedBox(height: 12),
                     _buildModernFieldRow("Remarks", "f_rem", isTextArea: true),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 120),
+                          const SizedBox(width: 28),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Checkbox(
+                                  value:
+                                      _checkStates["created_by_wizard"] ??
+                                      false,
+                                  activeColor: primaryIndigo,
+                                  side: const BorderSide(
+                                    color: Colors.grey,
+                                    width: 1.5,
+                                  ),
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _checkStates["created_by_wizard"] =
+                                          value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Created by Payment Wizard",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -718,24 +811,15 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                 width: 450,
                 child: Column(
                   children: [
-                    _buildSummaryRowWithAutoValue(
-                      "Total Before Discount",
-                      "f_before_disc",
-                    ),
+                    _buildSummaryRowWithAutoValue("Net Total ", "Net_Total"),
                     const SizedBox(height: 2),
-                    _buildDiscountRow(),
-                    const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue("Freight", "f_freight"),
-                    const SizedBox(height: 2),
-                    _buildRoundingRow(),
-                    const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue("Tax", "f_tax"),
+                    _buildSummaryRowWithAutoValue("Total Tax", "f_freight"),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
                     ),
                     _buildSummaryRowWithAutoValue(
-                      "Total",
+                      "Total Amount",
                       "f_total_final",
                       isBold: true,
                       isReadOnly: true,
@@ -754,32 +838,6 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
       ],
     );
   }
-
-  Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        const SizedBox(
-          width: 120,
-          child: Text("Discount", style: TextStyle(fontSize: 12)),
-        ),
-        const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
-        SizedBox(
-          width: 40,
-          child: _buildSummaryBox(
-            "f_disc_pct",
-            isPercent: true,
-            defaultValue: "0",
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text("%", style: TextStyle(fontSize: 12)),
-        ),
-        Expanded(child: _buildSummaryBox("f_disc_val")),
-      ],
-    ),
-  );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Row(
@@ -841,58 +899,13 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     );
   }
 
-  Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["cb_rounding"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["cb_rounding"] = v!),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "Rounding",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 28), // Samakan jarak spasi
-        Expanded(
-          child: _buildSummaryBox(
-            "f_rounding",
-            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildActionButtons() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Row(
       children: [
         _buildSAPActionButton("Add", isPrimary: true),
         const SizedBox(width: 8),
-        _buildSAPActionButton("Delete", isDanger: true),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
+        _buildSAPActionButton("Cancel", isDanger: true),
       ],
     ),
   );
@@ -951,57 +964,6 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryBox(
-    String key, {
-    String defaultValue = "0.00",
-    bool isReadOnly = false,
-    bool isPercent = false,
-  }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(
-        color: isReadOnly ? bgSlate : Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: TextField(
-        controller: controller,
-        readOnly: isReadOnly,
-        textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 12),
-        decoration: const InputDecoration(
-          isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-        ),
-        onChanged: (val) {
-          if (!isReadOnly) {
-            setState(() {
-              _fieldValues[key] = val;
-              if (key == "f_disc_pct") {
-                double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
-                      _getCtrl(
-                        "f_before_disc",
-                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ??
-                    0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
-                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
-              }
-            });
-          }
-        },
       ),
     );
   }
@@ -1076,88 +1038,77 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
+    bool isAddress = false,
   }) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Label "Bill to"
         SizedBox(
           width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 28), // Jarak spasi konsisten
+        const SizedBox(width: 28),
+
+        // DROPDOWN TERPISAH (Kiri)
+        Container(
+          width: 110,
+          height: 32, // Tinggi standar dropdown
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: bgSlate,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: borderGrey),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _dropdownValues[dropdownKey] ?? seriesOptions.first,
+              isDense: true,
+              icon: const Icon(Icons.arrow_drop_down, size: 20),
+              style: const TextStyle(fontSize: 11, color: Colors.black),
+              onChanged: (v) =>
+                  setState(() => _dropdownValues[dropdownKey] = v!),
+              items: seriesOptions
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8), // Jarak pemisah antar kotak
+        // TEXTFIELD ALAMAT TERPISAH (Kanan)
         Expanded(
           child: Container(
-            height: 32,
+            constraints: BoxConstraints(minHeight: isAddress ? 80 : 32),
             decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderGrey),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 110,
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: bgSlate,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(5),
-                    ),
-                    border: Border(right: BorderSide(color: borderGrey)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value:
-                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                      isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropdownKey] = v!),
-                      items: seriesOptions
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                    ),
-                  ),
+            child: TextField(
+              controller: _getCtrl(textKey, initial: initialNo),
+              maxLines: isAddress ? 4 : 1,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
                 ),
-                Expanded(
-                  child: Container(
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(5),
-                      ),
-                    ),
-                    child: Center(
-                      child: TextField(
-                        controller: _getCtrl(textKey, initial: initialNo),
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          _fieldValues[textKey] = val;
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
+              onChanged: (val) => _fieldValues[textKey] = val,
             ),
           ),
         ),
@@ -1325,73 +1276,6 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     );
   }
 
-  Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   Widget _buildSAPActionButton(
     String label, {
     bool isPrimary = false,
@@ -1445,101 +1329,21 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             children: [
               _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
               const SizedBox(height: 12),
-              _buildFileUploadRow("File 1", "cfg_f1"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 2", "cfg_f2"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 3", "cfg_f3"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 4", "cfg_f4"),
+              _buildModernFieldRow("FP No.", "cfg_fp_no"),
               const SizedBox(height: 12),
-              _buildModernFieldRow("Create By", "cfg_by"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
-                "No",
-                "Yes",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Punching", "cfg_punch", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Bending", "cfg_bend", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Assy", "cfg_assy", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
+              _buildHeaderDate("FP Date", "cfg_fp_date", ""),
               const SizedBox(height: 12),
               _buildModernFieldRow(
-                "Internal Memo",
-                "cfg_memo",
-                isTextArea: true,
+                "Total Amount",
+                "cfg_total_amt",
+                isDecimal: true,
               ),
-              const Divider(height: 45, thickness: 3),
-              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("AP Tax Date", "cfg_tax_date", ""),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
-                "010",
-                "020",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Area", "cfg_area"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kategori SO", "cfg_cat", [
-                "SO Resmi",
-                "SO Sample",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Name", "cfg_cust_name"),
               const SizedBox(height: 12),
               _buildModernFieldRow(
-                "alasan rubah duedate",
-                "cfg_duedate",
-                isTextArea: true,
+                "No kas bon",
+                "cfg_nokasbon",
+                isDecimal: true,
               ),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
-                "Lengkap",
-                "Tidak Lengkap",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "PIC Engineering",
-                "cfg_pic",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
-                "",
-              ]),
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
