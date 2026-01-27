@@ -651,7 +651,6 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        // 🔥 Struktur IntrinsicWidth -> ConstrainedBox agar perilaku sama dengan menu lain
         child: IntrinsicWidth(
           child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: (width ?? 80) - 16),
@@ -691,44 +690,6 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
       _getCtrl("Net_Total").text = formatted;
       _fieldValues["Net_Total"] = formatted;
     });
-  }
-
-  // --- BAGIAN KE BAWAH TIDAK DIUBAH (HELPER & FOOTER) ---
-
-  DataCell _buildDateCell(int index, String key) {
-    return DataCell(
-      InkWell(
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-          if (picked != null) {
-            setState(() {
-              String formattedDate = DateFormat('dd/MM/yyyy').format(picked);
-              _getCtrl("${key}_$index").text = formattedDate;
-              _fieldValues["${key}_$index"] = formattedDate;
-            });
-          }
-        },
-        child: Container(
-          width: 100,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: TextField(
-            controller: _getCtrl("${key}_$index"),
-            enabled: false,
-            style: const TextStyle(fontSize: 12, color: Colors.black),
-            decoration: const InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              hintText: "Select Date",
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildAddRowButtons() {

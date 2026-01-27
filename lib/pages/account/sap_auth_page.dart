@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import '../../constants.dart';
-import '../splash_page.dart'; // 🔥 PASTIKAN IMPORT INI ADA UNTUK BALIK KE SPLASH
+import '../splash_page.dart';
+import '../../services/api_services.dart';
 
 enum AuthMode { login, signup, forgotPassword }
 
@@ -27,17 +28,21 @@ class _SapAuthPageState extends State<SapAuthPage> {
   final TextEditingController _signupEmailController = TextEditingController();
   final TextEditingController _signupPassController = TextEditingController();
 
-  String? selectedCompany;
+  String? selectedCompanyValue; 
   bool _isLoading = false;
 
   bool _obscureText = true;
   bool _obscureSignup = true;
 
-  final List<String> companies = [
-    "PT. Dempo Laser Metalindo",
-    "PT. Duta Laserindo Metal",
-    "PT. Senzo Feinmetal",
-    "PT. ATMI Duta Engineering",
+  
+  final List<Map<String, String>> companies = [
+    {"name": "PT. Dempo Laser Metalindo", "value": "pt1"}, 
+    {"name": "PT. Duta Laserindo Metal", "value": "pt2"},
+    {"name": "PT. Senzo Feinmetal", "value": "pt3"}, 
+    {
+      "name": "PT. ATMI Duta Engineering",
+      "value": "pt4",
+    }, 
   ];
 
   final List<Map<String, dynamic>> features = [
@@ -58,7 +63,6 @@ class _SapAuthPageState extends State<SapAuthPage> {
     super.dispose();
   }
 
-  // 🔥 FUNGSI KEMBALI KE SPLASH DENGAN ANIMASI GESER KIRI 🔥
   void _backToSplash() {
     Navigator.pushReplacement(
       context,
@@ -178,8 +182,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
     color: const Color(0xFF2E7D32),
   );
 
+  // --- HANDLE LOGIN ---
   Future<void> handleLogin() async {
-    if (selectedCompany == null) {
+    if (selectedCompanyValue == null) {
       _showErrorDialog("Please select a Company first.");
       return;
     }
@@ -189,40 +194,70 @@ class _SapAuthPageState extends State<SapAuthPage> {
       _showErrorDialog("Please enter your email and password.");
       return;
     }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    // Kirim value (nama koneksi DB) ke API
+    final result = await ApiService.login(
+      email,
+      password,
+      selectedCompanyValue!,
+    );
+
     if (mounted) {
       setState(() => _isLoading = false);
-      _showSuccessDialog("Login Successful! Redirecting...");
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && Navigator.canPop(context)) Navigator.of(context).pop();
-        widget.onLoginSuccess();
-      });
+
+      if (result['success'] == true) {
+        _showSuccessDialog("Login Successful! Redirecting...");
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && Navigator.canPop(context)) Navigator.of(context).pop();
+          widget.onLoginSuccess();
+        });
+      } else {
+        _showErrorDialog(result['message'] ?? "Login Failed");
+      }
     }
   }
 
+  // --- HANDLE SIGNUP ---
   Future<void> handleSignup() async {
-    if (selectedCompany == null) {
+    if (selectedCompanyValue == null) {
       _showErrorDialog("Please select a Company first.");
       return;
     }
-    if (_signupNameController.text.isEmpty ||
-        _signupEmailController.text.isEmpty ||
-        _signupPassController.text.isEmpty) {
+    String name = _signupNameController.text.trim();
+    String email = _signupEmailController.text.trim();
+    String password = _signupPassController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       _showErrorDialog("Please fill in all fields.");
       return;
     }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    // Kirim value (nama koneksi DB) ke API
+    final result = await ApiService.register(
+      name,
+      email,
+      password,
+      selectedCompanyValue!,
+    );
+
     if (mounted) {
-      setState(() {
-        _isLoading = false;
-        _isReverseAnimation = true;
-        _authMode = AuthMode.login;
-      });
-      _showSuccessDialog(
-        "Account created successfully! Please wait for admin approval.",
-      );
+      setState(() => _isLoading = false);
+
+      if (result['success'] == true) {
+        setState(() {
+          _isReverseAnimation = true;
+          _authMode = AuthMode.login;
+        });
+        _showSuccessDialog(
+          "Registrasi Berhasil! Silakan Login dengan akun baru Anda.",
+        );
+      } else {
+        _showErrorDialog(result['message'] ?? "Registration Failed");
+      }
     }
   }
 
@@ -440,14 +475,12 @@ class _SapAuthPageState extends State<SapAuthPage> {
                   ),
                   child: Stack(
                     children: [
-                      // 🔥 KONTEN FORM (Z-INDEX BAWAH)
                       Center(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(60),
                           child: _buildAnimatedAuthForms(isDark: true),
                         ),
                       ),
-                      // 🔥 TOMBOL KEMBALI (Z-INDEX ATAS)
                       Positioned(
                         top: 20,
                         right: 20,
@@ -569,6 +602,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     color: Colors.white,
   );
 
+  // --- LOGIN FORM UI ---
   Widget _buildLoginForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -673,6 +707,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
+  // --- SIGNUP FORM UI ---
   Widget _buildSignupForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -764,6 +799,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     );
   }
 
+  // --- FORGOT FORM UI ---
   Widget _buildForgotForm({Key? key, required bool isDark}) {
     return Column(
       key: key,
@@ -793,7 +829,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
           height: 55,
           child: ElevatedButton(
             onPressed: () {
-              if (selectedCompany == null) {
+              if (selectedCompanyValue == null) {
                 _showErrorDialog("Please select a Company first.");
                 return;
               }
@@ -838,8 +874,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
     child: Text(text, style: _labelStyle),
   );
 
+  // 🔥 UPDATE: Dropdown Menggunakan Map (Name vs Value)
   Widget _buildCompanyDropdown(bool isDark) => DropdownButtonFormField<String>(
-    value: selectedCompany,
+    value: selectedCompanyValue,
     isExpanded: true,
     dropdownColor: const Color(0xFF2E2E48),
     style: const TextStyle(color: Colors.white),
@@ -851,13 +888,16 @@ class _SapAuthPageState extends State<SapAuthPage> {
     ),
     items: companies
         .map(
-          (e) => DropdownMenuItem(
-            value: e,
-            child: Text(e, style: const TextStyle(color: Colors.white)),
+          (item) => DropdownMenuItem(
+            value: item['value'], // Mengirim Value (nama DB connection)
+            child: Text(
+              item['name']!,
+              style: const TextStyle(color: Colors.white),
+            ), // Menampilkan Nama PT
           ),
         )
         .toList(),
-    onChanged: (v) => setState(() => selectedCompany = v),
+    onChanged: (v) => setState(() => selectedCompanyValue = v),
   );
 
   InputDecoration _inputDecoration(
