@@ -371,10 +371,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(
-            top: BorderSide(color: primaryIndigo, width: 2.5), 
-             
-            ),
+            border: Border(top: BorderSide(color: primaryIndigo, width: 2.5)),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -384,7 +381,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
               Positioned(
-                right: 0, 
+                right: 0,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -432,7 +429,6 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
           ),
         ),
 
-        // TABEL (FULL WIDTH MENTOK KANAN & AUTO EXPAND CELL)
         LayoutBuilder(
           builder: (context, constraints) {
             return Container(
@@ -441,7 +437,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 246, 246, 246),
                 border: Border(
-                bottom: BorderSide(color: Colors.white, width: 1.0),
+                  bottom: BorderSide(color: Colors.white, width: 1.0),
                   left: BorderSide(color: Colors.white, width: 1.0),
                   right: BorderSide(color: Colors.white, width: 1.0),
                 ),
@@ -454,14 +450,11 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   controller: _horizontalScroll,
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth, // Minimal selebar layar
-                    ),
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
                     child: DataTable(
                       headingRowColor: MaterialStateProperty.all(primaryIndigo),
                       headingRowHeight: 40,
-                      dataRowMinHeight:
-                          40, // Tinggi baris agar pas dengan input
+                      dataRowMinHeight: 40,
                       dataRowMaxHeight: 40,
                       columnSpacing: 20,
                       horizontalMargin: 12,
@@ -511,7 +504,6 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     );
   }
 
-  // --- HELPER TABEL INVENTORY ---
   List<DataColumn> _buildInventoryColumns() {
     TextStyle headerStyle = const TextStyle(
       color: Colors.white,
@@ -519,12 +511,11 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
       fontSize: 11,
     );
 
-    // Helper untuk header yang PASTI tengah
     DataColumn centeredHeader(String label) {
       return DataColumn(
         label: Expanded(
           child: Container(
-            alignment: Alignment.center, // Paksa alignment center
+            alignment: Alignment.center,
             child: Text(label, style: headerStyle, textAlign: TextAlign.center),
           ),
         ),
@@ -533,8 +524,8 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
     return [
       centeredHeader("#"),
-      DataColumn(label: Text("Whse Code", style: headerStyle)),
-      DataColumn(label: Text("Whse Name", style: headerStyle)),
+      centeredHeader("Whse Code"),
+      centeredHeader("Whse Name"),
       centeredHeader("Locked"),
       centeredHeader("In Stock"),
       centeredHeader("Committed"),
@@ -548,55 +539,22 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   }
 
   DataRow _buildInventoryDataRow(int index) {
-    List<Map<String, String>> dummyWhse = [
-      {"code": "01", "name": "General Warehouse"},
-      {"code": "DBS", "name": "BAD STOCK"},
-      {"code": "DCON", "name": "Whs Consumables"},
-      {"code": "DCS", "name": "Whse Customer"},
-      {"code": "DFG", "name": "Whs Finished Good", "bold": "true"},
-      {"code": "DFP", "name": "Whs Finished Good"},
-      {"code": "DPP", "name": "Whse Partial Part"},
-      {"code": "DRJ", "name": "Whs Reject"},
-      {"code": "DRM", "name": "WHS Raw Material"},
-      {"code": "DRP", "name": "Whs Repair"},
-      {"code": "DRS", "name": "Whse Ready Stock"},
-      {"code": "DRT", "name": "Whse Raw Material"},
-      {"code": "DSC", "name": "Whs Sub Cont"},
-    ];
-
-    String code = "";
-    String name = "";
-    bool isBold = false;
-    if (index < dummyWhse.length) {
-      code = dummyWhse[index]["code"]!;
-      name = dummyWhse[index]["name"]!;
-      isBold = dummyWhse[index]["bold"] == "true";
-    }
-
-    TextStyle rowStyle = TextStyle(
+    // 🔥 INI YANG TADI HILANG: Definisi rowStyle
+    TextStyle rowStyle = const TextStyle(
       fontSize: 12,
-      fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+      fontWeight: FontWeight.normal,
       color: Colors.black87,
     );
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (index == 0 || index == 4)
-          return const Color(0xFFFFF9C4).withOpacity(0.5);
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
         return Colors.white;
       }),
       cells: [
         DataCell(Center(child: Text("${index + 1}", style: rowStyle))),
-        DataCell(
-          Row(
-            children: [
-              if (code.isNotEmpty)
-                const Icon(Icons.arrow_right, color: Colors.orange, size: 18),
-              Text(code, style: rowStyle),
-            ],
-          ),
-        ),
-        DataCell(Text(name, style: rowStyle)),
+        _buildInvTextCell("inv_code_$index", initial: "", minWidth: 90),
+        _buildInvTextCell("inv_name_$index", initial: "", minWidth: 180),
+
         DataCell(
           Center(
             child: Transform.scale(
@@ -610,7 +568,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
             ),
           ),
         ),
-        // Cell Input Angka
+
         _buildInvNumberCell("inv_stock_$index", bg: Colors.white),
         _buildInvNumberCell("inv_commit_$index"),
         _buildInvNumberCell("inv_order_$index"),
@@ -623,14 +581,59 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     );
   }
 
+  DataCell _buildInvTextCell(
+    String key, {
+    String initial = "",
+    double minWidth = 80,
+  }) {
+    return DataCell(
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: IntrinsicWidth(
+          // 🔥 BIAR BISA MELEBAR OTOMATIS
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: minWidth,
+            ), // 🔥 Cuma set Minimal lebar
+            child: Container(
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: TextField(
+                controller: _getCtrl(key, initial: initial),
+                textAlign: TextAlign.start,
+                textAlignVertical: TextAlignVertical.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   DataCell _buildInvNumberCell(String key, {Color? bg}) {
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: IntrinsicWidth(
-          // Biarkan lebar mengikuti konten jika panjang
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 80), // Minimal lebar 80
+            constraints: const BoxConstraints(minWidth: 80),
             child: Container(
               height: 28,
               decoration: BoxDecoration(
@@ -643,13 +646,17 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
               child: TextField(
                 controller: _getCtrl(key),
                 textAlign: TextAlign.start,
-                textAlignVertical:
-                    TextAlignVertical.center, // POSISI PAS TENGAH
+                textAlignVertical: TextAlignVertical.center,
                 style: const TextStyle(fontSize: 11),
+
+                // 🔥 TAMBAHAN PENTING:
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ), // Biar keyboard HP jadi Angka
+
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
-                  // Reset padding bawaan agar textAlignVertical bekerja sempurna
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 4,
                     vertical: 0,

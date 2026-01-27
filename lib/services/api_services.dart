@@ -1,17 +1,17 @@
 import 'dart:convert';
+import 'dart:io'; // Untuk deteksi SocketException
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart'; // Untuk debugPrint
 
 class ApiService {
-  // GANTI IP sesuai kebutuhan (127.0.0.1 untuk Desktop/Simulator, 192.168.x.x untuk HP Asli)
   static const String baseUrl = "http://127.0.0.1:8000/api";
 
   // --- LOGIN ---
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
-    String targetPt, // Nama variabel disesuaikan
+    String targetPt,
   ) async {
-    // Sesuaikan endpoint dengan route di api.php Laravel (/test-login atau /login)
     final url = Uri.parse('$baseUrl/test-login');
 
     try {
@@ -24,15 +24,20 @@ class ApiService {
         body: jsonEncode({
           'email': email,
           'password': password,
-          // 🔥 PENTING: Key ini harus 'target_pt' sesuai Controller Laravel
           'target_pt': targetPt,
         }),
       );
 
-      print("Login Response: ${response.body}");
+      // debugPrint berasal dari foundation.dart, ini yang bikin kuning hilang
+      debugPrint("Login Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message': 'Error 404: Data Not Found.',
+        };
       } else {
         return {
           'success': false,
@@ -40,7 +45,15 @@ class ApiService {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Error Koneksi: $e'};
+      // Menggunakan SocketException di sini agar dart:io tidak kuning
+      String userMessage =
+          'Your connection is unstable / Koneksi tidak stabil.';
+      if (e is SocketException) {
+        userMessage =
+            'Tidak dapat terhubung ke server. Periksa internet atau IP Address.';
+      }
+
+      return {'success': false, 'message': userMessage};
     }
   }
 
@@ -64,15 +77,18 @@ class ApiService {
           'name': name,
           'email': email,
           'password': password,
-          // 🔥 PENTING: Key ini harus 'target_pt'
           'target_pt': targetPt,
         }),
       );
 
-      print("Register Response: ${response.body}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message':
+              'Error 404: Data Not Found.',
+        };
       } else {
         return {
           'success': false,
@@ -80,7 +96,13 @@ class ApiService {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Error Koneksi: $e'};
+  
+      return {
+        'success': false,
+        'message': e is SocketException
+            ? 'Your connection is unstable / Koneksi tidak stabil.'
+            : 'Terjadi kesalahan sistem.',
+      };
     }
   }
 }
