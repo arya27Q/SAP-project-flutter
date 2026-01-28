@@ -28,7 +28,7 @@ class ApiService {
         }),
       );
 
-      // debugPrint berasal dari foundation.dart, ini yang bikin kuning hilang
+     
       debugPrint("Login Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
@@ -45,7 +45,7 @@ class ApiService {
         };
       }
     } catch (e) {
-      // Menggunakan SocketException di sini agar dart:io tidak kuning
+      
       String userMessage =
           'Your connection is unstable / Koneksi tidak stabil.';
       if (e is SocketException) {

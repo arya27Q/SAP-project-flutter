@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../../constants.dart';
 import '../splash_page.dart';
 import '../../services/api_services.dart';
+import 'package:flutter/foundation.dart'; // Untuk debugPrint
 
 enum AuthMode { login, signup, forgotPassword }
 
@@ -28,22 +29,18 @@ class _SapAuthPageState extends State<SapAuthPage> {
   final TextEditingController _signupEmailController = TextEditingController();
   final TextEditingController _signupPassController = TextEditingController();
 
-  String? selectedCompanyValue; 
+  String? selectedCompanyValue;
   bool _isLoading = false;
 
   bool _obscureText = true;
   bool _obscureSignup = true;
 
-  
   final List<Map<String, String>> companies = [
-    {"name": "PT. Dempo Laser Metalindo", "value": "pt1"}, 
-    {"name": "PT. Duta Laserindo Metal", "value": "pt2"},
-    {"name": "PT. Senzo Feinmetal", "value": "pt3"}, 
-    {
-      "name": "PT. ATMI Duta Engineering",
-      "value": "pt4",
-    }, 
-  ];
+  {"name": "PT. Dempo Laser Metalindo", "value": "pt1"},   
+  {"name": "PT. ATMI Duta Engineering", "value": "pt2"},   
+  {"name": "PT. Senzo Feinmetal", "value": "pt3"},         
+  {"name": "PT. Duta Laserindo Metal", "value": "pt4"},    
+];
 
   final List<Map<String, dynamic>> features = [
     {"title": "Real-time Dashboard Monitoring"},
@@ -195,6 +192,8 @@ class _SapAuthPageState extends State<SapAuthPage> {
       return;
     }
 
+     debugPrint("Attempting Login to: $selectedCompanyValue");
+
     setState(() => _isLoading = true);
 
     // Kirim value (nama koneksi DB) ke API
@@ -234,6 +233,8 @@ class _SapAuthPageState extends State<SapAuthPage> {
       return;
     }
 
+    debugPrint("Attempting Register to: $selectedCompanyValue | Name: $name");
+    
     setState(() => _isLoading = true);
 
     // Kirim value (nama koneksi DB) ke API
