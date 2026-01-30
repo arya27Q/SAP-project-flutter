@@ -378,7 +378,7 @@ class _DeliveryPageState extends State<DeliveryPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -402,13 +402,13 @@ class _DeliveryPageState extends State<DeliveryPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1340,10 +1340,10 @@ class _DeliveryPageState extends State<DeliveryPage>
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: Colors.black54,
+                        color: primaryIndigo,
                       ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1461,10 +1461,10 @@ class _DeliveryPageState extends State<DeliveryPage>
           value: _dropdownValues[key],
           isDense: true,
           isExpanded: true,
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: Colors.black54,
+            color: primaryIndigo,
           ),
           style: const TextStyle(
             fontSize: 12,
@@ -1515,7 +1515,6 @@ class _DeliveryPageState extends State<DeliveryPage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-       
         SizedBox(
           width: 120,
           child: Text(
@@ -1524,7 +1523,7 @@ class _DeliveryPageState extends State<DeliveryPage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
-             
+
               shadows: [
                 Shadow(
                   offset: const Offset(0.5, 0.5),
@@ -1536,7 +1535,7 @@ class _DeliveryPageState extends State<DeliveryPage>
           ),
         ),
         const SizedBox(width: 28),
-        
+
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1544,7 +1543,7 @@ class _DeliveryPageState extends State<DeliveryPage>
               height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10), 
+                borderRadius: BorderRadius.circular(10),
                 // Border ungu tipis
                 border: Border.all(
                   color: const Color(0xFF4F46E5).withOpacity(0.15),
@@ -1583,13 +1582,13 @@ class _DeliveryPageState extends State<DeliveryPage>
                       ),
                     ),
                   ),
-                 
+
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Icon(
-                      Icons.search, 
-                      size: 16, 
-                      color: primaryIndigo.withOpacity(0.6), 
+                      Icons.search,
+                      size: 16,
+                      color: primaryIndigo.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -1781,6 +1780,7 @@ class _DeliveryPageState extends State<DeliveryPage>
             padding: const EdgeInsets.all(20),
             children: [
               _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+               const SizedBox (height: 8),
               _buildFileUploadRow("File 1", "cfg_f1"),
               _buildFileUploadRow("File 2", "cfg_f2"),
               _buildFileUploadRow("File 3", "cfg_f3"),

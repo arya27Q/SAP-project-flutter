@@ -407,7 +407,7 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -431,13 +431,13 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1382,10 +1382,10 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: Colors.black54,
+                        color: primaryIndigo,
                       ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1476,10 +1476,10 @@ class _ApDownPaymentPageState extends State<ApDownPaymentPage>
           value: _dropdownValues[key],
           isDense: true,
           // isExpanded: true, // Biarkan ini mati/comment agar aman
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: Colors.black54,
+            color: primaryIndigo,
           ),
           style: const TextStyle(
             fontSize: 12,

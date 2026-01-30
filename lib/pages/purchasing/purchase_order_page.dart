@@ -25,7 +25,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
-  final double _inputHeight = 36.0;
+  final double _inputHeight = 35.0;
   final BorderRadius _inputRadius = BorderRadius.circular(8);
 
   List<BoxShadow> get _softShadow => [
@@ -732,7 +732,7 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -756,13 +756,13 @@ class _PurchaseOrderPageState extends State<PurchaseOrderPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),

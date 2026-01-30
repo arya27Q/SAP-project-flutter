@@ -28,6 +28,29 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String?> _formValues = {};
 
+  // --- STYLE SETTINGS (UPDATED) ---
+  final double _inputHeight = 40.0; // Tinggi 40 biar sama kayak referensi
+  final BorderRadius _inputRadius = BorderRadius.circular(10); // Radius 10
+
+  // Shadow Ungu Halus
+  List<BoxShadow> get _softShadow => [
+    BoxShadow(
+      color: const Color(0xFF4F46E5).withOpacity(0.08),
+      offset: const Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.03),
+      offset: const Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  // Border Tipis Indigo
+  Border get _thinBorder =>
+      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
@@ -210,7 +233,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
-  // --- HEADER UTAMA (UPDATED: REF 1 & 3 SEJAJAR DATE) ---
+  // --- HEADER UTAMA ---
   Widget _buildModernHeader() => Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     padding: const EdgeInsets.all(24),
@@ -231,12 +254,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // --- KOLOM KIRI (70%) ---
+        // --- KOLOM KIRI ---
         Expanded(
           flex: 7,
           child: Column(
             children: [
-              // Row 1: Series & No | Posting Date
               Row(
                 children: [
                   Expanded(
@@ -261,8 +283,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Row 2: Origin | Due Date
               Row(
                 children: [
                   Expanded(
@@ -310,8 +330,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Row 3: Trans No | Doc Date
               Row(
                 children: [
                   Expanded(
@@ -334,8 +352,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Row 4: Trans Code (Kiri) | Ref 1 (Kanan - Lurus dengan Date)
               Row(
                 children: [
                   Expanded(
@@ -367,7 +383,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   const SizedBox(width: 16),
                   Expanded(
                     flex: 3,
-                    // Ref 1 disini, pakai label width 120 biar sejajar sama Date labels
                     child: _buildModernFieldRow(
                       "Ref. 1",
                       "h_ref1",
@@ -378,8 +393,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Row 5: Ref 2 (Kiri) | Ref 3 (Kanan - Lurus dengan Ref 1 & Date)
               Row(
                 children: [
                   Expanded(
@@ -393,7 +406,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   const SizedBox(width: 16),
                   Expanded(
                     flex: 3,
-                    // Ref 3 disini, pakai label width 120 biar sejajar sama Ref 1 & Date
                     child: _buildModernFieldRow(
                       "Ref. 3",
                       "h_ref3",
@@ -403,15 +415,13 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Row 6: Blanket Agreement
               _buildModernFieldRow("Blanket Agreement", "h_blanket"),
             ],
           ),
         ),
         const SizedBox(width: 40),
 
-        // --- KOLOM KANAN (30%) ---
+        // --- KOLOM KANAN ---
         Expanded(
           flex: 3,
           child: Column(
@@ -430,11 +440,12 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    height: 32,
+                    height: _inputHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFF9C4),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: borderGrey),
+                      borderRadius: _inputRadius,
+                      border: _thinBorder, // Border Ungu
+                      boxShadow: _softShadow, // Shadow
                     ),
                     child: TextField(
                       controller: _getCtrl(
@@ -446,8 +457,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
+                          horizontal: 10,
+                          vertical: 10,
                         ),
                       ),
                     ),
@@ -476,7 +487,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildSimpleTextField("h_project", hint: "Project"),
+                    child: _buildSmallDropdown("h_project", ["Project"]),
                   ),
                 ],
               ),
@@ -495,7 +506,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     ),
   );
 
-  // --- MIDDLE HEADER (FOTO KETIGA - DIRAPIKAN) ---
+  // --- MIDDLE HEADER ---
   Widget _buildMiddleHeader() => Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     padding: const EdgeInsets.all(24),
@@ -518,7 +529,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- KOLOM KIRI (Flex 1) ---
+            // --- KOLOM KIRI ---
             Expanded(
               flex: 1,
               child: Column(
@@ -557,10 +568,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ],
               ),
             ),
-
-            // Jarak horizontal antar kolom
             const SizedBox(width: 40),
-
+            // --- KOLOM KANAN ---
             Expanded(
               flex: 1,
               child: Column(
@@ -575,18 +584,21 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                     "21.January.2026",
                   ),
                   const SizedBox(height: 12),
-                  _buildField("Project", "h_project", initial: ""),
+                  _buildFieldRow("Project", "h_project", initial: ""),
                   const SizedBox(height: 12),
-                  _buildField("Tax Group", "h_tax_group", initial: ""),
+                  _buildFieldRow("Tax Group", "h_tax_group", initial: ""),
                   const SizedBox(height: 12),
-                  _buildField("Distr. Rule", "h_distr_rule", initial: ""),
+                  _buildFieldRow(
+                    "Distr. Rule",
+                    "h_distr_rule",
+                    initial: "",
+                  ),
                 ],
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        // Baris terakhir memanjang penuh di bawah
         _buildModernFieldRow(
           "Primary Form Item",
           "h_primary_form",
@@ -595,9 +607,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       ],
     ),
   );
-  // Helper Widget: Label di Atas, Dropdown di Bawah (Style SAMA dengan Header)
-
-  // --- WIDGET HELPER LAINNYA ---
 
   Widget _buildSimpleTextField(
     String key, {
@@ -605,11 +614,12 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     String? hint,
   }) {
     return Container(
-      height: 30,
+      height: _inputHeight,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: borderGrey),
+        borderRadius: _inputRadius,
+        border: _thinBorder, // Border Ungu
+        boxShadow: _softShadow, // Shadow
       ),
       child: TextField(
         controller: _getCtrl(key, initial: initial),
@@ -620,8 +630,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           border: InputBorder.none,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 8,
+            horizontal: 10,
+            vertical: 10,
           ),
         ),
         onChanged: (val) => _fieldValues[key] = val,
@@ -638,6 +648,10 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           child: Checkbox(
             value: _checkStates[key] ?? false,
             activeColor: primaryIndigo,
+            side: BorderSide(color: borderGrey, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (val) => setState(() => _checkStates[key] = val!),
           ),
         ),
@@ -755,7 +769,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -778,14 +792,14 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.2),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.2),
                         width: 0.5,
                       ),
                     ),
@@ -887,7 +901,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             child: TextField(
               controller: controller,
               focusNode: focusNode,
-              textAlign: isNumeric ? TextAlign.right : TextAlign.left,
+              textAlign: isNumeric ? TextAlign.right : TextAlign.right,
               style: const TextStyle(fontSize: 12),
               decoration: const InputDecoration(
                 isDense: true,
@@ -969,7 +983,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                ),
               ],
             ),
           ),
@@ -1092,7 +1110,6 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           ),
         ),
         const SizedBox(width: 60),
-
         Expanded(
           child: Column(
             children: [
@@ -1125,7 +1142,9 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       decimalDigits: 2,
     ).format(grandTotal);
 
-    _getCtrl("f_total_final").text = "IDR $formattedTotal";
+    if (_getCtrl("f_total_final").text != "IDR $formattedTotal") {
+      _getCtrl("f_total_final").text = "IDR $formattedTotal";
+    }
 
     return Column(
       children: [
@@ -1209,10 +1228,10 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     child: Row(
       children: [
         const SizedBox(
-          width: 120,
+          width: 140,
           child: Text("Discount", style: TextStyle(fontSize: 12)),
         ),
-        const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+        const SizedBox(width: 28),
         SizedBox(
           width: 40,
           child: _buildSummaryBox(
@@ -1234,7 +1253,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     return Row(
       children: [
         SizedBox(
-          width: 90, // Lebar label seragam agar kotak input sejajar
+          width: 90,
           child: Text(
             label,
             style: TextStyle(
@@ -1244,16 +1263,18 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Berikan jarak spasi pemisah
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
+            borderRadius: _inputRadius,
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Row(
                 children: [
@@ -1273,12 +1294,12 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
                     child: Icon(
-                      Icons.calendar_today,
+                      Icons.calendar_month_rounded,
                       size: 14,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
                     ),
                   ),
                 ],
@@ -1296,7 +1317,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120,
+          width: 140,
           child: Row(
             children: [
               SizedBox(
@@ -1305,17 +1326,19 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 child: Checkbox(
                   value: _checkStates["cb_rounding"] ?? false,
                   activeColor: primaryIndigo,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: BorderSide(color: borderGrey, width: 1.5),
                   onChanged: (v) =>
                       setState(() => _checkStates["cb_rounding"] = v!),
                 ),
               ),
               const SizedBox(width: 8),
-              // --- TULISAN ROUNDING GANTI KE SINI BIAR MUNCUL ---
               Text(
                 "Rounding",
                 style: TextStyle(
                   fontSize: 12,
-                  // Pake variabel secondarySlate biar warnanya balik normal (abu gelap/hitam)
                   color: secondarySlate,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1371,14 +1394,15 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               style: TextStyle(fontSize: 12, color: secondarySlate),
             ),
           ),
-          const SizedBox(width: 8), // Gunakan spasi konsisten
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
                 color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(10),
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: TextField(
                 controller: controller,
@@ -1392,8 +1416,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                 ),
                 onChanged: (val) {
@@ -1419,12 +1443,12 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
 
     return Container(
-      height: 24,
+      height: 35,
       decoration: BoxDecoration(
-        color: Colors.white, // Tetap putih bersih
-        // --- BORDER BIASA (UKURAN 1.0) ---
-        border: Border.all(color: borderGrey, width: 1.0),
-        borderRadius: BorderRadius.circular(4),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: _thinBorder, // Border Ungu
+        boxShadow: _softShadow, // Shadow
       ),
       child: TextField(
         controller: controller,
@@ -1437,8 +1461,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none, // Penting biar gak ada garis item di bawah
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1495,14 +1519,13 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           const SizedBox(width: 28),
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
+              height: isTextArea ? 80 : _inputHeight,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: borderGrey,
-                ), // Border tetep ada biar keliatan batasnya
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Center(
                 child: TextField(
@@ -1531,7 +1554,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     );
   }
 
-  Widget _buildField(
+  Widget _buildFieldRow(
     String label,
     String key, {
     bool isTextArea = false,
@@ -1549,7 +1572,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: labelWidth ?? 90, // Bisa custom lebar label
+            width: labelWidth ?? 90,
             child: Text(
               label,
               style: TextStyle(
@@ -1559,15 +1582,16 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               ),
             ),
           ),
-          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
+              height: isTextArea ? 80 : _inputHeight,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Center(
                 child: TextField(
@@ -1618,26 +1642,30 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Jarak spasi konsisten
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: 32,
+            height: _inputHeight,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              color: Colors.white,
+              borderRadius: _inputRadius,
+              border: _thinBorder, // Border Ungu
+              boxShadow: _softShadow, // Shadow
             ),
             child: Row(
               children: [
                 Container(
                   width: 70,
-                  height: 32,
+                  height: _inputHeight,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(5),
+                      left: Radius.circular(10),
                     ),
-                    border: Border(right: BorderSide(color: borderGrey)),
+                    border: Border(
+                      right: _thinBorder.top,
+                    ), // Border tipis kanan
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
@@ -1645,6 +1673,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                           _dropdownValues[dropdownKey] ?? seriesOptions.first,
                       isDense: true,
                       style: const TextStyle(fontSize: 11, color: Colors.black),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                      ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
                       items: seriesOptions
@@ -1657,11 +1690,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 ),
                 Expanded(
                   child: Container(
-                    height: 32,
+                    height: _inputHeight,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(5),
+                        right: Radius.circular(10),
                       ),
                     ),
                     child: Center(
@@ -1710,18 +1743,24 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: _inputHeight,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: _inputRadius,
+        border: _thinBorder, // Border Ungu
+        boxShadow: _softShadow, // Shadow
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
           style: const TextStyle(fontSize: 12, color: Colors.black),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+          ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
@@ -1751,7 +1790,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
         Expanded(child: _buildSmallDropdown(key, items)),
       ],
     ),
@@ -1777,16 +1816,17 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                color: Colors.white,
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Row(
                 children: [
@@ -1808,9 +1848,13 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 10),
-                    child: Icon(Icons.search, size: 16, color: Colors.grey),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(
+                      Icons.search,
+                      size: 16,
+                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                    ),
                   ),
                 ],
               ),
@@ -1883,7 +1927,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () async {
@@ -1917,12 +1961,12 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
                     child: Icon(
                       Icons.upload_file,
                       size: 16,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
                     ),
                   ),
                 ],

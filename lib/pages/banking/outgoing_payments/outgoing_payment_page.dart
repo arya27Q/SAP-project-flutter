@@ -16,9 +16,9 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
   String? _selectedCategory = 'Customer'; // Nilai default
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
-  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
+  final Color bgSlate = const Color(0xFFF8FAFC); // Update ke warna pucat
   final Color secondarySlate = const Color(0xFF64748B);
-  final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -26,6 +26,29 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, bool> _checkStates = {};
+
+  // --- STYLE SETTINGS (UPDATED) ---
+  final double _inputHeight = 40.0; // Tinggi 40 biar sama kayak referensi
+  final BorderRadius _inputRadius = BorderRadius.circular(10); // Radius 10
+
+  // Shadow Ungu Halus
+  List<BoxShadow> get _softShadow => [
+    BoxShadow(
+      color: const Color(0xFF4F46E5).withOpacity(0.08),
+      offset: const Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.03),
+      offset: const Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  // Border Tipis Indigo
+  Border get _thinBorder =>
+      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
@@ -369,263 +392,212 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
   }
 
   Widget _buildContentsTab() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double totalWidth = constraints.maxWidth;
-        // Lebar kolom statis
-        double widthNo = 50.0;
-        double widthGL = 150.0;
-
-        // Sisa lebar dibagi rata
-        double remainingWidth = totalWidth - (widthNo + widthGL);
-        double widthDynamic = remainingWidth / 3;
-
-        if (widthDynamic < 100) widthDynamic = 100;
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: primaryIndigo, width: 2.5),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Text(
-                    "Item/Service Type",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildSmallDropdown("item_type_main", ["Item", "Service"]),
-                  const Spacer(),
-                  _buildAddRowButtons(),
-                ],
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(color: primaryIndigo, width: 2.5),
             ),
-            Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(minHeight: 500),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 246, 246, 246),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                border: Border.all(color: borderGrey, width: 0.5),
+          ),
+          child: Row(
+            children: [
+              const Text(
+                "Item/Service Type",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                child: Scrollbar(
-                  controller: _horizontalScroll,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _horizontalScroll,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      // 🔥 ConstrainedBox: Memastikan tabel minimal selebar layar
-                      constraints: BoxConstraints(minWidth: totalWidth),
-                      child: DataTable(
-                        // 🔥 NOL-KAN SPACING agar tidak ada celah
-                        columnSpacing: 0,
-                        horizontalMargin: 0,
-                        headingRowHeight: 40,
-                        headingRowColor: MaterialStateProperty.all(
-                          primaryIndigo,
-                        ),
-
-                        // 🔥 BORDER LENGKAP: Garis kanan akan muncul di ujung layar
-                        border: TableBorder(
-                          top: BorderSide(color: borderGrey, width: 0.5),
-                          bottom: BorderSide(color: borderGrey, width: 0.5),
-                          left: BorderSide(color: borderGrey, width: 0.5),
-                          right: BorderSide(color: borderGrey, width: 0.5),
-                          verticalInside: BorderSide(
-                            color: borderGrey,
-                            width: 0.5,
-                          ),
-                          horizontalInside: BorderSide(
-                            color: borderGrey,
-                            width: 0.5,
-                          ),
-                        ),
-                        columns: _buildStaticColumns(
-                          widthNo,
-                          widthGL,
-                          widthDynamic,
-                        ),
-                        rows: List.generate(
-                          _rowCount,
-                          (index) => _buildDataRow(
-                            index,
-                            widthNo,
-                            widthGL,
-                            widthDynamic,
-                          ),
-                        ),
+              const SizedBox(width: 12),
+              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              const Spacer(),
+              _buildAddRowButtons(),
+            ],
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 500),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 255, 255, 255),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+            border: Border.all(color: borderGrey, width: 0.5),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+            child: Scrollbar(
+              controller: _horizontalScroll,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _horizontalScroll,
+                scrollDirection: Axis.horizontal,
+                child: IntrinsicWidth(
+                  child: DataTable(
+                    columnSpacing: 45,
+                    horizontalMargin: 15,
+                    headingRowHeight: 40,
+                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
+                    border: TableBorder(
+                      verticalInside: BorderSide(
+                        color: primaryIndigo.withOpacity(0.5),
+                        width: 0.5,
                       ),
+                      horizontalInside: BorderSide(
+                        color: primaryIndigo.withOpacity(0.5),
+                        width: 0.5,
+                      ),
+                    ),
+                    columns: _buildStaticColumns(),
+                    rows: List.generate(
+                      _rowCount,
+                      (index) => _buildDataRow(index),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
-  DataRow _buildDataRow(int index, double wNo, double wGL, double wDynamic) {
+  DataRow _buildDataRow(int index) {
     bool isSelected = _checkStates["row_sel_$index"] ?? false;
 
     return DataRow(
       selected: isSelected,
       color: WidgetStateProperty.resolveWith<Color?>((states) {
-        if (isSelected) return const Color(0xFFFFF29D); // Kuning SAP
+        if (isSelected) return const Color(0xFFFFF29D);
         return null;
       }),
       cells: [
-        // 1. # (Nomor Baris)
         DataCell(
-          Container(
-            width: wNo,
-            alignment: Alignment.center,
-            child: Text(
-              "${index + 1}",
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          Center(
+            child: Checkbox(
+              value: isSelected,
+              onChanged: (bool? value) {
+                setState(() {
+                  _checkStates["row_sel_$index"] = value ?? false;
+                });
+              },
             ),
           ),
         ),
-
-        // 2. G/L Account
         DataCell(
-          // 🔥 Mengikuti struktur 'IncomingPaymentPage' (IntrinsicWidth -> ConstrainedBox)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            // Bungkus dengan ConstrainedBox minWidth agar tabel penuh
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: wGL - 16,
-              ), // -16 untuk padding
-              child: IntrinsicWidth(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.arrow_right_alt,
-                      color: Colors.orange,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      // Ganti Expanded jadi Flexible dalam IntrinsicWidth
-                      child: TextField(
-                        controller: _getCtrl("gl_account_$index"),
-                        style: const TextStyle(fontSize: 12),
-                        maxLines: 1,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: "",
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        onChanged: (val) =>
-                            _fieldValues["gl_account_$index"] = val,
-                      ),
-                    ),
-                  ],
-                ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_right_alt, color: Colors.orange, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                _fieldValues["doc_no_$index"] ?? "",
+                style: const TextStyle(fontSize: 12),
               ),
+            ],
+          ),
+        ),
+        _buildModernTableCell("install_$index", initial: ""),
+        _buildModernTableCell("doc_type_$index", initial: ""),
+        _buildDateCell(index, "doc_date"),
+        _buildModernTableCell("star_$index", initial: ""),
+        _buildModernTableCell("overdue_$index", initial: ""),
+        _buildModernTableCell("total_val_$index", initial: ""),
+        _buildModernTableCell("wtax_$index", initial: ""),
+        _buildModernTableCell("balance_$index", initial: ""),
+        _buildModernTableCell("blocked_$index", initial: ""),
+        _buildModernTableCell(
+          "cash_disc_$index",
+          initial: "0%",
+          isPercent: true,
+        ),
+        _buildModernTableCell("rounding_$index", initial: ""),
+        _buildModernTableCell("total_pay_$index", initial: ""),
+        _buildModernTableCell("dim1_$index", initial: ""),
+        DataCell(
+          Center(
+            child: Checkbox(
+              value: _checkStates["pay_order_$index"] ?? false,
+              onChanged: (v) =>
+                  setState(() => _checkStates["pay_order_$index"] = v!),
             ),
           ),
         ),
-
-        // 3. Account Name
-        _buildModernTableCell("acct_name_$index", width: wDynamic),
-
-        // 4. Doc. Remarks
-        _buildModernTableCell("doc_remarks_$index", width: wDynamic),
-
-        // 5. Tax Definition
-        _buildModernTableCell("tax_def_$index", width: wDynamic),
       ],
     );
   }
 
-  // Header ke Tengah
-  List<DataColumn> _buildStaticColumns(
-    double wNo,
-    double wGL,
-    double wDynamic,
-  ) {
-    const headerStyle = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
+  DataCell _buildDateCell(int index, String key) {
+    return DataCell(
+      InkWell(
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+          if (picked != null) {
+            setState(() {
+              String formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+              _getCtrl("${key}_$index").text = formattedDate;
+              _fieldValues["${key}_$index"] = formattedDate;
+            });
+          }
+        },
+        child: Container(
+          width: 100,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: TextField(
+            controller: _getCtrl("${key}_$index"),
+            enabled: false,
+            style: const TextStyle(fontSize: 12, color: Colors.black),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              hintText: "Select Date",
+            ),
+          ),
+        ),
+      ),
     );
+  }
 
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: wNo,
-          child: const Center(child: Text("#", style: headerStyle)),
-        ),
-      ),
-      // 🔥 G/L Account menggunakan Expanded
-      DataColumn(
-        label: Expanded(
-          child: Text(
-            "G/L Account",
-            style: headerStyle,
-            textAlign: TextAlign.center,
+  Widget _buildAddRowButtons() {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () => setState(() => showSidePanel = true),
+          style: ElevatedButton.styleFrom(backgroundColor: primaryIndigo),
+          child: const Text(
+            "Add Item SO",
+            style: TextStyle(color: Colors.white, fontSize: 11),
           ),
         ),
-      ),
-      // 🔥 SEMUA KOLOM LAIN JUGA MENGGUNAKAN EXPANDED
-      // Ini akan membuat header selalu mengisi lebar kolom (center)
-      // meskipun kontennya melar melebihi wDynamic
-      DataColumn(
-        label: Expanded(
-          child: Text(
-            "Account Name",
-            style: headerStyle,
-            textAlign: TextAlign.center,
-          ),
+        IconButton(
+          onPressed: () => setState(() => _rowCount++),
+          icon: const Icon(Icons.add_box, color: Colors.green),
         ),
-      ),
-      DataColumn(
-        label: Expanded(
-          child: Text(
-            "Doc. Remarks",
-            style: headerStyle,
-            textAlign: TextAlign.center,
-          ),
+        IconButton(
+          onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null),
+          icon: const Icon(Icons.indeterminate_check_box, color: Colors.red),
         ),
-      ),
-      DataColumn(
-        label: Expanded(
-          child: Text(
-            "Tax Definition",
-            style: headerStyle,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    ];
+      ],
+    );
   }
 
   DataCell _buildModernTableCell(
     String key, {
     String initial = "",
     bool isPercent = false,
-    double? width,
   }) {
     final controller = _getCtrl(key, initial: initial);
 
@@ -650,20 +622,22 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
 
     return DataCell(
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: IntrinsicWidth(
           child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: (width ?? 80) - 16),
+            constraints: const BoxConstraints(minWidth: 80),
             child: TextField(
               controller: controller,
               focusNode: focusNode,
               textAlign: isNumeric ? TextAlign.right : TextAlign.left,
               style: const TextStyle(fontSize: 12),
-              maxLines: 1,
               decoration: const InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
               ),
               onChanged: (val) {
                 _fieldValues[key] = val;
@@ -678,8 +652,63 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
     );
   }
 
+  List<DataColumn> _buildStaticColumns() {
+    const headerStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    );
+
+    DataColumn sapHeader(String label, {bool isCenter = true}) {
+      return DataColumn(
+        label: isCenter
+            ? Expanded(
+                child: Text(
+                  label,
+                  style: headerStyle,
+                  textAlign: TextAlign.center,
+                ),
+              )
+            : Text(label, style: headerStyle),
+      );
+    }
+
+    return [
+      sapHeader("Selected", isCenter: true),
+      sapHeader("Document No."),
+      sapHeader("Installment"),
+      sapHeader("Document Type"),
+      sapHeader("Date"),
+      sapHeader("*"),
+      sapHeader("Overdue Days"),
+      sapHeader("Total"),
+      sapHeader("WTax Amount"),
+      sapHeader("Balance Due"),
+      sapHeader("Blocked"),
+      sapHeader("Cash Discount %"),
+      sapHeader("Total Rounding Amount"),
+      sapHeader("Total Payment"),
+      sapHeader("Dimension 1"),
+      sapHeader("Payment Or...", isCenter: true),
+    ];
+  }
+
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
+    for (int i = 0; i < _rowCount; i++) {
+      String val =
+          _controllers["total_val_$i"]?.text ??
+          _fieldValues["total_val_$i"] ??
+          "0";
+
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('IDR', '')
+          .trim();
+      totalAllRows += double.tryParse(cleanVal) ?? 0;
+    }
+
     setState(() {
       String formatted = NumberFormat.currency(
         locale: 'id_ID',
@@ -690,29 +719,6 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
       _getCtrl("Net_Total").text = formatted;
       _fieldValues["Net_Total"] = formatted;
     });
-  }
-
-  Widget _buildAddRowButtons() {
-    return Row(
-      children: [
-        ElevatedButton(
-          onPressed: () => setState(() => showSidePanel = true),
-          style: ElevatedButton.styleFrom(backgroundColor: primaryIndigo),
-          child: const Text(
-            "Add Item SO",
-            style: TextStyle(color: Colors.white, fontSize: 11),
-          ),
-        ),
-        IconButton(
-          onPressed: () => setState(() => _rowCount++),
-          icon: const Icon(Icons.add_box, color: Colors.green),
-        ),
-        IconButton(
-          onPressed: () => setState(() => _rowCount > 10 ? _rowCount-- : null),
-          icon: const Icon(Icons.indeterminate_check_box, color: Colors.red),
-        ),
-      ],
-    );
   }
 
   Widget _buildModernFooter() {
@@ -853,12 +859,14 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
+            borderRadius: _inputRadius,
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Row(
                 children: [
@@ -878,12 +886,12 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
                     child: Icon(
-                      Icons.calendar_today,
+                      Icons.calendar_month_rounded,
                       size: 14,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
                     ),
                   ),
                 ],
@@ -931,11 +939,12 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
           const SizedBox(width: 8),
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
                 color: isReadOnly ? bgSlate : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                border: _thinBorder, // Border Ungu
+                borderRadius: BorderRadius.circular(10), // Radius 10
+                boxShadow: _softShadow, // Shadow
               ),
               child: TextField(
                 controller: controller,
@@ -949,8 +958,8 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                 ),
                 onChanged: (val) {
@@ -994,12 +1003,13 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
           const SizedBox(width: 28),
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
+              height: isTextArea ? 80 : _inputHeight,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                color: Colors.white,
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Center(
                 child: TextField(
@@ -1057,18 +1067,23 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
         const SizedBox(width: 28),
         Container(
           width: 110,
-          height: 32,
+          height: _inputHeight,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: bgSlate,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: borderGrey),
+            color: Colors.white,
+            borderRadius: _inputRadius,
+            border: _thinBorder, // Border Ungu
+            boxShadow: _softShadow, // Shadow
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _dropdownValues[dropdownKey] ?? seriesOptions.first,
               isDense: true,
-              icon: const Icon(Icons.arrow_drop_down, size: 20),
+              icon: Icon(
+                Icons.arrow_drop_down,
+                size: 20,
+                color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+              ),
               style: const TextStyle(fontSize: 11, color: Colors.black),
               onChanged: (v) =>
                   setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1081,11 +1096,14 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
         const SizedBox(width: 8),
         Expanded(
           child: Container(
-            constraints: BoxConstraints(minHeight: isAddress ? 80 : 32),
+            constraints: BoxConstraints(
+              minHeight: isAddress ? 80 : _inputHeight,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: _inputRadius,
+              border: _thinBorder, // Border Ungu
+              boxShadow: _softShadow, // Shadow
             ),
             child: TextField(
               controller: _getCtrl(textKey, initial: initialNo),
@@ -1111,17 +1129,23 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
+      height: _inputHeight,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: _inputRadius,
+        border: _thinBorder, // Border Ungu
+        boxShadow: _softShadow, // Shadow
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
           style: const TextStyle(fontSize: 12, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            size: 20,
+            color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+          ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
@@ -1182,11 +1206,12 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                color: Colors.white,
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
               ),
               child: Row(
                 children: [
@@ -1208,9 +1233,13 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 10),
-                    child: Icon(Icons.search, size: 16, color: Colors.grey),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(
+                      Icons.search,
+                      size: 16,
+                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                    ),
                   ),
                 ],
               ),

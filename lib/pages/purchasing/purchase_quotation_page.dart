@@ -25,7 +25,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
-  final double _inputHeight = 36.0;
+  final double _inputHeight = 35.0;
   final BorderRadius _inputRadius = BorderRadius.circular(8);
 
   List<BoxShadow> get _softShadow => [
@@ -219,7 +219,6 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
- 
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -395,7 +394,6 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
       ),
     );
   }
-
 
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
@@ -734,7 +732,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -758,13 +756,13 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -982,7 +980,6 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
- 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
     String formattedTotal = NumberFormat.currency(
@@ -1100,7 +1097,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                               decoration: const InputDecoration(
                                 isDense: true,
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.only(top:14),
+                                contentPadding: EdgeInsets.only(top: 14),
                               ),
                               onChanged: (val) => setState(
                                 () => _fieldValues["f_disc_percent"] = val,
@@ -1350,7 +1347,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
-                  
+
                   contentPadding: EdgeInsets.only(left: 8, right: 8, top: 12),
                 ),
                 onChanged: (val) {
@@ -1400,7 +1397,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.only(left:8 , right:8 , top:12 ),
+          contentPadding: EdgeInsets.only(left: 8, right: 8, top: 12),
         ),
         onChanged: (val) {
           if (!isReadOnly) setState(() => _fieldValues[key] = val);

@@ -407,7 +407,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -431,13 +431,13 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1382,10 +1382,10 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: Colors.black54,
+                        color: primaryIndigo,
                       ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1478,7 +1478,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: primaryIndigo.withOpacity(0.6),
+            color: primaryIndigo,
           ),
           style: const TextStyle(
             fontSize: 12,
@@ -1528,7 +1528,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     ),
   );
 
- Widget _buildChooseFromListField(
+  Widget _buildChooseFromListField(
     String label,
     String key,
     List<String> data,
@@ -1537,7 +1537,6 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-       
         SizedBox(
           width: 120,
           child: Text(
@@ -1546,7 +1545,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
-             
+
               shadows: [
                 Shadow(
                   offset: const Offset(0.5, 0.5),
@@ -1558,7 +1557,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
           ),
         ),
         const SizedBox(width: 28),
-        
+
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1566,7 +1565,7 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
               height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10), 
+                borderRadius: BorderRadius.circular(10),
                 // Border ungu tipis
                 border: Border.all(
                   color: const Color(0xFF4F46E5).withOpacity(0.15),
@@ -1609,9 +1608,9 @@ class _ArCreditMemoPageState extends State<ArCreditMemoPage>
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Icon(
-                      Icons.search, 
-                      size: 16, 
-                      color: primaryIndigo.withOpacity(0.6), 
+                      Icons.search,
+                      size: 16,
+                      color: primaryIndigo.withOpacity(0.6),
                     ),
                   ),
                 ],

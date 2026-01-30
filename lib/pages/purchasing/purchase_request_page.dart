@@ -25,12 +25,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
-  // --- STYLE UNTUK INPUT (SHADOW & BORDER) ---
-  // Ukuran dinaikkan dikit jadi 36 biar pas (tidak kekecilan, tidak kegedean)
-  final double _inputHeight = 36.0;
-  final BorderRadius _inputRadius = BorderRadius.circular(
-    8,
-  ); // Radius 8 biar smooth
+  final double _inputHeight = 35.0;
+  final BorderRadius _inputRadius = BorderRadius.circular(8);
 
   // Shadow Ungu Halus (Reusable)
   List<BoxShadow> get _softShadow => [
@@ -765,15 +761,15 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
 
       return Container(
-        width: 150, // LEBAR DITAMBAH (Sesuai Request)
-        height: 36, // Tinggi disamakan dengan input header
+        width: 150,
+        height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8), // Radius 8
-          // Border Ungu Tipis
+          borderRadius: BorderRadius.circular(8),
+
           border: Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15)),
-          // Shadow Halus (Sesuai Request)
+
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF4F46E5).withOpacity(0.08),
@@ -848,7 +844,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -872,13 +868,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1413,37 +1409,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSmallDropdown(String key, List<String> items) {
-    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _dropdownValues[key],
-          isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
-          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-          items: items
-              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
-              .toList(),
-        ),
       ),
     );
   }

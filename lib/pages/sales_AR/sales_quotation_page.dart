@@ -241,13 +241,9 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
           child: Column(
             children: [
               _buildModernFieldRow("Customer", "h_cust"),
-
               _buildModernFieldRow("Name", "h_name"),
-
               _buildModernFieldRow("Contact Person", "h_cont"),
-
               _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-
               _buildSmallDropdownRowModern("Local Currency", "h_curr", [
                 "IDR",
                 "USD",
@@ -268,13 +264,9 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 "h_no_val",
                 initialNo: "256100727",
               ),
-
               _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-
               _buildHeaderDate("Posting Date", "h_post_date", ""),
-
               _buildHeaderDate("Delivery Date", "h_deliv", ""),
-
               _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
@@ -401,7 +393,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -425,13 +417,13 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1373,122 +1365,106 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12), // Jarak bawah
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // --- LABEL ---
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: secondarySlate,
-                fontWeight: FontWeight.w500,
-              ),
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
             ),
           ),
-
-          const SizedBox(width: 28), // Spasi
-          // --- CONTAINER MENYATU (Series + No) ---
-          Expanded(
-            child: Container(
-              height: 35, // Tinggi 35
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-
-                // Shadow Seragam
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                    spreadRadius: -2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-
-                // Border Seragam
-                border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
-                  width: 1,
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: 35,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
                 ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
               ),
-              child: Row(
-                children: [
-                  // BAGIAN 1: DROPDOWN (Series)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value:
-                            _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                        isDense: true,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        icon: const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 18,
-                          color: Colors.black54,
-                        ),
-                        onChanged: (v) =>
-                            setState(() => _dropdownValues[dropdownKey] = v!),
-                        items: seriesOptions
-                            .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  ),
-
-                  // BAGIAN 2: PEMISAH VERTIKAL
-                  Container(
-                    width: 1,
-                    height: 20,
-                    color: Colors.grey.withOpacity(0.3),
-                  ),
-
-                  // BAGIAN 3: TEXTFIELD (Nomor)
-                  Expanded(
-                    child: TextField(
-                      controller: _getCtrl(textKey, initial: initialNo),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 110,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value:
+                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
+                      isDense: true,
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black87,
+                        fontWeight: FontWeight.bold,
                       ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 9,
-                        ),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: primaryIndigo,
                       ),
-                      onChanged: (val) {
-                        _fieldValues[textKey] = val;
-                      },
+                      onChanged: (v) =>
+                          setState(() => _dropdownValues[dropdownKey] = v!),
+                      items: seriesOptions
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
                     ),
                   ),
-                ],
-              ),
+                ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _getCtrl(textKey, initial: initialNo),
+                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
+                    ),
+                    onChanged: (val) {
+                      _fieldValues[textKey] = val;
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 
   // Update function ini biar checkbox-nya lurus presisi sama teks lain
   Widget _buildModernCheckbox(String label, String key) {
@@ -1580,12 +1556,11 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
-          isExpanded:
-              true, // 🔥 PENTING: Biar teksnya ga kepotong & klik area luas
-          icon: const Icon(
+          isExpanded: true,
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: Colors.black54,
+            color: primaryIndigo, //
           ),
           style: const TextStyle(
             fontSize: 12,

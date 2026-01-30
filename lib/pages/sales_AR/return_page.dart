@@ -380,7 +380,7 @@ class _ReturnPageState extends State<ReturnPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -404,13 +404,13 @@ class _ReturnPageState extends State<ReturnPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1357,10 +1357,10 @@ class _ReturnPageState extends State<ReturnPage>
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: Colors.black54,
+                        color: primaryIndigo,
                       ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1478,10 +1478,10 @@ class _ReturnPageState extends State<ReturnPage>
           value: _dropdownValues[key],
           isDense: true,
           isExpanded: true,
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: Colors.black54,
+            color: primaryIndigo,
           ),
           style: const TextStyle(
             fontSize: 12,
@@ -1798,6 +1798,7 @@ class _ReturnPageState extends State<ReturnPage>
             padding: const EdgeInsets.all(20),
             children: [
               _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+               const SizedBox (height: 8),
               _buildFileUploadRow("File 1", "cfg_f1"),
               _buildFileUploadRow("File 2", "cfg_f2"),
               _buildFileUploadRow("File 3", "cfg_f3"),

@@ -377,7 +377,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 500),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 246, 246, 246),
+            color: const Color.fromARGB(255, 255, 255, 255),
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
@@ -401,13 +401,13 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
-                    border: const TableBorder(
+                    border: TableBorder(
                       verticalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: Color.fromARGB(208, 166, 164, 164),
+                        color: primaryIndigo.withOpacity(0.5),
                         width: 0.5,
                       ),
                     ),
@@ -1460,10 +1460,10 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           value: _dropdownValues[key],
           isDense: true,
           isExpanded: true,
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: Colors.black54,
+            color: primaryIndigo,
           ),
           style: const TextStyle(
             fontSize: 12,
@@ -1711,12 +1711,12 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: Icon(
                       Icons.upload_file,
                       size: 16,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -1780,6 +1780,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             padding: const EdgeInsets.all(20),
             children: [
               _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+               const SizedBox(height: 8),
               _buildFileUploadRow("File 1", "cfg_f1"),
               _buildFileUploadRow("File 2", "cfg_f2"),
               _buildFileUploadRow("File 3", "cfg_f3"),
@@ -1826,11 +1827,13 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                 "010",
                 "020",
               ]),
+               const SizedBox (height: 8),
               _buildModernFieldRow("Area", "cfg_area"),
               _buildChooseFromListField("Kategori SO", "cfg_cat", [
                 "SO Resmi",
                 "SO Sample",
               ]),
+               const SizedBox (height: 8),
               _buildModernFieldRow("Customer Name", "cfg_cust_name"),
               _buildModernFieldRow(
                 "alasan rubah duedate",
@@ -1841,6 +1844,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                 "Lengkap",
                 "Tidak Lengkap",
               ]),
+               const SizedBox (height: 8),
               _buildModernFieldRow(
                 "PIC Engineering",
                 "cfg_pic",
@@ -1849,6 +1853,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
               _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
               _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
+             
               _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
                 "",
               ]),

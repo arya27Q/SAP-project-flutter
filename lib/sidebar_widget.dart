@@ -46,7 +46,7 @@ class SidebarWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  "ERP SYSTEM",
+                  "SAMUDRA II ERP",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -302,6 +302,7 @@ class SidebarWidget extends StatelessWidget {
                   Icons.people_alt_rounded,
                   "Business Partner Master Data",
                 ),
+                _buildSimpleMenu(Icons.fact_check, "Quality Control"),
                 _buildSimpleMenu(
                   Icons.admin_panel_settings_outlined,
                   "Data Admin",
