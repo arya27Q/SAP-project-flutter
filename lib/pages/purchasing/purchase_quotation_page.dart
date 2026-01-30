@@ -25,6 +25,29 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
+  // --- STYLE SETTINGS (Shadow & Border Konsisten) ---
+  final double _inputHeight = 36.0; // Tinggi 36 biar pas dengan vertical 8
+  final BorderRadius _inputRadius = BorderRadius.circular(8); // Radius 8
+
+  // Shadow Indigo Halus (Sesuai Gambar)
+  List<BoxShadow> get _softShadow => [
+    BoxShadow(
+      color: const Color(0xFF4F46E5).withOpacity(0.08),
+      offset: const Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.03),
+      offset: const Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  Border get _thinBorder =>
+      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  // --------------------------------------------------
+
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
@@ -49,14 +72,13 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   FocusNode _getFn(
     String key, {
     bool isReadOnly = false,
-    String defaultValue = "0,00", // Default pakai koma
+    String defaultValue = "0,00",
     bool isPercent = false,
     bool isNumeric = true,
   }) {
     if (!_focusNodes.containsKey(key)) {
       final fn = FocusNode();
       fn.addListener(() {
-        // Logika jalan saat user meninggalkan input (hasFocus == false)
         if (!fn.hasFocus && isNumeric && !isReadOnly) {
           final controller = _getCtrl(key);
 
@@ -64,18 +86,20 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
             controller.text = defaultValue;
             return;
           }
-          // 1. Bersihkan semua karakter kecuali angka (titik dan koma lama dibuang)
-          String cleanText = controller.text.replaceAll(RegExp(r'[^0-9]'), '');
+          // Bersihkan format (hapus titik, ubah koma jadi titik buat parsing)
+          String cleanText = controller.text
+              .replaceAll('.', '')
+              .replaceAll(',', '.')
+              .replaceAll(RegExp(r'[^0-9.]'), '');
+
           double? parsed = double.tryParse(cleanText);
 
           if (mounted) {
             setState(() {
               if (parsed != null) {
                 if (isPercent) {
-                  // 2. Jika Persen: Munculkan angka bulat + simbol % (Contoh: 10%)
                   controller.text = "${parsed.toStringAsFixed(0)}%";
                 } else {
-                  // 3. Jika Rupiah: Gunakan NumberFormat id_ID (Contoh: 1.000.000,00)
                   controller.text = NumberFormat.currency(
                     locale: 'id_ID',
                     symbol: '',
@@ -87,8 +111,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
               }
 
               _fieldValues[key] = controller.text;
-
-              _syncTotalBeforeDiscount();
+              _syncTotalBeforeDiscount(); // Sync saat focus lost
             });
           }
         }
@@ -101,10 +124,12 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
+      // Bersihkan format ID (1.000,00 -> 1000.00)
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
-          .replaceAll('%', '');
+          .replaceAll('%', '')
+          .replaceAll(RegExp(r'[^0-9.-]'), ''); // Allow negative for discount
 
       return double.tryParse(cleanVal) ?? 0.0;
     }
@@ -116,6 +141,36 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     double rounding = parseValue("f_rounding");
 
     return (before - discount) + freight + tax + rounding;
+  }
+
+  void _syncTotalBeforeDiscount() {
+    double totalAllRows = 0;
+
+    for (int i = 0; i < _rowCount; i++) {
+      String val =
+          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
+
+      String cleanVal = val
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .replaceAll('%', '');
+
+      double parsedRow = double.tryParse(cleanVal) ?? 0.0;
+      totalAllRows += parsedRow;
+    }
+
+    // Update Controller langsung
+    String formatted = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 2,
+    ).format(totalAllRows);
+
+    _getCtrl("f_before_disc").text = formatted;
+    _fieldValues["f_before_disc"] = formatted;
+
+    // Trigger rebuild untuk update Grand Total di UI
+    // setState(() {}); // Opsional, tergantung logic build
   }
 
   @override
@@ -173,6 +228,9 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
+  // ==========================================
+  // HEADER SECTION
+  // ==========================================
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -193,6 +251,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // KIRI
           Expanded(
             flex: 6,
             child: Column(
@@ -200,11 +259,9 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 _buildHeaderField("Vendor", "vendor", initial: ""),
                 const SizedBox(height: 12),
                 _buildSearchableHeaderRow("Name", "h_name"),
-                const SizedBox(height: 4),
-                _buildSmallDropdownRowModern("Contact Person", "C_person", [
-                  "",
-                ]),
-                const SizedBox(height: 4),
+
+                _buildDropdownRowModern("Contact Person", "C_person", [""]),
+
                 _buildHeaderField("Department", "h_dept", initial: ""),
                 const SizedBox(height: 15),
                 Row(
@@ -220,10 +277,20 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "Send E-Mail if PO or GRPO is Added",
-                        style: TextStyle(fontSize: 12, color: Colors.black87),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black87,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0.5, 0.5),
+                              blurRadius: 1.0,
+                              color: Colors.grey.withOpacity(0.3),
+                            ),
+                          ],
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -240,6 +307,8 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
             ),
           ),
           const SizedBox(width: 40),
+
+          // KANAN
           Expanded(
             flex: 4,
             child: Column(
@@ -247,31 +316,42 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 Row(
                   children: [
                     SizedBox(
-                      width: 100, // KUNCI LURUS: 100
+                      width: 100,
                       child: Text(
                         "No.",
                         style: TextStyle(
                           fontSize: 12,
                           color: secondarySlate,
                           fontWeight: FontWeight.w500,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0.5, 0.5),
+                              blurRadius: 1.0,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 28), // JARAK PEMISAH: 28
+                    const SizedBox(width: 28),
+                    // Input No Series (KASIH SHADOW)
                     Container(
                       width: 60,
-                      height: 32,
+                      height: _inputHeight,
                       margin: const EdgeInsets.only(right: 4),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: borderGrey),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: _inputRadius,
+                        border: _thinBorder,
+                        boxShadow: _softShadow, // Shadow ditambahkan
                       ),
                       child: Center(
                         child: TextField(
                           controller: _getCtrl("h_no_series", initial: ""),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 11),
+                          // FIX TENGAH
+                          textAlignVertical: TextAlignVertical.center,
+                          style: const TextStyle(fontSize: 11, height: 1.0),
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             isDense: true,
@@ -280,18 +360,22 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                         ),
                       ),
                     ),
+                    // Input No Value (KASIH SHADOW)
                     Expanded(
                       child: Container(
-                        height: 32,
+                        height: _inputHeight,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: borderGrey),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: _inputRadius,
+                          border: _thinBorder,
+                          boxShadow: _softShadow, // Shadow ditambahkan
                         ),
                         child: Center(
                           child: TextField(
                             controller: _getCtrl("h_no_val", initial: ""),
-                            style: const TextStyle(fontSize: 12),
+                            // FIX TENGAH
+                            textAlignVertical: TextAlignVertical.center,
+                            style: const TextStyle(fontSize: 12, height: 1.0),
                             decoration: const InputDecoration(
                               border: InputBorder.none,
                               isDense: true,
@@ -307,6 +391,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                   ],
                 ),
                 const SizedBox(height: 12),
+                // Field Status (KASIH SHADOW - sudah ada di _buildHeaderField)
                 _buildHeaderField(
                   "Status",
                   "h_status",
@@ -314,6 +399,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                   isReadOnly: true,
                 ),
                 const SizedBox(height: 12),
+                // Field Dates (KASIH SHADOW - sudah ada di _buildHeaderDate)
                 _buildHeaderDate("Posting Date", "h_post_date", ""),
                 const SizedBox(height: 12),
                 _buildHeaderDate("Valid Until", "h_valid_date", ""),
@@ -329,23 +415,34 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
+  // ==========================================
+  // HELPER WIDGETS (FIXED ALIGNMENT & SHADOW)
+  // ==========================================
+
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           SizedBox(
-            width: 100, // KUNCI LURUS: 100
+            width: 100,
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 color: secondarySlate,
                 fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 28), // JARAK PEMISAH: 28
+          const SizedBox(width: 28),
           Expanded(
             child: InkWell(
               onTap: () {
@@ -353,11 +450,12 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 _showSearchDialog(label, key, dummyNames);
               },
               child: Container(
-                height: 32,
+                height: _inputHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: borderGrey),
+                  borderRadius: _inputRadius,
+                  border: _thinBorder,
+                  boxShadow: _softShadow,
                 ),
                 child: Row(
                   children: [
@@ -374,9 +472,13 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(Icons.search, size: 16, color: Colors.grey),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.search,
+                        size: 16,
+                        color: primaryIndigo.withOpacity(0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -397,29 +499,39 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     return Row(
       children: [
         SizedBox(
-          width: 100, // KUNCI LURUS: 100
+          width: 100,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // JARAK PEMISAH: 28
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: 32,
+            height: _inputHeight,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: _inputRadius,
+              border: _thinBorder,
+              boxShadow: _softShadow,
             ),
             child: TextField(
               controller: _getCtrl(key, initial: initial),
               readOnly: isReadOnly,
-              style: const TextStyle(fontSize: 12),
+              // FIX TENGAH: textAlignVertical + height 1.0
+              textAlignVertical: TextAlignVertical.center,
+              style: const TextStyle(fontSize: 12, height: 1.0),
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 isDense: true,
@@ -439,42 +551,52 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     return Row(
       children: [
         SizedBox(
-          width: 100, // KUNCI LURUS: 100
+          width: 100,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // JARAK PEMISAH: 28
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () => _selectDate(context, key),
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: _inputRadius,
+                border: _thinBorder,
+                boxShadow: _softShadow, // Shadow ditambahkan
               ),
               child: IgnorePointer(
                 child: TextField(
                   controller: _getCtrl(key, initial: initial),
-                  style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
+                  // FIX TENGAH
+                  textAlignVertical: TextAlignVertical.center,
+                  style: const TextStyle(fontSize: 12, height: 1.0),
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 8,
                     ),
                     suffixIcon: Icon(
-                      Icons.calendar_today,
+                      Icons.calendar_month_rounded,
                       size: 14,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6),
                     ),
                   ),
                 ),
@@ -556,6 +678,53 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
   }
 
   Widget _buildContentsTab() {
+    // Helper lokal untuk Dropdown dengan Shadow & Width khusus
+    Widget buildStyledDropdown(String key, List<String> items) {
+      if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
+      return Container(
+        width: 150, // LEBAR DITAMBAH (Sesuai Request)
+        height: 36, // Tinggi disamakan dengan input header
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8), // Radius 8
+          // Border Ungu Tipis
+          border: Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15)),
+          // Shadow Halus (Sesuai Request)
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF4F46E5).withOpacity(0.08),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
+              spreadRadius: -2,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              offset: const Offset(0, 2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: _dropdownValues[key],
+            isDense: true,
+            style: const TextStyle(fontSize: 12, color: Colors.black),
+            icon: Icon(
+              Icons.arrow_drop_down,
+              size: 20,
+              color: primaryIndigo.withOpacity(0.6),
+            ),
+            onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+            items: items
+                .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+                .toList(),
+          ),
+        ),
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -575,14 +744,19 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("item_type_main", ["Service", "Item"]),
+              // Panggil Helper Dropdown yang sudah diperlebar & ada shadow
+              buildStyledDropdown("item_type_main", ["Service", "Item"]),
+
               const Spacer(),
+
               const Text(
                 "Summary Type",
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("summary_type", ["No Summary"]),
+              // Panggil Helper yang sama biar konsisten
+              buildStyledDropdown("summary_type", ["No Summary"]),
+
               const SizedBox(width: 20),
               _buildAddRowButtons(),
             ],
@@ -647,7 +821,6 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
-
     DataColumn centeredColumn(String label) {
       return DataColumn(
         label: Expanded(
@@ -720,18 +893,12 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     bool isPercent = false,
   }) {
     final controller = _getCtrl(key, initial: initial);
-
     bool isNumeric =
         key.contains("qty") ||
         key.contains("price") ||
         key.contains("total") ||
         key.contains("disc") ||
-        key.contains("info_price") ||
-        key.contains("f_before") ||
-        key.contains("rounding") ||
-        key.contains("Freight") ||
-        key.contains("Tax");
-
+        key.contains("info_price");
     String defValue = isPercent ? "0%" : "0,00";
     final focusNode = _getFn(
       key,
@@ -760,14 +927,9 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 ),
               ),
               onChanged: (val) {
-                // Simpan nilai mentah ke fieldValues
                 _fieldValues[key] = val;
-
-                // Jika field ini adalah bagian dari angka (qty, price, dll), hitung ulang total
-                if (isNumeric) {
-                  _syncTotalBeforeDiscount();
-                }
-                // Penting: Hapus setState() kosong di sini karena sudah ada di dalam _syncTotalBeforeDiscoun
+                if (isNumeric) _syncTotalBeforeDiscount();
+                setState(() {});
               },
             ),
           ),
@@ -776,7 +938,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
-  DataCell _buildSearchableCell(String key) {
+ DataCell _buildSearchableCell(String key) {
     return DataCell(
       InkWell(
         onTap: () {
@@ -790,23 +952,24 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: IntrinsicWidth(
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 100),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      _fieldValues[key] ?? _controllers[key]?.text ?? "",
-                      style: const TextStyle(fontSize: 12),
-                    ),
+          child: Container(
+            width: 120,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.search, size: 14, color: Colors.grey),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+              ],
             ),
           ),
         ),
@@ -814,7 +977,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     );
   }
 
-  DataCell _buildDropdownCell(String key, List<String> items) {
+ DataCell _buildDropdownCell(String key, List<String> items) {
     return DataCell(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -828,18 +991,22 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                 isDense: true,
                 isExpanded: false,
                 style: const TextStyle(fontSize: 12, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, size: 18),
-                onChanged: (newValue) {
-                  setState(() {
-                    _dropdownValues[key] = newValue!;
-                  });
-                },
-                items: items.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                // --- PERUBAHAN DISINI (Warna Primary) ---
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  size: 18,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+                onChanged: (newValue) =>
+                    setState(() => _dropdownValues[key] = newValue!),
+                items: items
+                    .map(
+                      (String value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -847,48 +1014,20 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
       ),
     );
   }
-
-  void _syncTotalBeforeDiscount() {
-    double totalAllRows = 0;
-
-    for (int i = 0; i < _rowCount; i++) {
-      // GANTI 'index' JADI 'i' DI SINI
-      String val =
-          _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-
-      // PEMBERSIH: Buang titik ribuan, ubah koma desimal jadi titik
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
-
-      double parsedRow = double.tryParse(cleanVal) ?? 0.0;
-      totalAllRows += parsedRow;
-    }
-
-    setState(() {
-      // FORMAT BALIK KE STANDAR SAP (1.000.000,00)
-      String formatted = NumberFormat.currency(
-        locale: 'id_ID',
-        symbol: '',
-        decimalDigits: 2,
-      ).format(totalAllRows);
-
-      _getCtrl("f_before_disc").text = formatted;
-      _fieldValues["f_before_disc"] = formatted;
-    });
-  }
-
+ 
+  // ==========================================
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-
     String formattedTotal = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
       decimalDigits: 2,
     ).format(grandTotal);
 
-    _getCtrl("f_total_final").text = "IDR $formattedTotal";
+    // Perbaikan: Update text controller jika value berubah, tapi hindari loop
+    if (_getCtrl("f_total_final").text != "IDR $formattedTotal") {
+      _getCtrl("f_total_final").text = "IDR $formattedTotal";
+    }
 
     return Column(
       children: [
@@ -949,25 +1088,33 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         children: [
-                          const SizedBox(
-                            width: 140, // KUNCI FOOTER
+                          SizedBox(
+                            width: 140,
                             child: Text(
                               "Discount",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF64748B),
+                                color: const Color(0xFF64748B),
+                                shadows: [
+                                  Shadow(
+                                    offset: const Offset(0.5, 0.5),
+                                    blurRadius: 1.0,
+                                    color: Colors.grey.withOpacity(0.5),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 25), // GAP
+                          const SizedBox(width: 25),
                           Container(
-                            width: 50,
-                            height: 24,
+                            width: 60,
+                            height: 28,
                             margin: const EdgeInsets.only(right: 8),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: borderGrey),
+                              border: _thinBorder,
                               borderRadius: BorderRadius.circular(4),
+                              boxShadow: _softShadow,
                             ),
                             child: TextField(
                               controller: _getCtrl("f_disc_percent"),
@@ -985,6 +1132,9 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                                   horizontal: 4,
                                 ),
                               ),
+                              onChanged: (val) => setState(
+                                () => _fieldValues["f_disc_percent"] = val,
+                              ),
                             ),
                           ),
                           const Text("%", style: TextStyle(fontSize: 12)),
@@ -999,26 +1149,29 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       child: Row(
                         children: [
                           SizedBox(
-                            width: 140,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text(
-                                  "Freight",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF64748B),
+                            width: 120,
+                            child: Text(
+                              "Freight",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: const Color(0xFF64748B),
+                                shadows: [
+                                  Shadow(
+                                    offset: const Offset(0.5, 0.5),
+                                    blurRadius: 1.0,
+                                    color: Colors.grey.withOpacity(0.5),
                                   ),
-                                ),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  size: 14,
-                                  color: Colors.orange,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(width: 25),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(child: _buildSummaryBox("f_freight")),
                         ],
                       ),
@@ -1047,11 +1200,18 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                const Text(
+                                Text(
                                   "Rounding",
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Color(0xFF64748B),
+                                    color: const Color(0xFF64748B),
+                                    shadows: [
+                                      Shadow(
+                                        offset: const Offset(0.5, 0.5),
+                                        blurRadius: 1.0,
+                                        color: Colors.grey.withOpacity(0.5),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -1063,11 +1223,7 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                       ),
                     ),
                     const SizedBox(height: 2),
-                    _buildSummaryRowWithAutoValue(
-                      "Tax",
-                      "f_tax",
-                      isReadOnly: false,
-                    ),
+                    _buildSummaryRowWithAutoValue("Tax", "f_tax"),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(height: 1, thickness: 1),
@@ -1117,6 +1273,13 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
         color: Colors.white,
         border: Border.all(color: borderGrey),
         borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1156,52 +1319,58 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     bool isBold = false,
     bool isReadOnly = false,
   }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
+    final controller = _getCtrl(key, initial: defaultValue);
     final focusNode = _getFn(
       key,
       isReadOnly: isReadOnly,
       defaultValue: defaultValue,
     );
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           SizedBox(
-            width: 140, // KUNCI LURUS: 140
+            width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 25), // GAP
+          const SizedBox(width: 25),
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
                 color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(12),
+                border: _thinBorder, // Fixed Border
+                boxShadow: _softShadow, // Fixed Shadow
               ),
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,
                 readOnly: isReadOnly,
                 textAlign: TextAlign.right,
+                textAlignVertical: TextAlignVertical.center,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  height: 1.0,
                 ),
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
                 ),
                 onChanged: (val) {
                   if (!isReadOnly) setState(() => _fieldValues[key] = val);
@@ -1220,33 +1389,32 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     bool isReadOnly = false,
     bool isPercent = false,
   }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
+    final controller = _getCtrl(key, initial: defaultValue);
     final focusNode = _getFn(
       key,
       isReadOnly: isReadOnly,
       defaultValue: defaultValue,
       isPercent: isPercent,
     );
-
     return Container(
       height: 24,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
+        border: _thinBorder, // Fixed Border
         borderRadius: BorderRadius.circular(4),
+        boxShadow: _softShadow, // Fixed Shadow
       ),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
         readOnly: isReadOnly,
         textAlign: TextAlign.right,
+        textAlignVertical: TextAlignVertical.center,
         style: const TextStyle(
           fontSize: 12,
           color: Colors.black,
           fontWeight: FontWeight.w600,
+          height: 1.0,
         ),
         decoration: const InputDecoration(
           isDense: true,
@@ -1266,30 +1434,38 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     bool isTextArea = false,
     String initial = "",
   }) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100, // KUNCI LURUS: 100
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // JARAK PEMISAH: 28
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: isTextArea ? 80 : 32,
+            height: isTextArea ? 80 : _inputHeight,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: _inputRadius,
+              border: _thinBorder, // Fixed Border
+              boxShadow: _softShadow, // Fixed Shadow
             ),
             child: Center(
               child: TextField(
@@ -1301,6 +1477,70 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                 ),
+                onChanged: (v) => _fieldValues[key] = v,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildDropdownRowModern(
+    String label,
+    String key,
+    List<String> items,
+  ) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 100, // Lebar sama dengan header kiri lainnya
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: _inputHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: _inputRadius,
+              border: _thinBorder, // Fixed Border
+              boxShadow: _softShadow, // Fixed Shadow
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[key],
+                isDense: true,
+                isExpanded: true,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  size: 20,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+                onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+                items: items
+                    .map(
+                      (val) => DropdownMenuItem(value: val, child: Text(val)),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -1314,37 +1554,49 @@ class _PurchaseQuotationPageState extends State<PurchaseQuotationPage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 100, // KUNCI LURUS: 100
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // JARAK PEMISAH: 28
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: 32,
+            height: _inputHeight,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: borderGrey),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: _inputRadius,
+              border: _thinBorder, // Fixed Border
+              boxShadow: _softShadow, // Fixed Shadow
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _dropdownValues[key],
                 isDense: true,
                 style: const TextStyle(fontSize: 12, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, size: 20),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  size: 20,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
                 onChanged: (val) => setState(() => _dropdownValues[key] = val!),
                 items: items
                     .map(

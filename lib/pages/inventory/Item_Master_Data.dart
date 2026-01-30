@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class ItemMasterDataPage extends StatefulWidget {
   const ItemMasterDataPage({super.key});
@@ -13,9 +12,6 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   late TabController _tabController;
   final ScrollController _horizontalScroll = ScrollController();
 
-  // Note: _verticalScroll dihapus karena kita pakai scroll halaman utama (body)
-  // agar tabel tampil full 10 baris.
-
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _dropdownValues = {};
   final Map<String, bool> _checkStates = {};
@@ -25,11 +21,11 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   // ignore: unused_field
   final Map<String, FocusNode> _focusNodes = {};
 
-  int _inventoryRowCount = 10; // Default 10 baris
+  int _inventoryRowCount = 10; 
   int _currentTabIndex = 0;
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
-  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
+  final Color bgSlate = const Color(0xFFF1F5F9);
   final Color secondarySlate = const Color(0xFF64748B);
   final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
 
@@ -509,6 +505,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
       color: Colors.white,
       fontWeight: FontWeight.bold,
       fontSize: 11,
+      letterSpacing: 0.5, // Biar header lebih lega dikit
     );
 
     DataColumn centeredHeader(String label) {
@@ -516,7 +513,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
         label: Expanded(
           child: Container(
             alignment: Alignment.center,
-            child: Text(label, style: headerStyle, textAlign: TextAlign.center),
+            child: Text(label, style: headerStyle, textAlign: TextAlign.start),
           ),
         ),
       );
@@ -539,37 +536,47 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   }
 
   DataRow _buildInventoryDataRow(int index) {
-    // 🔥 INI YANG TADI HILANG: Definisi rowStyle
     TextStyle rowStyle = const TextStyle(
       fontSize: 12,
-      fontWeight: FontWeight.normal,
+      fontWeight: FontWeight.w500, // Agak tebal dikit biar kebaca
       color: Colors.black87,
     );
 
     return DataRow(
       color: WidgetStateProperty.resolveWith<Color?>((states) {
-        return Colors.white;
+        return Colors.transparent; // Biar background ngikut scaffold/container
       }),
       cells: [
+        // Index Row
         DataCell(Center(child: Text("${index + 1}", style: rowStyle))),
+
+        // Input Text
         _buildInvTextCell("inv_code_$index", initial: "", minWidth: 90),
         _buildInvTextCell("inv_name_$index", initial: "", minWidth: 180),
 
+        // Checkbox Modern
         DataCell(
           Center(
-            child: Transform.scale(
-              scale: 0.8,
+            child: SizedBox(
+              height: 20,
+              width: 20,
               child: Checkbox(
                 value: _checkStates["inv_locked_$index"] ?? false,
                 onChanged: (v) =>
                     setState(() => _checkStates["inv_locked_$index"] = v!),
-                activeColor: primaryIndigo,
+                activeColor: primaryIndigo, // Warna Tema
+                side: BorderSide(color: Colors.grey.shade400, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           ),
         ),
 
-        _buildInvNumberCell("inv_stock_$index", bg: Colors.white),
+        // Input Angka (Semua dikasih style box biar rapi rata)
+        _buildInvNumberCell("inv_stock_$index"),
         _buildInvNumberCell("inv_commit_$index"),
         _buildInvNumberCell("inv_order_$index"),
         _buildInvNumberCell("inv_avail_$index"),
@@ -588,19 +595,32 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   }) {
     return DataCell(
       Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          vertical: 4,
+        ), // Spasi atas bawah sel
         child: IntrinsicWidth(
-          // 🔥 BIAR BISA MELEBAR OTOMATIS
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: minWidth,
-            ), // 🔥 Cuma set Minimal lebar
+            constraints: BoxConstraints(minWidth: minWidth),
             child: Container(
-              height: 28,
+              height: 30, // Tinggi Seragam
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(6), // Rounded Modern
+                // 🔥 SHADOW SAMA PERSIS KAYAK FORM ATAS 🔥
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                    spreadRadius: -1,
+                  ),
+                ],
+
+                // Border Ungu Tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: _getCtrl(key, initial: initial),
@@ -609,14 +629,15 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
                 textCapitalization: TextCapitalization.characters,
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 0,
+                    horizontal: 8, // Padding kiri kanan teks
+                    vertical: 9, // Padding atas bawah teks biar tengah
                   ),
                 ),
               ),
@@ -635,31 +656,42 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 80),
             child: Container(
-              height: 28,
+              height: 30,
               decoration: BoxDecoration(
-                color: bg ?? Colors.transparent,
-                border: bg != null
-                    ? Border.all(color: Colors.grey.shade300)
-                    : null,
-                borderRadius: BorderRadius.circular(2),
+                color: bg ?? Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                    spreadRadius: -1,
+                  ),
+                ],
+
+                // Style Border Seragam
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: _getCtrl(key),
                 textAlign: TextAlign.start,
                 textAlignVertical: TextAlignVertical.center,
-                style: const TextStyle(fontSize: 11),
-
-                // 🔥 TAMBAHAN PENTING:
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
-                ), // Biar keyboard HP jadi Angka
-
+                ),
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 0,
+                    horizontal: 8,
+                    vertical: 9,
                   ),
                 ),
               ),
@@ -712,6 +744,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
                 _buildSmallDropdownRowModern(
                   "Manage Item by",
                   "gen_manage_by",
@@ -740,7 +773,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   "Preferred Vendor",
                   "purch_vendor",
                   buttonIcon: Icons.more_horiz,
-                  bgColor: const Color(0xFFFFF9C4),
+                  bgColor: const Color.fromARGB(255, 255, 255, 255),
                   labelWidth: 140,
                 ),
                 _buildModernFieldRow(
@@ -856,7 +889,6 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   "Sales UoM Name",
                   "sales_uom",
                   initial: "Unit",
-                  bgColor: const Color(0xFFFFF9C4),
                   labelWidth: 140,
                 ),
                 _buildModernFieldRow(
@@ -940,61 +972,129 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     double labelWidth = 130,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak antar row
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: labelWidth,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
+
+          const SizedBox(width: 10),
+
+          // --- CONTAINER MENYATU (Input + Button) ---
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 30,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: borderGrey),
-                    ),
+            child: Container(
+              height: 35, // Tinggi standar
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(10),
+
+                // Shadow Ungu Tipis (Seragam)
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border Ungu Tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // BAGIAN 1: TEXTFIELD
+                  Expanded(
                     child: TextField(
                       controller: _getCtrl(key, initial: initial),
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 6),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  height: 30,
-                  width: 35,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFDE68A),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey.shade400),
+
+                  // BAGIAN 2: GARIS PEMISAH (Opsional, biar makin rapi)
+                  Container(
+                    width: 1,
+                    height: 35,
+                    color: borderGrey.withOpacity(0.5),
                   ),
-                  child: Center(
-                    child: buttonIcon != null
-                        ? Icon(buttonIcon, size: 16, color: Colors.black54)
-                        : Text(
-                            buttonText ?? "...",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+
+                  // BAGIAN 3: BUTTON (Menyatu di kanan)
+                  Container(
+                    width: 40, // Lebar tombol
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFFFDE68A,
+                      ), // Warna Kuning asli (dipertahankan)
+                      // Rounded cuma di kanan biar nyatu
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(9),
+                        bottomRight: Radius.circular(9),
+                      ),
+                    ),
+                    child: Material(
+                      // Efek ripple pas diklik
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(9),
+                          bottomRight: Radius.circular(9),
+                        ),
+                        onTap: () {
+                          // Tambahin logic tombol disini kalau butuh
+                          print("Button $key clicked");
+                        },
+                        child: Center(
+                          child: buttonIcon != null
+                              ? Icon(
+                                  buttonIcon,
+                                  size: 16,
+                                  color: Colors.black54,
+                                )
+                              : Text(
+                                  buttonText ?? "...",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1009,68 +1109,118 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     List<String> units, {
     double labelWidth = 130,
   }) {
-    if (!_dropdownValues.containsKey(dropKey))
+    if (!_dropdownValues.containsKey(dropKey)) {
       _dropdownValues[dropKey] = units.first;
+    }
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak lebih lega
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: labelWidth,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
+
+          const SizedBox(width: 10),
+
+          // --- CONTAINER MENYATU (Input + Dropdown Unit) ---
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 30,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: borderGrey),
-                    ),
+            child: Container(
+              height: 35, // Tinggi standar
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10), // Rounded
+                // Shadow Seragam
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border Ungu Tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // BAGIAN 1: TEXTFIELD (Angka Volume)
+                  Expanded(
                     child: TextField(
                       controller: _getCtrl(key),
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 6),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
+                        hintText: "0", // Opsional hint
+                        hintStyle: TextStyle(color: Colors.black26),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  height: 30,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: borderGrey),
+
+                  // BAGIAN 2: GARIS PEMISAH VERTIKAL
+                  Container(
+                    width: 1,
+                    height: 20,
+                    color: Colors.grey.withOpacity(0.3),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _dropdownValues[dropKey],
-                      isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
-                      icon: const Icon(Icons.arrow_drop_down, size: 18),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropKey] = v!),
-                      items: units
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
+
+                  // BAGIAN 3: DROPDOWN UNIT (Kanan)
+                  Container(
+                    padding: const EdgeInsets.only(left: 8, right: 4),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _dropdownValues[dropKey],
+                        isDense: true,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black87,
+                          fontWeight:
+                              FontWeight.bold, // Bold biar unitnya jelas
+                        ),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: Colors.black54,
+                        ),
+                        onChanged: (v) =>
+                            setState(() => _dropdownValues[dropKey] = v!),
+                        items: units
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1086,72 +1236,137 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     double labelWidth = 130,
   }) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: labelWidth,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
+
+          const SizedBox(width: 10),
+
+          // --- CONTAINER MENYATU ---
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 30,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: borderGrey),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _dropdownValues[key],
-                        isDense: true,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
+            child: Container(
+              height: 35,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // BAGIAN 1: DROPDOWN (Jenis Pajak)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _dropdownValues[key],
+                          isDense: true,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 18,
+                            color: Colors.black54,
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _dropdownValues[key] = v!),
+                          items: items
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
                         ),
-                        icon: const Icon(Icons.arrow_drop_down, size: 18),
-                        onChanged: (v) =>
-                            setState(() => _dropdownValues[key] = v!),
-                        items: items
-                            .map(
-                              (e) => DropdownMenuItem(value: e, child: Text(e)),
-                            )
-                            .toList(),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  width: 50,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    border: Border.all(color: borderGrey),
-                    borderRadius: BorderRadius.circular(6),
+
+                  // BAGIAN 2: GARIS PEMISAH
+                  Container(
+                    width: 1,
+                    height: 20,
+                    color: Colors.grey.withOpacity(0.3),
                   ),
-                  child: TextField(
-                    controller: _getCtrl("${key}_pct", initial: percentVal),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+
+                  // BAGIAN 3: INPUT + PERSEN (Disatukan di tengah)
+                  SizedBox(
+                    width: 70, // Lebar area kanan fix
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, // 🔥 KUNCI: Biar nempel di tengah
+                      children: [
+                        // Input Angka (Lebar secukupnya)
+                        SizedBox(
+                          width: 30,
+                          child: TextField(
+                            controller: _getCtrl(
+                              "${key}_pct",
+                              initial: percentVal,
+                            ),
+                            textAlign:
+                                TextAlign.end, // Rata kanan (mendekati %)
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding:
+                                  EdgeInsets.zero, // Padding 0 biar presisi
+                              hintText: "0",
+                              hintStyle: TextStyle(color: Colors.black26),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(
+                          width: 4,
+                        ), // Jarak dikit antara angka dan %
+                        // Simbol %
+                        const Text(
+                          "%",
+                          style: TextStyle(fontSize: 12, color: Colors.black54),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                const Text("%", style: TextStyle(fontSize: 12)),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1168,33 +1383,64 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     Color? bgColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        crossAxisAlignment: isTextArea
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
+          // --- BAGIAN LABEL ---
           SizedBox(
             width: labelWidth,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
+
+          const SizedBox(width: 10),
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              height: isTextArea ? 80 : 35,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: bgColor ?? bgSlate,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                color: bgColor ?? Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: _getCtrl(key, initial: initial),
                 maxLines: isTextArea ? 3 : 1,
-                style: const TextStyle(fontSize: 12),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 6),
+                  contentPadding: EdgeInsets.symmetric(vertical: 9),
                 ),
               ),
             ),
@@ -1212,32 +1458,70 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     Color? bgColor,
   }) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak antar row lebih lega
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: labelWidth,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
+
+          const SizedBox(width: 10), // Spacer
+          // --- DROPDOWN CONTAINER ---
           Expanded(
             child: Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              height: 35, // Samakan tinggi dengan textfield
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: bgColor ?? const Color.fromARGB(255, 255, 255, 255),
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                color: bgColor ?? Colors.white,
+                borderRadius: BorderRadius.circular(10),
+
+                // Shadow Halus
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border Tipis (Ungu/Abu)
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _dropdownValues[key],
                   isDense: true,
-                  style: const TextStyle(fontSize: 12, color: Colors.black),
-                  iconEnabledColor: Colors.black54,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: Colors.black54,
+                  ),
                   onChanged: (v) => setState(() => _dropdownValues[key] = v!),
                   items: items
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -1259,66 +1543,114 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     String initialNo = "",
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
-            ),
-          ),
-          Container(
-            width: 100,
-            height: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: bgSlate,
-              border: Border.all(color: borderGrey),
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(6),
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues[dropdownKey] ?? series.first,
-                isDense: true,
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                onChanged: (v) =>
-                    setState(() => _dropdownValues[dropdownKey] = v!),
-                items: series
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
             ),
           ),
+
+          const SizedBox(width: 10),
+
+          // --- CONTAINER MENYATU (Dropdown + Input) ---
           Expanded(
             child: Container(
-              height: 30,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(
-                  top: BorderSide(color: borderGrey),
-                  bottom: BorderSide(color: borderGrey),
-                  right: BorderSide(color: borderGrey),
-                ),
-                borderRadius: const BorderRadius.horizontal(
-                  right: Radius.circular(6),
+                borderRadius: BorderRadius.circular(10), // Rounded penuh
+                // Shadow sama persis
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border sama persis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
                 ),
               ),
-              child: TextField(
-                controller: _getCtrl(textKey, initial: initialNo),
-                style: const TextStyle(fontSize: 12, color: Colors.black),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
+              child: Row(
+                children: [
+                  // BAGIAN 1: DROPDOWN (Series)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _dropdownValues[dropdownKey] ?? series.first,
+                        isDense: true,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
+                        onChanged: (v) =>
+                            setState(() => _dropdownValues[dropdownKey] = v!),
+                        items: series
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                      ),
+                    ),
                   ),
-                ),
+
+                  // BAGIAN 2: GARIS PEMISAH VERTIKAL
+                  Container(
+                    width: 1,
+                    height: 20, // Tinggi garis
+                    color: Colors.grey.withOpacity(0.3), // Warna garis pemisah
+                  ),
+
+                  // BAGIAN 3: TEXTFIELD (Nomor)
+                  Expanded(
+                    child: TextField(
+                      controller: _getCtrl(textKey, initial: initialNo),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 9,
+                        ),
+                        hintText: "No.", // Opsional hint
+                        hintStyle: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black26,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -1328,27 +1660,55 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   }
 
   Widget _buildCheckboxRow(String label, String key) {
-    return Row(
-      children: [
-        SizedBox(
-          height: 20,
-          width: 20,
-          child: Checkbox(
-            value: _checkStates[key] ?? false,
-            onChanged: (v) => setState(() => _checkStates[key] = v!),
-            activeColor: primaryIndigo,
-            side: const BorderSide(color: Colors.grey, width: 1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(3),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            bool current = _checkStates[key] ?? false;
+            _checkStates[key] = !current;
+          });
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Transform.translate(
+              offset: const Offset(-6, 0),
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: Checkbox(
+                  value: _checkStates[key] ?? false,
+                  onChanged: (v) => setState(() => _checkStates[key] = v!),
+                  activeColor: primaryIndigo,
+                  side: BorderSide(color: borderGrey, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  visualDensity: const VisualDensity(
+                    horizontal: -4,
+                    vertical: -4,
+                  ),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
             ),
-          ),
+            Transform.translate(
+              offset: const Offset(-0.1,0),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.black87),
-        ),
-      ],
+      ),
     );
   }
 
@@ -1446,10 +1806,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   }
 
   // --- PLACEHOLDERS UNTUK TAB LAIN ---
-  Widget _buildContactPersonsTab() =>
-      const Center(child: Text("Contact Persons Data Placeholder"));
-  Widget _buildAddressesTab() =>
-      const Center(child: Text("Addresses Data Placeholder"));
+
   Widget _buildPaymentTermTab() =>
       const Center(child: Text("Production Data Placeholder"));
   Widget _buildPaymentRunTab() =>

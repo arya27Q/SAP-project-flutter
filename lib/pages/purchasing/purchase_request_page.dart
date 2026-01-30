@@ -25,6 +25,33 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
+  // --- STYLE UNTUK INPUT (SHADOW & BORDER) ---
+  // Ukuran dinaikkan dikit jadi 36 biar pas (tidak kekecilan, tidak kegedean)
+  final double _inputHeight = 36.0;
+  final BorderRadius _inputRadius = BorderRadius.circular(
+    8,
+  ); // Radius 8 biar smooth
+
+  // Shadow Ungu Halus (Reusable)
+  List<BoxShadow> get _softShadow => [
+    BoxShadow(
+      color: const Color(0xFF4F46E5).withOpacity(0.08),
+      offset: const Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.03),
+      offset: const Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  // Border Ungu Tipis (Reusable)
+  Border get _thinBorder =>
+      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  // -------------------------------------------
+
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
@@ -100,10 +127,9 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      // MEMBERSIHKAN FORMAT INDONESIA KE ANGKA MATEMATIKA
       String cleanVal = val
-          .replaceAll('.', '') // Buang titik ribuan
-          .replaceAll(',', '.') // Ganti koma jadi titik desimal
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
           .replaceAll(RegExp(r'[^0-9.]'), '');
 
       return double.tryParse(cleanVal) ?? 0.0;
@@ -121,7 +147,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     for (int i = 0; i < _rowCount; i++) {
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      // MEMBERSIHKAN HARGA PER BARIS BIAR BISA DITAMBAHIN
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
@@ -131,7 +156,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
     if (mounted) {
       setState(() {
-        // FORMAT BALIK KE INDONESIA (1.000,00) BIAR GAK BALIK KE NOL
         String formatted = NumberFormat.currency(
           locale: 'id_ID',
           symbol: '',
@@ -199,6 +223,9 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
+  // ==========================================
+  // HEADER SECTION
+  // ==========================================
   Widget _buildModernHeader() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -219,10 +246,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // KIRI
           Expanded(
             flex: 6,
             child: Column(
               children: [
+                // 1. Baris Requester (Dropdown + Input)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
@@ -235,25 +264,37 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                             fontSize: 12,
                             color: secondarySlate,
                             fontWeight: FontWeight.w500,
+                            shadows: [
+                              Shadow(
+                                offset: const Offset(0.5, 0.5),
+                                blurRadius: 1.0,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                       const SizedBox(width: 28),
+                      // Dropdown User/Employee
                       Container(
-                        height: 32,
+                        height: _inputHeight,
                         width: 110,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 7),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: borderGrey),
-                          borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(6),
-                          ),
+                          borderRadius: _inputRadius,
+                          border: _thinBorder,
+                          boxShadow: _softShadow,
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _dropdownValues["h_req_type"] ?? "User",
                             isDense: true,
+                            icon: Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 18,
+                              color: primaryIndigo.withOpacity(0.6),
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black,
@@ -272,15 +313,16 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      // Input Value
                       Expanded(
                         child: Container(
-                          height: 32,
+                          height: _inputHeight,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            border: Border.all(color: borderGrey),
-                            borderRadius: const BorderRadius.horizontal(
-                              right: Radius.circular(6),
-                            ),
+                            borderRadius: _inputRadius,
+                            border: _thinBorder,
+                            boxShadow: _softShadow,
                           ),
                           child: TextField(
                             controller: _getCtrl("h_req_type_val", initial: ""),
@@ -290,7 +332,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 10,
-                                vertical: 8,
+                                vertical: 10,
                               ),
                             ),
                           ),
@@ -299,11 +341,14 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     ],
                   ),
                 ),
+
                 _buildSearchableHeaderRow("Requester Name", "h_req_name"),
                 _buildHeaderField("Branch", "h_branch", initial: ""),
                 const SizedBox(height: 12),
                 _buildHeaderField("Department", "h_dept", initial: ""),
                 const SizedBox(height: 15),
+
+                // Checkbox
                 Row(
                   children: [
                     SizedBox(
@@ -317,10 +362,20 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         "Send E-Mail if PO or GRPO is Added",
-                        style: TextStyle(fontSize: 12, color: Colors.black87),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black87,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0.5, 0.5),
+                              blurRadius: 1.0,
+                              color: Colors.grey.withOpacity(0.3),
+                            ),
+                          ],
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -337,10 +392,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             ),
           ),
           const SizedBox(width: 40),
+
+          // KANAN
           Expanded(
             flex: 4,
             child: Column(
               children: [
+                // 1. Baris No. Series
                 Row(
                   children: [
                     SizedBox(
@@ -351,18 +409,26 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                           fontSize: 12,
                           color: secondarySlate,
                           fontWeight: FontWeight.w500,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0.5, 0.5),
+                              blurRadius: 1.0,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                     const SizedBox(width: 28),
                     Container(
                       width: 60,
-                      height: 32,
+                      height: _inputHeight,
                       margin: const EdgeInsets.only(right: 4),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: borderGrey),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(8),
+                        border: _thinBorder,
+                        boxShadow: _softShadow,
                       ),
                       child: Center(
                         child: TextField(
@@ -379,11 +445,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     ),
                     Expanded(
                       child: Container(
-                        height: 32,
+                        height: _inputHeight,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: borderGrey),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(8),
+                          border: _thinBorder,
+                          boxShadow: _softShadow,
                         ),
                         child: Center(
                           child: TextField(
@@ -394,7 +461,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 8,
-                                vertical: 8,
+                                vertical: 10,
                               ),
                             ),
                           ),
@@ -404,6 +471,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   ],
                 ),
                 const SizedBox(height: 12),
+
                 _buildHeaderField(
                   "Status",
                   "h_status",
@@ -426,6 +494,10 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     );
   }
 
+  // ==========================================
+  // HELPER WIDGETS
+  // ==========================================
+
   Widget _buildSearchableHeaderRow(String label, String key) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -439,6 +511,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 fontSize: 12,
                 color: secondarySlate,
                 fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
@@ -457,11 +536,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 _showSearchDialog(label, key, dummyNames);
               },
               child: Container(
-                height: 32,
+                height: _inputHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: borderGrey),
+                  borderRadius: _inputRadius,
+                  border: _thinBorder,
+                  boxShadow: _softShadow,
                 ),
                 child: Row(
                   children: [
@@ -478,9 +558,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(Icons.search, size: 16, color: Colors.grey),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.search,
+                        size: 16,
+                        color: primaryIndigo.withOpacity(0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -508,17 +592,25 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
         const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: 32,
+            height: _inputHeight,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: _inputRadius,
+              boxShadow: _softShadow,
+              border: _thinBorder,
             ),
             child: TextField(
               controller: _getCtrl(key, initial: initial),
@@ -529,7 +621,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 8,
+                  vertical: 10,
                 ),
               ),
             ),
@@ -550,6 +642,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
@@ -558,27 +657,28 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
           child: InkWell(
             onTap: () => _selectDate(context, key),
             child: Container(
-              height: 32,
+              height: _inputHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: _inputRadius,
+                border: _thinBorder,
+                boxShadow: _softShadow,
               ),
               child: IgnorePointer(
                 child: TextField(
                   controller: _getCtrl(key, initial: initial),
                   style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 8,
+                      vertical: 10,
                     ),
                     suffixIcon: Icon(
-                      Icons.calendar_today,
+                      Icons.calendar_month_rounded,
                       size: 14,
-                      color: Colors.grey,
+                      color: primaryIndigo.withOpacity(0.6),
                     ),
                   ),
                 ),
@@ -660,6 +760,53 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   }
 
   Widget _buildContentsTab() {
+    // Helper lokal untuk Dropdown dengan Shadow & Width khusus
+    Widget buildStyledDropdown(String key, List<String> items) {
+      if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
+      return Container(
+        width: 150, // LEBAR DITAMBAH (Sesuai Request)
+        height: 36, // Tinggi disamakan dengan input header
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8), // Radius 8
+          // Border Ungu Tipis
+          border: Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15)),
+          // Shadow Halus (Sesuai Request)
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF4F46E5).withOpacity(0.08),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
+              spreadRadius: -2,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              offset: const Offset(0, 2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: _dropdownValues[key],
+            isDense: true,
+            style: const TextStyle(fontSize: 12, color: Colors.black),
+            icon: Icon(
+              Icons.arrow_drop_down,
+              size: 20,
+              color: primaryIndigo.withOpacity(0.6),
+            ),
+            onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+            items: items
+                .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+                .toList(),
+          ),
+        ),
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -679,14 +826,19 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("item_type_main", ["Service", "Item"]),
+              // Panggil Helper Dropdown yang sudah diperlebar & ada shadow
+              buildStyledDropdown("item_type_main", ["Service", "Item"]),
+
               const Spacer(),
+
               const Text(
                 "Summary Type",
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("summary_type", ["No Summary"]),
+              // Panggil Helper yang sama biar konsisten
+              buildStyledDropdown("summary_type", ["No Summary"]),
+
               const SizedBox(width: 20),
               _buildAddRowButtons(),
             ],
@@ -751,8 +903,6 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       fontWeight: FontWeight.bold,
       color: Colors.white,
     );
-
-    // Header ke tengah otomatis
     DataColumn centeredColumn(String label) {
       return DataColumn(
         label: Expanded(
@@ -825,14 +975,12 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     bool isPercent = false,
   }) {
     final controller = _getCtrl(key, initial: initial);
-
     bool isNumeric =
         key.contains("qty") ||
         key.contains("price") ||
         key.contains("total") ||
         key.contains("disc") ||
         key.contains("info_price");
-
     String defValue = isPercent ? "0%" : "0,00";
     final focusNode = _getFn(
       key,
@@ -862,9 +1010,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
               ),
               onChanged: (val) {
                 _fieldValues[key] = val;
-                if (isNumeric) {
-                  _syncTotalBeforeDiscount();
-                }
+                if (isNumeric) _syncTotalBeforeDiscount();
                 setState(() {});
               },
             ),
@@ -888,23 +1034,24 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: IntrinsicWidth(
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 100),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      _fieldValues[key] ?? _controllers[key]?.text ?? "",
-                      style: const TextStyle(fontSize: 12),
-                    ),
+          child: Container(
+            width: 120,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _fieldValues[key] ?? _controllers[key]?.text ?? "",
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.search, size: 14, color: Colors.grey),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+              ],
             ),
           ),
         ),
@@ -926,18 +1073,22 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 isDense: true,
                 isExpanded: false,
                 style: const TextStyle(fontSize: 12, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, size: 18),
-                onChanged: (newValue) {
-                  setState(() {
-                    _dropdownValues[key] = newValue!;
-                  });
-                },
-                items: items.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                // --- PERUBAHAN DISINI (Warna Primary) ---
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  size: 18,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+                onChanged: (newValue) =>
+                    setState(() => _dropdownValues[key] = newValue!),
+                items: items
+                    .map(
+                      (String value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -948,13 +1099,11 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
-
     String formattedTotal = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
       decimalDigits: 2,
     ).format(grandTotal);
-
     _getCtrl("f_total_final").text = "IDR $formattedTotal";
 
     return Column(
@@ -1001,7 +1150,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     _buildSummaryRowWithAutoValue(
                       "Total Before Discount",
                       "f_before_disc",
-                      isReadOnly: true, // ReadOnly karena otomatis dari tabel
+                      isReadOnly: true,
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -1010,15 +1159,22 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                           width: 140,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
+                            children: [
                               Text(
                                 "Freight",
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF64748B),
+                                  color: const Color(0xFF64748B),
+                                  shadows: [
+                                    Shadow(
+                                      offset: const Offset(0.5, 0.5),
+                                      blurRadius: 1.0,
+                                      color: Colors.grey.withOpacity(0.5),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.arrow_forward,
                                 size: 14,
                                 color: Colors.orange,
@@ -1086,7 +1242,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
   Widget _buildSummaryRowWithAutoValue(
     String label,
     String key, {
-    String defaultValue = "0,00",
+    String defaultValue = "0.00",
     bool isBold = false,
     bool isReadOnly = false,
   }) {
@@ -1104,17 +1260,28 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 58),
           Expanded(
             child: Container(
-              height: 28,
+              height: 32, // Ukuran disesuaikan jadi 32 biar sama
               decoration: BoxDecoration(
                 color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: _inputRadius, // Pakai radius yang sama
+                border: _thinBorder, // Pakai border yang sama
+                boxShadow: _softShadow, // Pakai shadow yang sama
               ),
               child: TextField(
                 controller: controller,
@@ -1130,7 +1297,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 6,
+                    vertical: 8,
                   ),
                 ),
               ),
@@ -1143,7 +1310,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
   Widget _buildSummaryBox(
     String key, {
-    String defaultValue = "0,00",
+    String defaultValue = "0.00",
     bool isReadOnly = false,
     bool isPercent = false,
   }) {
@@ -1154,13 +1321,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
       defaultValue: defaultValue,
       isPercent: isPercent,
     );
-
     return Container(
-      height: 24,
+      height: 32, // Ukuran disesuaikan jadi 32
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: _inputRadius,
+        border: _thinBorder,
+        boxShadow: _softShadow,
       ),
       child: TextField(
         controller: controller,
@@ -1175,7 +1342,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         decoration: const InputDecoration(
           isDense: true,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
       ),
     );
@@ -1186,48 +1353,69 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     String key, {
     bool isTextArea = false,
     String initial = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: isTextArea ? 80 : 32,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: Center(
-              child: TextField(
-                controller: _getCtrl(key, initial: initial),
-                maxLines: isTextArea ? 3 : 1,
-                style: const TextStyle(fontSize: 12, color: Colors.black),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                ),
+    bool isDecimal = false,
+  }) {
+    String effectiveInitial = (isDecimal && initial.isEmpty) ? "0.00" : initial;
+    final controller = _getCtrl(key, initial: effectiveInitial);
+    FocusNode? focusNode;
+    if (isDecimal) focusNode = _getFn(key, defaultValue: "0.00");
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(width: 28),
+          Expanded(
+            child: Container(
+              height: isTextArea ? 80 : _inputHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: _inputRadius,
+                boxShadow: _softShadow,
+                border: _thinBorder,
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.start,
+                keyboardType: isDecimal
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 9),
+                ),
+                onChanged: (val) => _fieldValues[key] = val,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
@@ -1238,6 +1426,13 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         color: Colors.white,
         border: Border.all(color: borderGrey),
         borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

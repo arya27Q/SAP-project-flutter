@@ -260,13 +260,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           child: Column(
             children: [
               _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 4),
+
               _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 4),
+
               _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 4),
+
               _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 4),
+
               _buildBpCurrencyRow(),
             ],
           ),
@@ -283,13 +283,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 "h_no_val",
                 initialNo: "",
               ),
-              const SizedBox(height: 4),
+
               _buildModernFieldRow("Status", "h_stat", initial: ""),
-              const SizedBox(height: 4),
+
               _buildHeaderDate("Posting Date", "h_post", ""),
-              const SizedBox(height: 4),
+
               _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 4),
+
               _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
@@ -391,7 +391,13 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              SizedBox(
+                width: 150,
+                child: _buildSmallDropdown("item_type_main", [
+                  "Item",
+                  "Service",
+                ]),
+              ),
               const Spacer(),
               _buildAddRowButtons(),
             ],
@@ -421,7 +427,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 scrollDirection: Axis.horizontal,
                 child: IntrinsicWidth(
                   child: DataTable(
-                    columnSpacing: 45,
+                    columnSpacing: 30,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
@@ -619,7 +625,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
               ],
             ),
           ),
@@ -810,7 +820,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     ),
                     const SizedBox(height: 2),
                     _buildDiscountRow(),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 10),
                     _buildSummaryRowWithAutoValue("Tax", "f_tax"),
                     const SizedBox(height: 2),
                     _buildRoundingRow(),
@@ -884,11 +894,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
 
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           SizedBox(
-            width: 120, // KUNCI LURUS: 120
+            width: 120,
             child: Text(
               label,
               style: TextStyle(
@@ -898,41 +908,54 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               ),
             ),
           ),
-          const SizedBox(width: 28), // KUNCI LURUS: 28
+          const SizedBox(width: 28),
           Expanded(
             child: InkWell(
               onTap: () => _selectDate(context, key),
+              borderRadius: BorderRadius.circular(10),
               child: Container(
-                height: 32,
+                height: 35,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: borderGrey),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryIndigo.withOpacity(0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: primaryIndigo.withOpacity(0.15),
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: IgnorePointer(
                           child: TextField(
                             controller: _getCtrl(key, initial: initial),
-                            style: const TextStyle(fontSize: 12),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
                             decoration: const InputDecoration(
                               border: InputBorder.none,
                               isDense: true,
-                              contentPadding: EdgeInsets.zero,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
                       child: Icon(
-                        Icons.calendar_today,
-                        size: 14,
-                        color: Colors.grey,
+                        Icons.calendar_month_rounded,
+                        size: 14, // Sesuai permintaanmu
+                        color: primaryIndigo.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -1006,7 +1029,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
   }
 
   Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1021,6 +1044,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                   value: _checkStates["cb_rounding"] ?? false,
                   onChanged: (v) =>
                       setState(() => _checkStates["cb_rounding"] = v!),
+                  activeColor: primaryIndigo,
+                  side: BorderSide(color: borderGrey, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1073,24 +1101,44 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       initial: _fieldValues[key] ?? defaultValue,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           SizedBox(
             width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           const SizedBox(width: 58),
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
-                color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: controller,
@@ -1099,13 +1147,14 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  color: Colors.black87,
                 ),
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                 ),
                 onChanged: (val) {
@@ -1130,11 +1179,27 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       initial: _fieldValues[key] ?? defaultValue,
     );
     return Container(
-      height: 24,
+      height: 35,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: controller,
@@ -1147,8 +1212,8 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         ),
         decoration: const InputDecoration(
           isDense: true,
-          border: InputBorder.none, // Penting biar ga rusak tampilannya
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         ),
         onChanged: (val) {
           if (!isReadOnly) {
@@ -1189,7 +1254,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -1207,12 +1272,28 @@ class _ArInvoicePageState extends State<ArInvoicePage>
           const SizedBox(width: 28), // KUNCI LURUS: 28
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
+              height: isTextArea ? 80 : 35,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: controller,
@@ -1222,11 +1303,11 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                 keyboardType: isDecimal
                     ? const TextInputType.numberWithOptions(decimal: true)
                     : TextInputType.text,
-                style: const TextStyle(fontSize: 12, color: Colors.black),
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(vertical: 9),
                 ),
                 onChanged: (val) {
                   _fieldValues[key] = val;
@@ -1246,7 +1327,7 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     String textKey, {
     String initialNo = "",
   }) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1264,30 +1345,48 @@ class _ArInvoicePageState extends State<ArInvoicePage>
         const SizedBox(width: 28), // KUNCI LURUS: 28
         Expanded(
           child: Container(
-            height: 32,
+            height: 35,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: Row(
               children: [
                 Container(
                   width: 110,
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(5),
-                    ),
-                    border: Border(right: BorderSide(color: borderGrey)),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value:
                           _dropdownValues[dropdownKey] ?? seriesOptions.first,
                       isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: Colors.black54,
+                      ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
                       items: seriesOptions
@@ -1298,32 +1397,26 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                     ),
                   ),
                 ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
                 Expanded(
-                  child: Container(
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(5),
+                  child: TextField(
+                    controller: _getCtrl(textKey, initial: initialNo),
+                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
                       ),
                     ),
-                    child: Center(
-                      child: TextField(
-                        controller: _getCtrl(textKey, initial: initialNo),
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          _fieldValues[textKey] = val;
-                        },
-                      ),
-                    ),
+                    onChanged: (val) {
+                      _fieldValues[textKey] = val;
+                    },
                   ),
                 ),
               ],
@@ -1350,21 +1443,49 @@ class _ArInvoicePageState extends State<ArInvoicePage>
     ],
   );
 
+  // 1. Tambahkan parameter {double? customWidth}
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
+      height: 35,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
+          // isExpanded: true, // Biarkan ini mati/comment agar aman
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: Colors.black54,
+          ),
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
@@ -1391,6 +1512,14 @@ class _ArInvoicePageState extends State<ArInvoicePage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              // Tetap dikasih shadow di text labelnya biar konsisten sama request sebelumnya
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
@@ -1410,26 +1539,51 @@ class _ArInvoicePageState extends State<ArInvoicePage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120, // KUNCI LURUS: 120
+          width: 120,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
+        const SizedBox(width: 28),
+
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
             child: Container(
-              height: 32,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(10),
+                // Border ungu tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -1451,9 +1605,14 @@ class _ArInvoicePageState extends State<ArInvoicePage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 10),
-                    child: Icon(Icons.search, size: 16, color: Colors.grey),
+                  // Icon Search (Warna Indigo Soft)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(
+                      Icons.search,
+                      size: 16,
+                      color: primaryIndigo.withOpacity(0.6),
+                    ),
                   ),
                 ],
               ),
@@ -1727,23 +1886,43 @@ class _ArInvoicePageState extends State<ArInvoicePage>
 
   Widget _buildBpCurrencyRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
           Container(
             width: 150,
-            height: 32,
+            height: 35,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _dropdownValues["h_curr_type"] ?? "BP Currency",
                 isDense: true,
+                // --- PERUBAHAN ICON DISINI ---
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: primaryIndigo, // Menggunakan warna primaryIndigo
+                ),
                 style: const TextStyle(fontSize: 11, color: Colors.black),
                 onChanged: (v) =>
                     setState(() => _dropdownValues["h_curr_type"] = v!),
@@ -1754,16 +1933,30 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
           const SizedBox(width: 8),
-
-          // 2. Label IDR
           Container(
             width: 60,
-            height: 32,
+            height: 35,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: const Text(
               "IDR",
@@ -1775,15 +1968,29 @@ class _ArInvoicePageState extends State<ArInvoicePage>
             ),
           ),
           const SizedBox(width: 8),
-
-          // 3. Input Rate
           Expanded(
             child: Container(
-              height: 32,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: _getCtrl("h_curr_rate", initial: ""),

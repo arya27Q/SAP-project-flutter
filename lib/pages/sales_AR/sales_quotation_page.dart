@@ -13,6 +13,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
+  int _currentIndex = 0;
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
   final Color secondarySlate = const Color(0xFF64748B);
@@ -78,7 +79,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               key.contains("f_rounding");
 
           if (isNumericField) {
-            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
               RegExp(r'[^0-9]'),
               '',
@@ -89,7 +89,6 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               setState(() {
                 if (parsed != null) {
                   if (isPercent) {
-                    // UBAH DI SINI: Tambahkan simbol % setelah angka
                     controller.text = "${parsed.toStringAsFixed(0)}%";
                   } else {
                     controller.text = NumberFormat.currency(
@@ -147,7 +146,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
       String cleanVal = val
           .replaceAll('.', '')
           .replaceAll(',', '.')
-          .replaceAll('%', ''); // Tambahkan ini
+          .replaceAll('%', '');
 
       return double.tryParse(cleanVal) ?? 0.0;
     }
@@ -165,6 +164,14 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging ||
+          _tabController.index != _currentIndex) {
+        setState(() {
+          _currentIndex = _tabController.index;
+        });
+      }
+    });
   }
 
   @override
@@ -186,12 +193,14 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
           SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                RepaintBoundary(child: _buildModernHeader()),
+                _buildModernHeader(),
                 const SizedBox(height: 16),
                 _buildTabSection(),
                 const SizedBox(height: 16),
                 _buildModernFooter(),
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -200,7 +209,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               top: 0,
               right: 0,
               bottom: 0,
-              child: RepaintBoundary(child: _buildFloatingSidePanel()),
+              child: _buildFloatingSidePanel(),
             ),
         ],
       ),
@@ -232,13 +241,13 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
           child: Column(
             children: [
               _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
+
               _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
+
               _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 12),
+
               _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 12),
+
               _buildSmallDropdownRowModern("Local Currency", "h_curr", [
                 "IDR",
                 "USD",
@@ -259,13 +268,13 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 "h_no_val",
                 initialNo: "256100727",
               ),
-              const SizedBox(height: 12),
+
               _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              const SizedBox(height: 12),
+
               _buildHeaderDate("Posting Date", "h_post_date", ""),
-              const SizedBox(height: 12),
+
               _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 12),
+
               _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
@@ -322,29 +331,35 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 Tab(text: "Accounting"),
                 Tab(text: "Attachments"),
               ],
-              onTap: (index) => setState(() {}),
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
-            child: IndexedStack(
-              index: _tabController.index,
-              children: [
-                _buildContentsTab(),
-                _buildLogisticsTab(),
-                _buildAccountingTab(),
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Text("Attachments Content"),
-                  ),
-                ),
-              ],
-            ),
+            child: _buildCurrentTabContent(),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildCurrentTabContent() {
+    switch (_currentIndex) {
+      case 0:
+        return _buildContentsTab();
+      case 1:
+        return _buildLogisticsTab();
+      case 2:
+        return _buildAccountingTab();
+      case 3:
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(40),
+            child: Text("Attachments Content"),
+          ),
+        );
+      default:
+        return const SizedBox();
+    }
   }
 
   Widget _buildContentsTab() {
@@ -367,7 +382,16 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              // --- FIX UTAMA DISINI ---
+              // Memberikan lebar pasti pada Dropdown agar tidak crash di dalam Row
+              SizedBox(
+                width: 150,
+                child: _buildSmallDropdown("item_type_main", [
+                  "Item",
+                  "Service",
+                ]),
+              ),
+              // ------------------------
               const Spacer(),
               _buildAddRowButtons(),
             ],
@@ -397,7 +421,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 scrollDirection: Axis.horizontal,
                 child: IntrinsicWidth(
                   child: DataTable(
-                    columnSpacing: 45,
+                    columnSpacing: 30,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
@@ -597,7 +621,11 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
               ],
             ),
           ),
@@ -630,7 +658,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     });
   }
 
-  Widget _buildLogisticsTab() => SingleChildScrollView(
+  Widget _buildLogisticsTab() => Padding(
     padding: const EdgeInsets.all(24),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -678,7 +706,7 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     ),
   );
 
-  Widget _buildAccountingTab() => SingleChildScrollView(
+  Widget _buildAccountingTab() => Padding(
     padding: const EdgeInsets.all(24),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -831,147 +859,323 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-  Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        const SizedBox(
-          width: 120,
-          child: Text("Discount", style: TextStyle(fontSize: 12)),
-        ),
-        const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
-        SizedBox(
-          width: 40,
-          child: _buildSummaryBox(
-            "f_disc_pct",
-            isPercent: true,
-            defaultValue: "0",
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text("%", style: TextStyle(fontSize: 12)),
-        ),
-        Expanded(child: _buildSummaryBox("f_disc_val")),
-      ],
-    ),
-  );
-
   Widget _buildHeaderDate(String label, String key, String initial) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 120, // Lebar label seragam agar kotak input sejajar
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120, // Lebar label
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 28), // Berikan jarak spasi pemisah
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectDate(context, key),
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: IgnorePointer(
-                        child: TextField(
-                          controller: _getCtrl(key, initial: initial),
-                          style: const TextStyle(fontSize: 12),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
+
+          const SizedBox(width: 28), // Spasi konsisten
+
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDate(context, key),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 35, // Tinggi standar
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+
+                  // Shadow & Border Ungu Tipis
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withOpacity(0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withOpacity(0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: IgnorePointer(
+                          // Biar keyboard ga muncul
+                          child: TextField(
+                            controller: _getCtrl(key, initial: initial),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
                           ),
                         ),
                       ),
                     ),
+
+                    // Ikon Kalender Modern
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        size: 16,
+                        color: primaryIndigo.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiscountRow() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              "Discount",
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 28),
+
+          Expanded(
+            child: Container(
+              height: 35,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+
+                // Style Seragam
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: Colors.grey,
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Input Persen (Kiri)
+                  SizedBox(
+                    width: 50,
+                    child: TextField(
+                      controller: _getCtrl("f_disc_pct", initial: "0"),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 9),
+                      ),
+                      onChanged: (val) =>
+                          setState(() => _fieldValues["f_disc_pct"] = val),
+                    ),
+                  ),
+
+                  // Simbol %
+                  Text(
+                    "%",
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+
+                  // Garis Pemisah Vertikal
+                  Container(
+                    width: 1,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    color: Colors.grey.withOpacity(0.3),
+                  ),
+
+                  // Input Value (Kanan - Sisa ruang)
+                  Expanded(
+                    child: TextField(
+                      controller: _getCtrl("f_disc_val", initial: "0.00"),
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
+                      ),
+                      onChanged: (val) =>
+                          setState(() => _fieldValues["f_disc_val"] = val),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["cb_rounding"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["cb_rounding"] = v!),
+  Widget _buildRoundingRow() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Label (Checkbox + Teks)
+          SizedBox(
+            width: 120,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  bool val = _checkStates["cb_rounding"] ?? false;
+                  _checkStates["cb_rounding"] = !val;
+                });
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // Checkbox Geser Kiri (-10 trick) biar lurus label atasnya
+                  Transform.translate(
+                    offset: const Offset(-5, 0),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: _checkStates["cb_rounding"] ?? false,
+                        onChanged: (v) =>
+                            setState(() => _checkStates["cb_rounding"] = v!),
+                        activeColor: primaryIndigo,
+                        visualDensity: const VisualDensity(
+                          horizontal: -4,
+                          vertical: -4,
+                        ),
+                        side: BorderSide(color: borderGrey, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ),
+
+                  Transform.translate(
+                    offset: const Offset(-1, 0),
+                    child: Text(
+                      "Rounding",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: secondarySlate,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 28),
+
+          Expanded(
+            child: Container(
+              height: 35,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
-                "Rounding",
+              child: TextField(
+                controller: _getCtrl("f_rounding", initial: "0.00"),
+                readOnly: !(_checkStates["cb_rounding"] ?? false),
+                textAlign: TextAlign.right,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
+                  // Pudarkan warna kalau disabled
+                  color: (_checkStates["cb_rounding"] ?? false)
+                      ? Colors.black87
+                      : Colors.grey,
                 ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                ),
+                onChanged: (val) =>
+                    setState(() => _fieldValues["f_rounding"] = val),
               ),
-            ],
+            ),
           ),
-        ),
-        const SizedBox(width: 28), // Samakan jarak spasi
-        Expanded(
-          child: _buildSummaryBox(
-            "f_rounding",
-            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Delete", isDanger: true),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
@@ -984,25 +1188,49 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
       key,
       initial: _fieldValues[key] ?? defaultValue,
     );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           SizedBox(
             width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          const SizedBox(width: 8), // Gunakan spasi konsisten
+
+          const SizedBox(width: 8),
+
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
-                color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: controller,
@@ -1011,13 +1239,14 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  color: Colors.black87,
                 ),
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                 ),
                 onChanged: (val) {
@@ -1031,45 +1260,19 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     );
   }
 
-  Widget _buildSummaryBox(
-    String key, {
-    String defaultValue = "0.00",
-    bool isReadOnly = false,
-    bool isPercent = false,
-  }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: TextField(
-        controller: controller,
-        readOnly: isReadOnly,
-        textAlign: TextAlign.right,
-
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        ),
-        onChanged: (val) {
-          if (!isReadOnly) {
-            setState(() {
-              _fieldValues[key] = val;
-            });
-          }
-        },
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+      child: Row(
+        children: [
+          _buildSAPActionButton("Add", isPrimary: true),
+          const SizedBox(width: 12),
+          _buildSAPActionButton("Cancel", isDanger: true),
+          const Spacer(),
+          _buildSAPActionButton("Copy From", customColor: Colors.blue.shade600),
+          const SizedBox(width: 8),
+          _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
+        ],
       ),
     );
   }
@@ -1086,12 +1289,17 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     FocusNode? focusNode = isDecimal ? _getFn(key, defaultValue: "0.00") : null;
 
     return Padding(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        bottom: 12,
+      ), // Jarak antar row biar ga nempel
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: isTextArea
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
+          // --- LABEL ---
           SizedBox(
-            width: 120, // Lebar label seragam agar kotak input sejajar
+            width: 120, // Lebar label
             child: Text(
               label,
               style: TextStyle(
@@ -1101,35 +1309,56 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
               ),
             ),
           ),
-          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+
+          const SizedBox(width: 28), // Spasi
+          // --- INPUT CONTAINER ---
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              height: isTextArea ? 80 : 35, // Tinggi standar 35
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: Center(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  maxLines: isTextArea ? 3 : 1,
-                  textAlign: TextAlign.left,
-                  keyboardType: isDecimal
-                      ? const TextInputType.numberWithOptions(decimal: true)
-                      : TextInputType.text,
-                  style: const TextStyle(fontSize: 12, color: Colors.black),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                borderRadius: BorderRadius.circular(10), // Rounded Modern
+                // Shadow Ungu Tipis (Seragam)
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
                   ),
-                  onChanged: (val) {
-                    _fieldValues[key] = val;
-                  },
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border Ungu Tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
                 ),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.left,
+                keyboardType: isDecimal
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 9,
+                  ), // Padding tengah vertikal
+                ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
               ),
             ),
           ),
@@ -1144,126 +1373,225 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12), // Jarak bawah
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // --- LABEL ---
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 28), // Jarak spasi konsisten
-        Expanded(
-          child: Container(
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 110,
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(5),
-                    ),
-                    border: Border(right: BorderSide(color: borderGrey)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value:
-                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                      isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropdownKey] = v!),
-                      items: seriesOptions
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(5),
-                      ),
-                    ),
-                    child: Center(
-                      child: TextField(
-                        controller: _getCtrl(textKey, initial: initialNo),
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          _fieldValues[textKey] = val;
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 
-  Widget _buildModernCheckbox(String label, String key) => Row(
-    children: [
-      SizedBox(
-        width: 24,
-        height: 32,
-        child: Checkbox(
-          value: _checkStates[key] ?? false,
-          activeColor: primaryIndigo,
-          onChanged: (val) => setState(() => _checkStates[key] = val!),
+          const SizedBox(width: 28), // Spasi
+          // --- CONTAINER MENYATU (Series + No) ---
+          Expanded(
+            child: Container(
+              height: 35, // Tinggi 35
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+
+                // Shadow Seragam
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+
+                // Border Seragam
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // BAGIAN 1: DROPDOWN (Series)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value:
+                            _dropdownValues[dropdownKey] ?? seriesOptions.first,
+                        isDense: true,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: Colors.black54,
+                        ),
+                        onChanged: (v) =>
+                            setState(() => _dropdownValues[dropdownKey] = v!),
+                        items: seriesOptions
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ),
+
+                  // BAGIAN 2: PEMISAH VERTIKAL
+                  Container(
+                    width: 1,
+                    height: 20,
+                    color: Colors.grey.withOpacity(0.3),
+                  ),
+
+                  // BAGIAN 3: TEXTFIELD (Nomor)
+                  Expanded(
+                    child: TextField(
+                      controller: _getCtrl(textKey, initial: initialNo),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 9,
+                        ),
+                      ),
+                      onChanged: (val) {
+                        _fieldValues[textKey] = val;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Update function ini biar checkbox-nya lurus presisi sama teks lain
+  Widget _buildModernCheckbox(String label, String key) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            bool val = _checkStates[key] ?? false;
+            _checkStates[key] = !val;
+          });
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Trik geser visual ke kiri (-10) biar padding bawaan checkbox ilang
+            Transform.translate(
+              offset: const Offset(-10, 0),
+              child: SizedBox(
+                width: 30, // Lebar area tap
+                height: 30,
+                child: Checkbox(
+                  value: _checkStates[key] ?? false,
+                  activeColor: primaryIndigo,
+                  onChanged: (val) => setState(() => _checkStates[key] = val!),
+                  // Visual Density Compact
+                  visualDensity: const VisualDensity(
+                    horizontal: -4,
+                    vertical: -4,
+                  ),
+                  side: BorderSide(color: borderGrey, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+
+            Transform.translate(
+              offset: const Offset(-8, 0),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      const SizedBox(width: 8),
-      Text(label, style: const TextStyle(fontSize: 12)),
-    ],
-  );
+    );
+  }
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
+      height: 35, // Tinggi disamain jadi 35
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10), // Rounded modern
+        // Shadow Ungu Tipis (Seragam)
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+
+        // Border Ungu Tipis
+        border: Border.all(
+          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
+          isExpanded:
+              true, // 🔥 PENTING: Biar teksnya ga kepotong & klik area luas
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: Colors.black54,
+          ),
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500, // Agak tebal dikit biar kebaca
+          ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
@@ -1277,27 +1605,32 @@ class _SalesQuotationPageState extends State<SalesQuotationPage>
     String label,
     String key,
     List<String> items,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12), // Jarak bawah biar ga nempel
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // --- LABEL ---
+          SizedBox(
+            width: 120, // Lebar label fix
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
-        Expanded(child: _buildSmallDropdown(key, items)),
-      ],
-    ),
-  );
+
+          const SizedBox(width: 28), // Spasi Pemisah
+          // --- DROPDOWN ---
+          Expanded(child: _buildSmallDropdown(key, items)),
+        ],
+      ),
+    );
+  }
 
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);

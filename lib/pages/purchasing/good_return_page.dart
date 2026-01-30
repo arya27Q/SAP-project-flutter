@@ -26,6 +26,29 @@ class _GoodReturnPageState extends State<GoodReturnPage>
   final Map<String, String> _fieldValues = {};
   final Map<String, FocusNode> _focusNodes = {};
 
+  // --- STYLE SETTINGS ---
+  final double _inputHeight = 36.0;
+  final BorderRadius _inputRadius = BorderRadius.circular(8);
+
+  // Shadow Indigo Halus
+  List<BoxShadow> get _softShadow => [
+    BoxShadow(
+      color: const Color(0xFF4F46E5).withOpacity(0.08),
+      offset: const Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.03),
+      offset: const Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  Border get _thinBorder =>
+      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  // ----------------------
+
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
@@ -106,7 +129,6 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               key.contains("f_rounding");
 
           if (isNumericField) {
-            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
               RegExp(r'[^0-9]'),
               '',
@@ -117,7 +139,6 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               setState(() {
                 if (parsed != null) {
                   if (isPercent) {
-                    // UBAH DI SINI: Tambahkan simbol % setelah angka
                     controller.text = "${parsed.toStringAsFixed(0)}%";
                   } else {
                     controller.text = NumberFormat.currency(
@@ -165,7 +186,6 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     double tax = parseValue("f_tax");
     double rounding = parseValue("f_rounding");
 
-    // Rumus: (Sebelum Diskon - Diskon) + WTax + Rounding + Pajak
     return (before - discVal) + wtaxamount + rounding + tax;
   }
 
@@ -860,9 +880,23 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     padding: const EdgeInsets.symmetric(vertical: 2),
     child: Row(
       children: [
-        const SizedBox(
+        SizedBox(
           width: 140,
-          child: Text("DPM", style: TextStyle(fontSize: 12)),
+          child: Text(
+            "DPM",
+            style: TextStyle(
+              fontSize: 12,
+              color: secondarySlate,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(width: 58),
         SizedBox(
@@ -888,17 +922,24 @@ class _GoodReturnPageState extends State<GoodReturnPage>
       child: Row(
         children: [
           SizedBox(
-            width: 120, // KUNCI LURUS: 120
+            width: 100, // Label width 100 (Sesuai snippet)
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 color: secondarySlate,
                 fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 28), // KUNCI LURUS: 28
+          const SizedBox(width: 28),
           Expanded(
             child: InkWell(
               onTap: () => _selectDate(context, key),
@@ -907,7 +948,8 @@ class _GoodReturnPageState extends State<GoodReturnPage>
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: borderGrey),
+                  border: _thinBorder,
+                  boxShadow: _softShadow,
                 ),
                 child: Row(
                   children: [
@@ -960,17 +1002,24 @@ class _GoodReturnPageState extends State<GoodReturnPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120, // KUNCI LURUS: 120
+            width: 100, // Label width 100 (Sesuai snippet)
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 color: secondarySlate,
                 fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 28), // KUNCI LURUS: 28
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
               height: isTextArea ? 80 : 32,
@@ -978,7 +1027,8 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                border: _thinBorder,
+                boxShadow: _softShadow,
               ),
               child: TextField(
                 controller: controller,
@@ -1024,12 +1074,19 @@ class _GoodReturnPageState extends State<GoodReturnPage>
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 "Rounding",
                 style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF64748B),
+                  color: const Color(0xFF64748B),
                   fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0.5, 0.5),
+                      blurRadius: 1.0,
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1061,6 +1118,29 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     ),
   );
 
+  Widget _buildSAPActionButton(
+    String label, {
+    bool isPrimary = false,
+    bool isDanger = false,
+    Color? customColor,
+  }) {
+    Color bgColor = isDanger
+        ? Colors.red
+        : (isPrimary ? primaryIndigo : (customColor ?? Colors.white));
+    return ElevatedButton(
+      onPressed: () => debugPrint("Klik $label"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   Widget _buildSummaryRowWithAutoValue(
     String label,
     String key, {
@@ -1080,7 +1160,17 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 58),
@@ -1089,8 +1179,9 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               height: 28,
               decoration: BoxDecoration(
                 color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
+                border: _thinBorder,
                 borderRadius: BorderRadius.circular(4),
+                boxShadow: _softShadow,
               ),
               child: TextField(
                 controller: controller,
@@ -1133,8 +1224,9 @@ class _GoodReturnPageState extends State<GoodReturnPage>
       height: 24,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
+        border: _thinBorder,
         borderRadius: BorderRadius.circular(4),
+        boxShadow: _softShadow,
       ),
       child: TextField(
         controller: controller,
@@ -1194,17 +1286,24 @@ class _GoodReturnPageState extends State<GoodReturnPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120, // KUNCI LURUS: 120
+            width: 100, // Label width 100 (Sesuai snippet)
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 color: secondarySlate,
                 fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 28), // KUNCI LURUS: 28
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
               height: isTextArea ? 80 : 32,
@@ -1212,7 +1311,8 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                border: _thinBorder,
+                boxShadow: _softShadow,
               ),
               child: TextField(
                 controller: controller,
@@ -1251,23 +1351,31 @@ class _GoodReturnPageState extends State<GoodReturnPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120, // KUNCI LURUS: 120
+          width: 100, // Label width 100 (Sesuai snippet)
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
             height: 32,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              border: _thinBorder,
+              boxShadow: _softShadow,
             ),
             child: Row(
               children: [
@@ -1359,6 +1467,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
         color: Colors.white,
         border: Border.all(color: borderGrey),
         borderRadius: BorderRadius.circular(6),
+        boxShadow: _softShadow,
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1379,23 +1488,60 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120, // KUNCI LURUS: 120
+          width: 100, // Label width 100 (Sesuai snippet)
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
-        Expanded(child: _buildSmallDropdown(key, items)),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: 36, // Sesuai _inputHeight
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: _thinBorder,
+              boxShadow: _softShadow,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues[key],
+                isDense: true,
+                isExpanded: true,
+                style: const TextStyle(fontSize: 12, color: Colors.black),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  size: 20,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
+                onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+                items: items
+                    .map(
+                      (val) => DropdownMenuItem(value: val, child: Text(val)),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        ),
       ],
     ),
   );
@@ -1410,17 +1556,24 @@ class _GoodReturnPageState extends State<GoodReturnPage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 120, // KUNCI LURUS: 120
+          width: 100, // Label width 100 (Sesuai snippet)
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
@@ -1428,8 +1581,9 @@ class _GoodReturnPageState extends State<GoodReturnPage>
               height: 32,
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: borderGrey),
+                border: _thinBorder,
                 borderRadius: BorderRadius.circular(6),
+                boxShadow: _softShadow,
               ),
               child: Row(
                 children: [
@@ -1510,25 +1664,93 @@ class _GoodReturnPageState extends State<GoodReturnPage>
     );
   }
 
-  Widget _buildSAPActionButton(
-    String label, {
-    bool isPrimary = false,
-    bool isDanger = false,
-    Color? customColor,
-  }) {
-    Color bgColor = isDanger
-        ? Colors.red
-        : (isPrimary ? primaryIndigo : (customColor ?? Colors.white));
-    return ElevatedButton(
-      onPressed: () => debugPrint("Klik $label"),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: bgColor,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+  Widget _buildBpCurrencyRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
+          // SizedBox(
+          //   width: 100,
+          //   child: Text("BP Currency", ...),
+          // ),
+          // const SizedBox(width: 28),
+
+          // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
+          Container(
+            width: 150,
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: _thinBorder,
+              boxShadow: _softShadow,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dropdownValues["h_curr_type"] ?? "BP Currency",
+                isDense: true,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                onChanged: (v) =>
+                    setState(() => _dropdownValues["h_curr_type"] = v!),
+                items: ["BP Currency", "Local Currency", "Foreign Currency"]
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 2. Label IDR
+          Container(
+            width: 60,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: _thinBorder,
+              boxShadow: _softShadow,
+            ),
+            child: const Text(
+              "IDR",
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // 3. Input Rate
+          Expanded(
+            child: Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: _thinBorder,
+                boxShadow: _softShadow,
+              ),
+              child: TextField(
+                controller: _getCtrl("h_curr_rate", initial: ""),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 11, color: Colors.black),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (val) => _fieldValues["h_curr_rate"] = val,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1549,6 +1771,7 @@ class _GoodReturnPageState extends State<GoodReturnPage>
             "Sales Order",
             style: TextStyle(fontSize: 14, color: Colors.white),
           ),
+          automaticallyImplyLeading: false,
           actions: [
             IconButton(
               onPressed: () => setState(() => showSidePanel = false),
@@ -1724,92 +1947,4 @@ class _GoodReturnPageState extends State<GoodReturnPage>
       ],
     ),
   );
-
-  Widget _buildBpCurrencyRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          /* BAGIAN INI DIHAPUS AGAR DROPDOWN GESER KE KIRI */
-          // SizedBox(
-          //   width: 120,
-          //   child: Text("BP Currency", ...),
-          // ),
-          // const SizedBox(width: 28),
-
-          // 1. Dropdown Tipe Currency (Langsung mulai dari sini)
-          Container(
-            width: 150,
-            height: 32,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues["h_curr_type"] ?? "BP Currency",
-                isDense: true,
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                onChanged: (v) =>
-                    setState(() => _dropdownValues["h_curr_type"] = v!),
-                items: ["BP Currency", "Local Currency", "Foreign Currency"]
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // 2. Label IDR
-          Container(
-            width: 60,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
-            ),
-            child: const Text(
-              "IDR",
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // 3. Input Rate
-          Expanded(
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: TextField(
-                controller: _getCtrl("h_curr_rate", initial: ""),
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
-                  ),
-                ),
-                onChanged: (val) => _fieldValues["h_curr_rate"] = val,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

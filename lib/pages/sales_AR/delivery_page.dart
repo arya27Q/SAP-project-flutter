@@ -15,10 +15,10 @@ class _DeliveryPageState extends State<DeliveryPage>
   late TabController _tabController;
   int _rowCount = 10;
 
-  final Color primaryIndigo = const Color(0xFF4F46E5); 
-  final Color secondarySlate = const Color(0xFF64748B); 
-  final Color bgSlate = const Color(0xFFF8FAFC); 
-  final Color borderGrey = const Color(0xFFD0D5DC); 
+  final Color primaryIndigo = const Color(0xFF4F46E5);
+  final Color secondarySlate = const Color(0xFF64748B);
+  final Color bgSlate = const Color(0xFFF8FAFC);
+  final Color borderGrey = const Color(0xFFD0D5DC);
   final ScrollController _horizontalScroll = ScrollController();
 
   final Map<String, TextEditingController> _controllers = {};
@@ -80,7 +80,6 @@ class _DeliveryPageState extends State<DeliveryPage>
               key.contains("f_rounding");
 
           if (isNumericField) {
-            // Bersihkan semua karakter non-angka termasuk % lama
             String cleanText = controller.text.replaceAll(
               RegExp(r'[^0-9]'),
               '',
@@ -91,7 +90,6 @@ class _DeliveryPageState extends State<DeliveryPage>
               setState(() {
                 if (parsed != null) {
                   if (isPercent) {
-                    // UBAH DI SINI: Tambahkan simbol % setelah angka
                     controller.text = "${parsed.toStringAsFixed(0)}%";
                   } else {
                     controller.text = NumberFormat.currency(
@@ -194,6 +192,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                 _buildTabSection(),
                 const SizedBox(height: 16),
                 _buildModernFooter(),
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -234,13 +233,9 @@ class _DeliveryPageState extends State<DeliveryPage>
           child: Column(
             children: [
               _buildModernFieldRow("Customer", "h_cust"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Contact Person", "h_cont"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Local Currency", "h_curr", [
                 "IDR",
                 "USD",
@@ -261,13 +256,9 @@ class _DeliveryPageState extends State<DeliveryPage>
                 "h_no_val",
                 initialNo: "256100727",
               ),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              const SizedBox(height: 12),
               _buildHeaderDate("Posting Date", "h_post_date", ""),
-              const SizedBox(height: 12),
               _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 12),
               _buildHeaderDate("Document Date", "h_doc", ""),
             ],
           ),
@@ -349,6 +340,7 @@ class _DeliveryPageState extends State<DeliveryPage>
     );
   }
 
+  // --- TABLE LOGIC (KEEPS AS IS - IntrinsicWidth based) ---
   Widget _buildContentsTab() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -369,7 +361,14 @@ class _DeliveryPageState extends State<DeliveryPage>
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
-              _buildSmallDropdown("item_type_main", ["Item", "Service"]),
+              // Use sized box to prevent row layout issues
+              SizedBox(
+                width: 150,
+                child: _buildSmallDropdown("item_type_main", [
+                  "Item",
+                  "Service",
+                ]),
+              ),
               const Spacer(),
               _buildAddRowButtons(),
             ],
@@ -399,7 +398,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                 scrollDirection: Axis.horizontal,
                 child: IntrinsicWidth(
                   child: DataTable(
-                    columnSpacing: 45,
+                    columnSpacing: 30,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
@@ -599,7 +598,11 @@ class _DeliveryPageState extends State<DeliveryPage>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.search, size: 14, color: Colors.grey),
+                Icon(
+                  Icons.search,
+                  size: 14,
+                  color: primaryIndigo.withOpacity(0.6),
+                ),
               ],
             ),
           ),
@@ -622,6 +625,8 @@ class _DeliveryPageState extends State<DeliveryPage>
     });
   }
 
+  // --- LOGISTIK & ACCOUNTING TAB (Updated with new Field styles) ---
+
   Widget _buildLogisticsTab() => SingleChildScrollView(
     padding: const EdgeInsets.all(24),
     child: Row(
@@ -631,9 +636,7 @@ class _DeliveryPageState extends State<DeliveryPage>
           child: Column(
             children: [
               _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
                 "",
               ]),
@@ -655,9 +658,7 @@ class _DeliveryPageState extends State<DeliveryPage>
               _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
               const SizedBox(height: 20),
               _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern(
                 "BP Channel Contact",
                 "log_bp_cont",
@@ -679,31 +680,25 @@ class _DeliveryPageState extends State<DeliveryPage>
           child: Column(
             children: [
               _buildModernFieldRow("Journal Remark", "acc_journal"),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
                 "",
               ]),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
                 "",
               ]),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern(
                 "Central Bank Ind.",
                 "acc_central_bank",
                 [""],
               ),
-              const SizedBox(height: 12),
               _buildModernFieldRow(
                 "Manually\nRecalculate Due Date",
                 "acc_manual_due",
               ),
-              const SizedBox(height: 12),
               _buildModernFieldRow(
                 "Cash Discount\nDate Offset",
                 "acc_cash_disc",
               ),
-              const SizedBox(height: 12),
               _buildModernCheckbox(
                 "Use Shipped Goods Account",
                 "cb_shipped_acc",
@@ -716,17 +711,11 @@ class _DeliveryPageState extends State<DeliveryPage>
           child: Column(
             children: [
               _buildModernFieldRow("BP Project", "acc_bp_proj"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Required Date", "acc_req_date"),
-              const SizedBox(height: 12),
               _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Order Number", "acc_order_no"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
             ],
           ),
@@ -734,6 +723,8 @@ class _DeliveryPageState extends State<DeliveryPage>
       ],
     ),
   );
+
+  // --- FOOTER (Updated Styles) ---
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
@@ -823,127 +814,290 @@ class _DeliveryPageState extends State<DeliveryPage>
     );
   }
 
+  // --- STYLING WIDGETS (SHADOW + FLOATING) ---
+
   Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       children: [
         const SizedBox(
           width: 120,
-          child: Text("Discount", style: TextStyle(fontSize: 12)),
-        ),
-        const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
-        SizedBox(
-          width: 40,
-          child: _buildSummaryBox(
-            "f_disc_pct",
-            isPercent: true,
-            defaultValue: "0",
+          child: Text(
+            "Discount",
+            style: TextStyle(
+              fontSize: 12,
+              color: Color(0xFF64748B),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text("%", style: TextStyle(fontSize: 12)),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Container(
+            height: 35,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: TextField(
+                    controller: _getCtrl("f_disc_pct", initial: "0"),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 9),
+                    ),
+                    onChanged: (val) =>
+                        setState(() => _fieldValues["f_disc_pct"] = val),
+                  ),
+                ),
+                Text(
+                  "%",
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: Colors.grey.withOpacity(0.3),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _getCtrl("f_disc_val", initial: "0.00"),
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 9,
+                      ),
+                    ),
+                    onChanged: (val) =>
+                        setState(() => _fieldValues["f_disc_val"] = val),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        Expanded(child: _buildSummaryBox("f_disc_val")),
       ],
     ),
   );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 120, // Lebar label seragam agar kotak input sejajar
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 28), // Berikan jarak spasi pemisah
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectDate(context, key),
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: IgnorePointer(
-                        child: TextField(
-                          controller: _getCtrl(key, initial: initial),
-                          style: const TextStyle(fontSize: 12),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
+          const SizedBox(width: 28),
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDate(context, key),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withOpacity(0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withOpacity(0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: IgnorePointer(
+                          child: TextField(
+                            controller: _getCtrl(key, initial: initial),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: Colors.grey,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        size: 16,
+                        color: primaryIndigo.withOpacity(0.6),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
           width: 120,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["cb_rounding"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["cb_rounding"] = v!),
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                bool val = _checkStates["cb_rounding"] ?? false;
+                _checkStates["cb_rounding"] = !val;
+              });
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Transform.translate(
+                  offset: const Offset(-5, 0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _checkStates["cb_rounding"] ?? false,
+                      onChanged: (v) =>
+                          setState(() => _checkStates["cb_rounding"] = v!),
+                      activeColor: primaryIndigo,
+                      visualDensity: const VisualDensity(
+                        horizontal: -4,
+                        vertical: -4,
+                      ),
+                      side: BorderSide(color: borderGrey, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "Rounding",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
+                Transform.translate(
+                  offset: const Offset(-1, 0),
+                  child: Text(
+                    "Rounding",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: secondarySlate,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 28), // Samakan jarak spasi
+        const SizedBox(width: 28),
         Expanded(
-          child: _buildSummaryBox(
-            "f_rounding",
-            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
+          child: Container(
+            height: 35,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+            child: TextField(
+              controller: _getCtrl("f_rounding", initial: "0.00"),
+              readOnly: !(_checkStates["cb_rounding"] ?? false),
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: (_checkStates["cb_rounding"] ?? false)
+                    ? Colors.black87
+                    : Colors.grey,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
+              ),
+              onChanged: (val) =>
+                  setState(() => _fieldValues["f_rounding"] = val),
+            ),
           ),
         ),
       ],
@@ -977,24 +1131,44 @@ class _DeliveryPageState extends State<DeliveryPage>
       initial: _fieldValues[key] ?? defaultValue,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           SizedBox(
             width: 140,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          const SizedBox(width: 8), // Gunakan spasi konsisten
+          const SizedBox(width: 8),
           Expanded(
             child: Container(
-              height: 28,
+              height: 35,
               decoration: BoxDecoration(
-                color: isReadOnly ? Colors.white : Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: TextField(
                 controller: controller,
@@ -1003,13 +1177,14 @@ class _DeliveryPageState extends State<DeliveryPage>
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  color: Colors.black87,
                 ),
                 decoration: const InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                 ),
                 onChanged: (val) {
@@ -1019,62 +1194,6 @@ class _DeliveryPageState extends State<DeliveryPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryBox(
-    String key, {
-    String defaultValue = "0.00",
-    bool isReadOnly = false,
-    bool isPercent = false,
-  }) {
-    final controller = _getCtrl(
-      key,
-      initial: _fieldValues[key] ?? defaultValue,
-    );
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey, width: 1.0),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: TextField(
-        controller: controller,
-        readOnly: isReadOnly,
-        textAlign: TextAlign.right,
-
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        ),
-        onChanged: (val) {
-          if (!isReadOnly) {
-            setState(() {
-              _fieldValues[key] = val;
-              if (key == "f_disc_pct") {
-                double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
-                      _getCtrl(
-                        "f_before_disc",
-                      ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
-                    ) ??
-                    0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
-                _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
-              }
-            });
-          }
-        },
       ),
     );
   }
@@ -1091,12 +1210,14 @@ class _DeliveryPageState extends State<DeliveryPage>
     FocusNode? focusNode = isDecimal ? _getFn(key, defaultValue: "0.00") : null;
 
     return Padding(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: isTextArea
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120, // Lebar label seragam agar kotak input sejajar
+            width: 120,
             child: Text(
               label,
               style: TextStyle(
@@ -1106,35 +1227,49 @@ class _DeliveryPageState extends State<DeliveryPage>
               ),
             ),
           ),
-          const SizedBox(width: 28), // Tambahkan jarak pemisah yang konsisten
+          const SizedBox(width: 28),
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 32,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              height: isTextArea ? 80 : 35,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
-              ),
-              child: Center(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  maxLines: isTextArea ? 3 : 1,
-                  textAlign: TextAlign.left,
-                  keyboardType: isDecimal
-                      ? const TextInputType.numberWithOptions(decimal: true)
-                      : TextInputType.text,
-                  style: const TextStyle(fontSize: 12, color: Colors.black),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
                   ),
-                  onChanged: (val) {
-                    _fieldValues[key] = val;
-                  },
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
                 ),
+              ),
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                maxLines: isTextArea ? 3 : 1,
+                textAlign: TextAlign.left,
+                keyboardType: isDecimal
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 9),
+                ),
+                onChanged: (val) {
+                  _fieldValues[key] = val;
+                },
               ),
             ),
           ),
@@ -1150,7 +1285,7 @@ class _DeliveryPageState extends State<DeliveryPage>
     String textKey, {
     String initialNo = "",
   }) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1165,33 +1300,51 @@ class _DeliveryPageState extends State<DeliveryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Jarak spasi konsisten
+        const SizedBox(width: 28),
         Expanded(
           child: Container(
-            height: 32,
+            height: 35,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: borderGrey),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: Row(
               children: [
                 Container(
                   width: 110,
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(5),
-                    ),
-                    border: Border(right: BorderSide(color: borderGrey)),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value:
                           _dropdownValues[dropdownKey] ?? seriesOptions.first,
                       isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: Colors.black54,
+                      ),
                       onChanged: (v) =>
                           setState(() => _dropdownValues[dropdownKey] = v!),
                       items: seriesOptions
@@ -1202,32 +1355,26 @@ class _DeliveryPageState extends State<DeliveryPage>
                     ),
                   ),
                 ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
                 Expanded(
-                  child: Container(
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(5),
+                  child: TextField(
+                    controller: _getCtrl(textKey, initial: initialNo),
+                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
                       ),
                     ),
-                    child: Center(
-                      child: TextField(
-                        controller: _getCtrl(textKey, initial: initialNo),
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          _fieldValues[textKey] = val;
-                        },
-                      ),
-                    ),
+                    onChanged: (val) {
+                      _fieldValues[textKey] = val;
+                    },
                   ),
                 ),
               ],
@@ -1238,37 +1385,92 @@ class _DeliveryPageState extends State<DeliveryPage>
     ),
   );
 
-  Widget _buildModernCheckbox(String label, String key) => Row(
-    children: [
-      SizedBox(
-        width: 24,
-        height: 32,
-        child: Checkbox(
-          value: _checkStates[key] ?? false,
-          activeColor: primaryIndigo,
-          onChanged: (val) => setState(() => _checkStates[key] = val!),
-        ),
+  Widget _buildModernCheckbox(String label, String key) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: InkWell(
+      onTap: () {
+        setState(() {
+          bool val = _checkStates[key] ?? false;
+          _checkStates[key] = !val;
+        });
+      },
+      borderRadius: BorderRadius.circular(4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.translate(
+            offset: const Offset(-10, 0),
+            child: SizedBox(
+              width: 30,
+              height: 30,
+              child: Checkbox(
+                value: _checkStates[key] ?? false,
+                activeColor: primaryIndigo,
+                onChanged: (val) => setState(() => _checkStates[key] = val!),
+                visualDensity: const VisualDensity(
+                  horizontal: -4,
+                  vertical: -4,
+                ),
+                side: BorderSide(color: borderGrey, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: const Offset(-8, 0),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
       ),
-      const SizedBox(width: 8),
-      Text(label, style: const TextStyle(fontSize: 12)),
-    ],
+    ),
   );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30,
+      height: 35,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _dropdownValues[key],
           isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: Colors.black54,
+          ),
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
@@ -1283,7 +1485,7 @@ class _DeliveryPageState extends State<DeliveryPage>
     String key,
     List<String> items,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1298,7 +1500,7 @@ class _DeliveryPageState extends State<DeliveryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
         Expanded(child: _buildSmallDropdown(key, items)),
       ],
     ),
@@ -1309,10 +1511,11 @@ class _DeliveryPageState extends State<DeliveryPage>
     String key,
     List<String> data,
   ) => Padding(
-    padding: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+       
         SizedBox(
           width: 120,
           child: Text(
@@ -1321,19 +1524,44 @@ class _DeliveryPageState extends State<DeliveryPage>
               fontSize: 12,
               color: secondarySlate,
               fontWeight: FontWeight.w500,
+             
+              shadows: [
+                Shadow(
+                  offset: const Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
+        
         Expanded(
           child: InkWell(
             onTap: () => _showSearchDialog(label, key, data),
             child: Container(
-              height: 32,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(10), 
+                // Border ungu tipis
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -1355,9 +1583,14 @@ class _DeliveryPageState extends State<DeliveryPage>
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 10),
-                    child: Icon(Icons.search, size: 16, color: Colors.grey),
+                 
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(
+                      Icons.search, 
+                      size: 16, 
+                      color: primaryIndigo.withOpacity(0.6), 
+                    ),
                   ),
                 ],
               ),
@@ -1367,7 +1600,6 @@ class _DeliveryPageState extends State<DeliveryPage>
       ],
     ),
   );
-
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
     showDialog(
@@ -1415,7 +1647,7 @@ class _DeliveryPageState extends State<DeliveryPage>
   }
 
   Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: 12),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1430,7 +1662,7 @@ class _DeliveryPageState extends State<DeliveryPage>
             ),
           ),
         ),
-        const SizedBox(width: 28), // Spasi pemisah konsisten
+        const SizedBox(width: 28),
         Expanded(
           child: InkWell(
             onTap: () async {
@@ -1440,17 +1672,33 @@ class _DeliveryPageState extends State<DeliveryPage>
               }
             },
             child: Container(
-              height: 32,
+              height: 35,
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -1465,7 +1713,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.only(right: 8),
+                    padding: EdgeInsets.only(right: 12),
                     child: Icon(
                       Icons.upload_file,
                       size: 16,
@@ -1533,21 +1781,13 @@ class _DeliveryPageState extends State<DeliveryPage>
             padding: const EdgeInsets.all(20),
             children: [
               _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
-              const SizedBox(height: 12),
               _buildFileUploadRow("File 1", "cfg_f1"),
-              const SizedBox(height: 8),
               _buildFileUploadRow("File 2", "cfg_f2"),
-              const SizedBox(height: 8),
               _buildFileUploadRow("File 3", "cfg_f3"),
-              const SizedBox(height: 8),
               _buildFileUploadRow("File 4", "cfg_f4"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Create By", "cfg_by"),
-              const SizedBox(height: 12),
               _buildModernFieldRow("Delivery To", "cfg_up"),
-              const SizedBox(height: 12),
               _buildChooseFromListField("Series Draft", "cfg_series", [""]),
-              const SizedBox(height: 12),
               _buildChooseFromListField("No Do ", "cfg_no_do", [""]),
               const SizedBox(height: 30),
               SizedBox(

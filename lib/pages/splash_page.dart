@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:lottie/lottie.dart';
-import '../main_layout.dart'; // 🔥 IMPORT INI BIAR BISA KE DASHBOARD
+import '../main_layout.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,7 +15,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   final Color darkSlate = const Color(0xFF0F172A);
   final Color accentYellow = const Color(0xFFFFD700);
   bool _isLoading = true;
-  bool _showContent = false; // 🔥 Pemicu animasi semua elemen
+  bool _showContent = false;
   late AnimationController _floatingController;
 
   @override
@@ -26,12 +26,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
 
-    // Timer loading robot & content
     Timer(const Duration(milliseconds: 3800), () {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _showContent = true; // 🔥 Aktifkan efek muncul halus serentak
+          _showContent = true;
         });
       }
     });
@@ -54,13 +53,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
             const curve = Curves.easeInOutQuart;
-
             var tween = Tween(
               begin: begin,
               end: end,
             ).chain(CurveTween(curve: curve));
             var offsetAnimation = animation.drive(tween);
-
             return SlideTransition(position: offsetAnimation, child: child);
           },
           transitionDuration: const Duration(milliseconds: 800),
@@ -76,10 +73,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       body: Stack(
         children: [
           _buildCyberGrid(),
-
-          // --- KOTAK-KOTAK DENGAN POSISI TETAP TAPI ANIMASI DALAM ---
-          _buildAnimatedSquare(top: 60, left: 0.05, size: 70, rotation: 0.3),
-          _buildAnimatedSquare(top: 170, left: 0.15, size: 90, rotation: 0.6),
+          _buildAnimatedSquare(top: 60, left: 0.06, size: 70, rotation: 0.5),
+          _buildAnimatedSquare(top: 180, left: 0.18, size: 90, rotation: 0.6),
           _buildAnimatedSquare(
             bottom: 100,
             right: 0.05,
@@ -92,7 +87,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             size: 115,
             rotation: -0.4,
           ),
-          _buildAnimatedSquare(top: 420, right: 0.25, size: 60, rotation: 0.8),
+        _buildAnimatedSquare(top: 380, right: 0.28, size: 60, rotation: 0.8),
 
           _buildAnimatedPremiumCircle(
             -150,
@@ -114,26 +109,40 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
           _buildFloatingParticle(top: 150, left: 0.15, size: 12),
           _buildFloatingParticle(top: 450, left: 0.85, size: 15),
 
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildRobotWithGlow(),
-                const SizedBox(height: 50),
-                _buildBrandingSection(), // Muncul halus & Slide up
-                const SizedBox(height: 80),
-                _buildActionSection(),
-              ],
+          // Layout Utama (Teks & Tombol)
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(),
+
+                    _buildRobotWithGlow(),
+                    const SizedBox(height: 50),
+
+                    _buildBrandingSection(),
+                    const SizedBox(height: 60),
+
+                    _buildActionSection(),
+
+                    const SizedBox(height: 40),
+                    _buildFooterText(),
+
+                    const Spacer(),
+                  ],
+                ),
+              ),
             ),
           ),
-
-          _buildAnimatedFooter(), // Footer muncul halus
         ],
       ),
     );
   }
 
-  // 🔥 BRANDING SECTION DENGAN FADE & SLIDE UP 🔥
+  // ... Widget Helper ...
+
   Widget _buildBrandingSection() {
     return AnimatedOpacity(
       opacity: _showContent ? 1.0 : 0.0,
@@ -153,6 +162,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 letterSpacing: 6.5,
                 color: darkSlate.withOpacity(0.7),
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
             Container(
@@ -192,6 +202,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],
@@ -200,7 +211,23 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
   }
 
-  // 🔥 FIX: Kotak ditaruh di posisi yang bener sesuai layar 🔥
+  Widget _buildFooterText() {
+    return AnimatedOpacity(
+      opacity: _showContent ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 2500),
+      child: Text(
+        "POWERED BY DLM GROUP TECHNOLOGY",
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: darkSlate.withOpacity(0.5),
+          letterSpacing: 2.2,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildAnimatedSquare({
     double? top,
     double? left,
@@ -427,29 +454,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             ),
           ),
   );
-
-  Widget _buildAnimatedFooter() {
-    return Positioned(
-      bottom: 45,
-      left: 0,
-      right: 0,
-      child: AnimatedOpacity(
-        opacity: _showContent ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 2500),
-        child: const Center(
-          child: Text(
-            "POWERED BY DLM GROUP TECHNOLOGY",
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: Colors.black26,
-              letterSpacing: 2.0,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class GridPainter extends CustomPainter {
