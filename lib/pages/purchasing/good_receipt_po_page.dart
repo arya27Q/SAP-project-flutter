@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class GoodReturnPage extends StatefulWidget {
-  const GoodReturnPage({super.key});
+class GoodReceiptPOPage extends StatefulWidget {
+  const GoodReceiptPOPage({super.key});
 
   @override
-  State<GoodReturnPage> createState() => _GoodReturnPageState();
+  State<GoodReceiptPOPage> createState() => _GoodReceivePOPageState();
 }
 
-class _GoodReturnPageState extends State<GoodReturnPage>
+class _GoodReceivePOPageState extends State<GoodReceiptPOPage>
     with SingleTickerProviderStateMixin {
   bool showSidePanel = false;
   late TabController _tabController;

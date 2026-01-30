@@ -20,6 +20,7 @@ import 'pages/purchasing/purchase_request_page.dart';
 import 'pages/purchasing/purchase_quotation_page.dart';
 import 'pages/purchasing/purchase_order_page.dart';
 import 'pages/purchasing/good_return_page.dart';
+import 'pages/purchasing/good_receipt_po_page.dart';
 import 'pages/purchasing/ap_down_payment_page.dart';
 import 'pages/purchasing/ap_invoice_page.dart';
 import 'pages/purchasing/ap_credit_memo_page.dart';
@@ -40,7 +41,7 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   String currentView = "Dashboard";
-  bool isLoggedIn = false; 
+  bool isLoggedIn = false;
   int userLevel = 1;
   String userName = "Admin SAP";
   String userDiv = "Super User";
@@ -166,6 +167,8 @@ class _MainLayoutState extends State<MainLayout> {
         return const PurchaseOrderPage();
       case "Goods Return":
         return const GoodReturnPage();
+      case "Goods Receipt PO":
+        return const GoodReceiptPOPage();
       case "A/P Down Payment":
         return const ApDownPaymentPage();
       case "A/P Invoice":
@@ -177,14 +180,13 @@ class _MainLayoutState extends State<MainLayout> {
         return const IncomingPaymentPage();
 
       case "Outgoing Payments":
-        return const OutgoingPaymentPage(); 
+        return const OutgoingPaymentPage();
 
       case "Journal Entry":
         return const JournalEntryPage();
 
       case "Item Master Data":
         return const ItemMasterDataPage();
-        
 
       default:
         return Center(
