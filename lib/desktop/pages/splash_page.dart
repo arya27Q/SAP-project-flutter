@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:lottie/lottie.dart';
-import '../main_layout.dart';
+
+// 🔥 IMPORT 🔥
+import '../../main_layout.dart'; // Dashboard Desktop
+import '../../tablet/login_page.dart'; // Login Tablet
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -42,13 +45,32 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // 🔥 LOGIC NAVIGASI (SUDAH DINORMALKAN KEMBALI) 🔥
   void _navigateToDashboard() {
     if (mounted) {
+      // 1. Cek Lebar Layar
+      double screenWidth = MediaQuery.of(context).size.width;
+
+      bool isTablet = screenWidth < 900;
+     
+
+      // 2. Tentukan Tujuan Halaman
+      Widget destinationPage;
+
+      if (isTablet) {
+        // Layar Sempit -> Masuk QC System
+        destinationPage = const TabletLoginPage();
+      } else {
+        // Layar Lebar (Laptop) -> Masuk ERP System
+        destinationPage = const MainLayout();
+      }
+
+      // 3. Pindah Halaman
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              const MainLayout(),
+              destinationPage,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -87,7 +109,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             size: 115,
             rotation: -0.4,
           ),
-        _buildAnimatedSquare(top: 380, right: 0.28, size: 60, rotation: 0.8),
+          _buildAnimatedSquare(top: 380, right: 0.28, size: 60, rotation: 0.8),
 
           _buildAnimatedPremiumCircle(
             -150,

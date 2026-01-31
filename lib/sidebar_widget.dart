@@ -323,7 +323,7 @@ class SidebarWidget extends StatelessWidget {
     );
   }
 
-  // --- HELPER WIDGETS ---
+  
 
   Widget _buildSimpleMenu(IconData icon, String title, {VoidCallback? onTap}) {
     bool isActive = currentView == title;

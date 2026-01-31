@@ -2,35 +2,37 @@ import 'package:flutter/material.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 
-import 'pages/account/sap_auth_page.dart';
+import 'desktop/pages/account/sap_auth_page.dart';
 
-import 'pages/dashboard.dart';
+import 'desktop/pages/dashboard.dart';
 
-import 'pages/sales_AR/sales_order_page.dart';
-import 'pages/sales_AR/sales_quotation_page.dart';
-import 'pages/sales_AR/delivery_page.dart';
-import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
-import 'pages/sales_AR/ar_invoice_page.dart';
-import 'pages/sales_AR/ar_credit_memo_page.dart';
-import 'pages/sales_AR/return_page.dart';
+import 'desktop/pages/sales_AR/sales_order_page.dart';
+import 'desktop/pages/sales_AR/sales_quotation_page.dart';
+import 'desktop/pages/sales_AR/delivery_page.dart';
+import 'desktop/pages/sales_AR/ar_down_payment_invoice_page.dart';
+import 'desktop/pages/sales_AR/ar_invoice_page.dart';
+import 'desktop/pages/sales_AR/ar_credit_memo_page.dart';
+import 'desktop/pages/sales_AR/return_page.dart';
 
-import 'pages/Business_Partner_Master_Data.dart';
+import 'desktop/pages/Business_Partner_Master_Data.dart';
 
-import 'pages/purchasing/purchase_request_page.dart';
-import 'pages/purchasing/purchase_quotation_page.dart';
-import 'pages/purchasing/purchase_order_page.dart';
-import 'pages/purchasing/good_return_page.dart';
-import 'pages/purchasing/good_receipt_po_page.dart';
-import 'pages/purchasing/ap_down_payment_page.dart';
-import 'pages/purchasing/ap_invoice_page.dart';
-import 'pages/purchasing/ap_credit_memo_page.dart';
+import 'desktop/pages/purchasing/purchase_request_page.dart';
+import 'desktop/pages/purchasing/purchase_quotation_page.dart';
+import 'desktop/pages/purchasing/purchase_order_page.dart';
+import 'desktop/pages/purchasing/good_return_page.dart';
+import 'desktop/pages/purchasing/good_receipt_po_page.dart';
+import 'desktop/pages/purchasing/ap_down_payment_page.dart';
+import 'desktop/pages/purchasing/ap_invoice_page.dart';
+import 'desktop/pages/purchasing/ap_credit_memo_page.dart';
 
-import 'pages/banking/incoming_payments/incoming_payment_page.dart';
-import 'pages/banking/outgoing_payments/outgoing_payment_page.dart';
+import 'desktop/pages/banking/incoming_payments/incoming_payment_page.dart';
+import 'desktop/pages/banking/outgoing_payments/outgoing_payment_page.dart';
 
-import 'pages/financials/journal_entry_page.dart';
+import 'desktop/pages/financials/journal_entry_page.dart';
 
-import 'pages/inventory/item_master_data.dart';
+import 'desktop/pages/inventory/item_master_data.dart';
+
+import 'desktop/pages/Quality_Control_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -67,14 +69,12 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF1F5F9),
-
       drawer: isMobile
           ? SidebarWidget(
               currentView: currentView,
               onViewChanged: (view) => _handleViewChange(view),
             )
           : null,
-
       body: Row(
         children: [
           if (!isMobile)
@@ -82,7 +82,6 @@ class _MainLayoutState extends State<MainLayout> {
               currentView: currentView,
               onViewChanged: (view) => _handleViewChange(view),
             ),
-
           Expanded(
             child: Column(
               children: [
@@ -96,7 +95,6 @@ class _MainLayoutState extends State<MainLayout> {
                       onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                     ),
                   ),
-
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
@@ -187,6 +185,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Item Master Data":
         return const ItemMasterDataPage();
+
+      case "Quality Control":
+        return const DesktopQcPage();
 
       default:
         return Center(

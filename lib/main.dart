@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'constants.dart';
- // Ini harus diimpor karena nanti dipakai di Navigator
-import 'pages/splash_page.dart';
+
+// Import DUA-DUANYA
+import 'desktop/pages/splash_page.dart'; 
+import 'tablet/tablet_splash_page.dart';
 
 void main() {
   runApp(const SAPModernApp());
@@ -14,13 +17,26 @@ class SAPModernApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'QC System',
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Segoe UI',
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
-      // 🔥 PINTU MASUK UTAMA ADALAH SPLASH
-      home: const SplashPage(), 
+      
+      // 🔥 LOGIC DETEKSI LAYAR 🔥
+      home: LayoutBuilder(
+        builder: (context, constraints) {
+          // Kalau lebar layar > 800px, anggap Desktop
+          if (constraints.maxWidth > 1000) {
+            return const SplashPage(); // Masuk Desktop
+          } 
+          // Kalau lebih kecil, anggap Tablet
+          else {
+            return const TabletSplashPage(); // Masuk Tablet
+          }
+        },
+      ),
     );
   }
 }
