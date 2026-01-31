@@ -13,7 +13,7 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
   final Color successGreen = const Color(0xFF10B981);
   final Color dangerRed = const Color(0xFFEF4444);
   final Color bgSlate =
-      const Color(0xFFF1F5F9); // Background yang kontras untuk shadow
+      const Color.fromARGB(255, 255, 255, 255); // Background yang kontras untuk shadow
   final Color textDark = const Color(0xFF1E293B);
 
   // --- Stronger Shadows for "Floating" Effect ---
@@ -367,7 +367,9 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
                             fontWeight: FontWeight.bold)),
                     SizedBox(height: 6),
                     Text("Data real-time pengecekan unit di lapangan",
-                        style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        style: TextStyle(
+                            color: Color.fromARGB(237, 221, 219, 219),
+                            fontSize: 14)),
                   ],
                 ),
                 ElevatedButton.icon(
@@ -699,14 +701,14 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
 
   Widget _buildDonutChartMock() {
     return SizedBox(
-      height: 300,
+      height: 225,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
             SizedBox(
-              width: 200,
-              height: 200,
+              width: 190,
+              height: 190,
               child: CircularProgressIndicator(
                 value: 0.88,
                 strokeWidth: 26,
@@ -720,7 +722,7 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
               children: [
                 Text("88.2%",
                     style: TextStyle(
-                        fontSize: 36,
+                        fontSize: 35,
                         fontWeight: FontWeight.bold,
                         color: textDark,
                         letterSpacing: -1)),

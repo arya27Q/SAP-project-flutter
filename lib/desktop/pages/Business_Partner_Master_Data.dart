@@ -54,9 +54,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           children: [
             _buildHeaderSection(),
             const SizedBox(height: 24),
-
             _buildTabSection(),
-
             const SizedBox(height: 20),
             _buildActionArea(),
           ],
@@ -220,14 +218,12 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ),
             ),
           ),
-
           const SizedBox(width: 6),
           const Text(
             "=",
             style: TextStyle(fontSize: 11, color: Colors.black54),
           ),
           const SizedBox(width: 6),
-
           Expanded(
             child: Text(
               accName,
@@ -428,7 +424,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ],
             ),
           ),
-
           const SizedBox(width: 40),
           Expanded(
             child: SingleChildScrollView(
@@ -716,10 +711,10 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           }
           return Container(
             height: 22,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: const Color.fromARGB(255, 188, 204, 115),
+                  color: Color.fromARGB(255, 188, 204, 115),
                   width: 0.5,
                 ),
               ),
@@ -855,7 +850,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           color: Colors.white,
           width: 2.5, // Border lebih tebel
         ),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -1005,109 +999,136 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     String textKey, {
     String initialNo = "",
   }) {
+    // Definisi warna agar konsisten (bisa dipindah ke variabel class jika mau)
+    const Color borderPurple = Color(0xFFE0E7FF);
+    const Color iconPurple = Color(0xFF818CF8);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak antar row
       child: Row(
         children: [
+          // --- LABEL ---
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600, // Label agak tebal
+              ),
             ),
           ),
-          // 1. Dropdown Kiri (Manual / System)
+
+          // --- 1. DROPDOWN KIRI (Manual / System) ---
           Container(
             width: 100,
-            height: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: bgSlate,
-              border: Border.all(color: borderGrey),
+              color: Colors.white,
+              // Radius hanya di kiri
               borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(6),
+                left: Radius.circular(10),
               ),
+              border: Border.all(color: borderPurple),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _dropdownValues[dropdownKey] ?? series.first,
                 isDense: true,
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: iconPurple,
+                  size: 20,
+                ),
                 onChanged: (v) =>
                     setState(() => _dropdownValues[dropdownKey] = v!),
                 items: series
                     .map(
                       (e) => DropdownMenuItem(
                         value: e,
-                        child: Text(
-                          e,
-                          style: const TextStyle(color: Colors.black),
-                        ),
+                        child: Text(e),
                       ),
                     )
                     .toList(),
               ),
             ),
           ),
-          // 2. TextField Tengah (VJS-481)
+
+          // --- 2. TEXTFIELD TENGAH (VJS-481) ---
           Expanded(
             child: Container(
-              height: 30,
-              decoration: BoxDecoration(
+              height: 38,
+              decoration: const BoxDecoration(
                 color: Colors.white,
+                // Border hanya Atas & Bawah agar menyatu dengan kiri kanan
                 border: Border(
-                  top: BorderSide(color: borderGrey),
-                  bottom: BorderSide(color: borderGrey),
+                  top: BorderSide(color: borderPurple),
+                  bottom: BorderSide(color: borderPurple),
                 ),
               ),
               child: TextField(
                 controller: _getCtrl(textKey, initial: initialNo),
-                style: const TextStyle(fontSize: 12, color: Colors.black),
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
+                    horizontal: 10,
+                    vertical: 10,
                   ),
                 ),
               ),
             ),
           ),
+
+          // --- 3. DROPDOWN KANAN (Vendor / Customer) ---
           Container(
             width: 100,
-            height: 30,
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: borderGrey),
+              // Radius hanya di kanan
               borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(6),
+                right: Radius.circular(10),
               ),
+              border: Border.all(color: borderPurple),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _dropdownValues["bp_type_header"] ?? "Vendor",
                 isDense: true,
                 isExpanded: true,
-                // PERBAIKAN: Warna teks hitam dan icon terlihat
-                style: const TextStyle(fontSize: 11, color: Colors.black),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: iconPurple,
+                  size: 20,
+                ),
                 onChanged: (v) =>
                     setState(() => _dropdownValues["bp_type_header"] = v!),
                 items: ["Vendor", "Customer"]
                     .map(
                       (e) => DropdownMenuItem(
                         value: e,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 8,
-                          ), // Sesuaikan padding agar tidak terlalu ke kanan
-                          child: Text(
-                            e,
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
+                        child: Text(e),
                       ),
                     )
                     .toList(),
@@ -1119,38 +1140,99 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
+  Widget _buildSmallDropdown(String key, List<String> items) {
+    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 38, // Samakan tinggi dengan TextField modern
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10), // Radius lebih bulat
+        border: Border.all(
+          color: const Color(0xFFE0E7FF), // Border ungu muda
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                const Color(0xFF4F46E5).withOpacity(0.05), // Shadow ungu halus
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _dropdownValues[key],
+          isDense: true,
+          style: const TextStyle(fontSize: 13, color: Colors.black87),
+          // Icon ungu sesuai gambar
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Color(0xFF818CF8),
+            size: 20,
+          ),
+          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          items: items
+              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSmallDropdownRowModern(
     String label,
     String key,
     List<String> items,
   ) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak antar row agak lega
       child: Row(
         children: [
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600, // Label agak tebal
+              ),
             ),
           ),
           Expanded(
             child: Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              height: 38, // Samakan tinggi dengan TextField
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 255, 255, 255),
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFFE0E7FF), // Border ungu muda
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5)
+                        .withOpacity(0.05), // Shadow halus
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _dropdownValues[key],
                   isDense: true,
-                  style: const TextStyle(fontSize: 12, color: Colors.black),
-                  iconEnabledColor: Colors.black54,
+                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  // Icon ungu sesuai gambar
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Color(0xFF818CF8),
+                    size: 20,
+                  ),
                   onChanged: (v) => setState(() => _dropdownValues[key] = v!),
                   items: items
                       .map(
@@ -1158,7 +1240,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                           value: e,
                           child: Text(
                             e,
-                            style: const TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black87),
                           ),
                         ),
                       )
@@ -1202,37 +1284,54 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     final FocusNode _focusNode = _focusNodes[key]!;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 12), // Jarak antar row agak lega
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600, // Label agak tebal
+              ),
             ),
           ),
+          // Icon Panah Orange (Khas SAP link indicator) tetap dipertahankan
           Icon(Icons.play_arrow, size: 14, color: Colors.orange.shade700),
           const SizedBox(width: 8),
+
+          // --- KOTAK INPUT DIPERBARUI ---
           Container(
             width: 100,
-            height: 24,
+            height: 38, // Tinggi disamakan (sebelumnya 24)
             decoration: BoxDecoration(
-              color: bgSlate,
-              border: Border.all(color: borderGrey),
-              borderRadius: BorderRadius.circular(4),
+              color: Colors.white, // Background putih
+              borderRadius: BorderRadius.circular(10), // Radius bulat
+              border: Border.all(
+                color: const Color(0xFFE0E7FF), // Border ungu muda
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      const Color(0xFF4F46E5).withOpacity(0.05), // Shadow halus
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
-              textAlign: TextAlign.right, // Angka rata kanan khas SAP
+              textAlign: TextAlign.right, // Angka rata kanan
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
               decoration: const InputDecoration(
                 isDense: true,
-                // Padding disesuaikan agar teks tetap di tengah container 24px
-                contentPadding: EdgeInsets.only(right: 8, top: 4, bottom: 4),
+                // Padding disesuaikan agar teks pas di tengah tinggi 38
+                contentPadding: EdgeInsets.only(right: 10, top: 10, bottom: 10),
                 border: InputBorder.none,
               ),
               onChanged: (val) {
@@ -1251,34 +1350,81 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     bool isTextArea = false,
     String initial = "",
   }) {
+    // Deteksi sederhana: Jika label mengandung kata "Date", tampilkan icon kalender
+    bool isDate = label.toLowerCase().contains("date");
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(
+          bottom: 12), // Jarak antar row agak dilonggarkan
       child: Row(
+        crossAxisAlignment:
+            isTextArea ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
+          // --- LABEL ---
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate, // Pastikan warna label abu-abu kebiruan
+                fontWeight: FontWeight.w600, // Sedikit tebal biar tegas
+              ),
             ),
           ),
+
+          // --- INPUT FIELD ---
           Expanded(
             child: Container(
-              height: isTextArea ? 80 : 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              height: isTextArea
+                  ? 80
+                  : 38, // Tinggi disesuaikan biar tidak gepeng (30 terlalu kecil)
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: bgSlate,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                color: Colors.white, // Background Putih
+                borderRadius: BorderRadius.circular(
+                    10), // Radius lebih bulat (seperti gambar)
+                border: Border.all(
+                  color: const Color(
+                      0xFFE0E7FF), // Warna border ungu muda (Indigo-100)
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5)
+                        .withOpacity(0.05), // Shadow Ungu sangat transparan
+                    blurRadius: 10, // Blur luas biar glowing
+                    offset: const Offset(0, 4), // Bayangan sedikit ke bawah
+                    spreadRadius: 0,
+                  ),
+                ],
               ),
               child: TextField(
                 controller: _getCtrl(key, initial: initial),
                 maxLines: isTextArea ? 3 : 1,
-                style: const TextStyle(fontSize: 12),
-                decoration: const InputDecoration(
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 6),
+                  // Padding vertikal agar teks pas di tengah container
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: isTextArea ? 10 : 10),
+                  // Tambahkan Icon Kalender jika field tanggal (sesuai gambar)
+                  suffixIcon: isDate
+                      ? const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 16,
+                          color: Color(0xFF818CF8), // Warna icon ungu muda
+                        )
+                      : null,
+                  suffixIconConstraints: const BoxConstraints(
+                    minHeight: 20,
+                    minWidth: 20,
+                  ),
                 ),
               ),
             ),
@@ -1290,20 +1436,24 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
 
   Widget _buildSearchField(String label, String key, List<String> options) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12.0), // Jarak antar row agak lega
       child: Row(
         children: [
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600, // Label agak tebal
+              ),
             ),
           ),
           Expanded(
             child: GestureDetector(
               onTap: () async {
-                // List awal untuk menampung hasil filter
+                // --- LOGIKA PENCARIAN TETAP UTUH ---
                 List<String> filteredOptions = List.from(options);
 
                 final String? selected = await showDialog<String>(
@@ -1312,7 +1462,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     return StatefulBuilder(
                       builder: (context, setDialogState) {
                         return AlertDialog(
-                          // --- BAGIAN INPUT PENCARIAN ---
                           title: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1342,8 +1491,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                                     filteredOptions = options
                                         .where(
                                           (opt) => opt.toLowerCase().contains(
-                                            value.toLowerCase(),
-                                          ),
+                                                value.toLowerCase(),
+                                              ),
                                         )
                                         .toList();
                                   });
@@ -1396,13 +1545,24 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                   setState(() => _dropdownValues[key] = selected);
                 }
               },
+              // --- UPDATE TAMPILAN CONTAINER DI SINI ---
               child: Container(
-                height: 30,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                height: 38, // Tinggi disamakan dengan field lain
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  border: Border.all(color: Color(0xFFD1D9E6)),
-                  borderRadius: BorderRadius.circular(6),
+                  color: Colors.white, // Background putih
+                  borderRadius: BorderRadius.circular(10), // Radius bulat
+                  border: Border.all(
+                    color: const Color(0xFFE0E7FF), // Border ungu muda
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5)
+                          .withOpacity(0.05), // Shadow halus
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -1410,14 +1570,18 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       child: Text(
                         _dropdownValues[key] ?? "Search...",
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           color: _dropdownValues[key] == null
-                              ? const Color.fromARGB(255, 255, 255, 255)
-                              : Colors.black,
+                              ? Colors.grey
+                              : Colors.black87,
                         ),
                       ),
                     ),
-                    const Icon(Icons.search, size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.search,
+                      size: 18,
+                      color: Color(0xFF818CF8), // Icon warna ungu muda
+                    ),
                   ],
                 ),
               ),
@@ -1474,12 +1638,11 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     _buildModernFieldRow("Bank Name", "Bank Name"),
                     _buildModernFieldRow("bank Code", "Bank code"),
                     _buildModernFieldRow("Account", "Account"),
-
                     const SizedBox(height: 5),
-                    Align(
+                    const Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           vertical: 8.0,
                           horizontal: 0.0,
                         ),
@@ -1532,9 +1695,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     _buildSmallDropdownRowModern("Hollidays", "Hollidays", [
                       "",
                     ]),
-
                     const SizedBox(height: 40),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -1665,7 +1826,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         ],
                       ),
                     ),
-
                     Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
@@ -1682,7 +1842,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                             ["Document Date"],
                           ),
                           const SizedBox(height: 12),
-
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -1759,7 +1918,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 12),
                           _buildModernFieldRow(
                             "Tolerance Days",
@@ -1784,7 +1942,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                             "pt_cash",
                             [""],
                           ),
-
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
                             child: Divider(
@@ -1792,7 +1949,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                               thickness: 1.5,
                             ),
                           ),
-
                           const Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -1806,7 +1962,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                             ),
                           ),
                           const SizedBox(height: 16),
-
                           _buildSimpleFieldRow("Disc %", "pt_disc"),
                           const SizedBox(height: 4),
                           _buildSimpleFieldRow("Interest %", "pt_int"),
@@ -1820,7 +1975,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                           _buildSimpleFieldRow("Max. Credit", "pt_max"),
                           const SizedBox(height: 4),
                           _buildSimpleFieldRow("Comm. Limit", "pt_com"),
-
                           const SizedBox(height: 32),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -1875,31 +2029,6 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
-  Widget _buildSmallDropdown(String key, List<String> items) {
-    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      height: 30, // Tinggi standar agar lurus dengan TextField
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _dropdownValues[key],
-          isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
-          items: items
-              .map((val) => DropdownMenuItem(value: val, child: Text(val)))
-              .toList(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSimpleFieldRow(
     String label,
     String key, {
@@ -1924,23 +2053,38 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     });
 
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12.0), // Jarak antar row agak lega
       child: Row(
         children: [
           SizedBox(
             width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: secondarySlate),
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w600, // Label agak tebal
+              ),
             ),
           ),
           Expanded(
             child: Container(
-              height: 30,
+              height: 38, // Samakan tinggi dengan field lain
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: bgSlate,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: borderGrey),
+                color: Colors.white, // Background putih
+                borderRadius: BorderRadius.circular(10), // Radius bulat
+                border: Border.all(
+                  color: const Color(0xFFE0E7FF), // Border ungu muda
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5)
+                        .withOpacity(0.05), // Shadow halus
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: TextField(
                 controller: _controller,
@@ -1948,13 +2092,11 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                style: const TextStyle(fontSize: 13),
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
                 decoration: const InputDecoration(
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
+                  // Padding vertikal agar teks pas di tengah tinggi 38
+                  contentPadding: EdgeInsets.symmetric(vertical: 10),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {
@@ -2113,19 +2255,28 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   Widget _buildSmallBox(String key, {double? width}) {
     return Container(
       width: width,
-      height: 25,
+      height: 38,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: borderGrey),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFFE0E7FF),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withOpacity(0.05), // Shadow halus
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextField(
         controller: _getCtrl(key),
-        style: const TextStyle(fontSize: 11),
+        style: const TextStyle(fontSize: 13, color: Colors.black87),
         decoration: const InputDecoration(
           border: InputBorder.none,
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         ),
       ),
     );
@@ -2133,13 +2284,10 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
 
   Widget _buildActionArea() {
     return Container(
-      // Tambahkan horizontal padding agar sejajar dengan box di atasnya (margin 16)
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
-        // Menggunakan spaceBetween untuk mendorong satu grup ke kiri dan satu ke kanan
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // GRUP TOMBOL KIRI (Add / Update & Cancel)
           Row(
             children: [
               ElevatedButton(
