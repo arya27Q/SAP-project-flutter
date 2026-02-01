@@ -14,7 +14,7 @@ class DashboardPage extends StatefulWidget {
     required this.userName,
     required this.userDivision,
     required this.onLogout,
-    this.currentDatabase = "DB_SAMUDRA_UTAMA",
+    this.currentDatabase = "Selamat Datang Administrator",
   });
 
   @override
@@ -30,10 +30,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
   // Shadow Super Tebal & Melayang
   final List<BoxShadow> floatingShadow = [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.15),
+    const BoxShadow(
+      color: Color(0x26000000), // 0.15 opacity
       blurRadius: 30,
-      offset: const Offset(0, 15),
+      offset: Offset(0, 15),
       spreadRadius: 2,
     ),
   ];
@@ -63,29 +63,24 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER
             _buildHeader(),
             const SizedBox(height: 40),
 
-            // SYNC STATUS
             _buildSectionTitle("GROUP SUBSIDIARY SYNC STATUS"),
             const SizedBox(height: 15),
             _buildSyncStatusList(),
             const SizedBox(height: 40),
 
-            // CRITICAL ALERTS
             _buildSectionTitle("CRITICAL ALERTS & APPROVALS"),
             const SizedBox(height: 15),
             _buildAlertsGrid(w < 900),
             const SizedBox(height: 40),
 
-            // FINANCIAL SUMMARY
             _buildSectionTitle("FINANCIAL SUMMARY"),
             const SizedBox(height: 15),
             _buildFinancialGrid(w < 900),
             const SizedBox(height: 40),
 
-            // --- STRATEGIC HUB (BAGIAN YG KAMU MINTA DIKASIH KETERANGAN) ---
             _buildSectionTitle("STRATEGIC INTELLIGENCE HUB"),
             const SizedBox(height: 15),
             isMobile
@@ -236,7 +231,7 @@ class _DashboardPageState extends State<DashboardPage> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.greenAccent),
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.green.withOpacity(0.2)),
+                  color: Color(0x334CAF50)), // 0.2 opacity
               child: const Row(children: [
                 Icon(Icons.circle, size: 8, color: Colors.greenAccent),
                 SizedBox(width: 8),
@@ -326,7 +321,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- ALERTS GRID ---
   Widget _buildAlertsGrid(bool isMobile) {
     return GridView.count(
       shrinkWrap: true,
@@ -355,7 +349,7 @@ class _DashboardPageState extends State<DashboardPage> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-                color: color.withOpacity(0.5),
+                color: color.withValues(alpha: 0.5),
                 blurRadius: 20,
                 offset: const Offset(0, 10))
           ]),
@@ -385,7 +379,7 @@ class _DashboardPageState extends State<DashboardPage> {
         Positioned(
             right: 0,
             top: 0,
-            child: Icon(icon, color: Colors.white.withOpacity(0.25), size: 48))
+            child: Icon(icon, color: const Color(0x40FFFFFF), size: 48))
       ]),
     );
   }
@@ -438,7 +432,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- CHART 1: ANNUAL BAR CHART (INTERAKTIF TOOLTIP AKTIF) ---
   Widget _buildAnnualBarChart() {
     return Container(
       height: 420,
@@ -484,18 +477,20 @@ class _DashboardPageState extends State<DashboardPage> {
                         style: const TextStyle(
                             color: Colors.grey, fontSize: 10)))),
           ),
-          borderData: FlBorderData(show: false),
-          // --- FITUR KOTAK KETERANGAN SAAT DITEKAN/HOVER ---
+          borderData: FlBorderData(
+              show: true,
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFFBDBDBD), width: 1),
+                left: BorderSide(color: Color(0xFFBDBDBD), width: 1),
+              )),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              tooltipBgColor:
-                  Colors.black.withOpacity(0.8), // Background kotak hitam
+              tooltipBgColor: Color(0xCC000000), // 0.8 opacity
               tooltipRoundedRadius: 8,
               tooltipPadding: const EdgeInsets.all(8),
-              // Isi Text Tooltip
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
-                  '${2021 + group.x}\n', // Judul Tahun
+                  '${2021 + group.x}\n',
                   const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -518,7 +513,7 @@ class _DashboardPageState extends State<DashboardPage> {
             _makeBar(1, 58),
             _makeBar(2, 65),
             _makeBar(3, 78),
-            _makeBar(4, 92)
+            _makeBar(4, 90)
           ],
         ))),
       ]),
@@ -535,7 +530,6 @@ class _DashboardPageState extends State<DashboardPage> {
     ]);
   }
 
-  // --- CHART 2: PIE CHART (INTERAKTIF MEMBESAR SAAT DITEKAN) ---
   Widget _buildResourcePieChart() {
     return Container(
       height: 420,
@@ -570,8 +564,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   });
                 },
               ),
-              sectionsSpace: 2, centerSpaceRadius: 40,
-              sections: _showingSections(), // Panggil fungsi sections dinamis
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+              sections: _showingSections(),
             ),
           )),
           const SizedBox(width: 20),
@@ -598,8 +593,8 @@ class _DashboardPageState extends State<DashboardPage> {
   List<PieChartSectionData> _showingSections() {
     return List.generate(5, (i) {
       final isTouched = i == touchedPieIndex;
-      final fontSize = isTouched ? 16.0 : 0.0; // Muncul angka kalau disentuh
-      final radius = isTouched ? 60.0 : 50.0; // Membesar kalau disentuh
+      final fontSize = isTouched ? 16.0 : 0.0;
+      final radius = isTouched ? 60.0 : 50.0;
 
       switch (i) {
         case 0:
@@ -676,7 +671,6 @@ class _DashboardPageState extends State<DashboardPage> {
     ]);
   }
 
-  // --- CHART 3: LINE CHART (MONTHLY) ---
   Widget _buildRevenueLineChart() {
     return Container(
       height: 420,
@@ -707,9 +701,9 @@ class _DashboardPageState extends State<DashboardPage> {
               show: true,
               drawVerticalLine: true,
               getDrawingHorizontalLine: (v) => const FlLine(
-                  color: Color(0xFFEEEEEE), strokeWidth: 1, dashArray: [6, 6]),
+                  color: Color(0xFFE0E0E0), strokeWidth: 1, dashArray: [6, 6]),
               getDrawingVerticalLine: (v) => const FlLine(
-                  color: Color(0xFFEEEEEE), strokeWidth: 1, dashArray: [6, 6])),
+                  color: Color(0xFFE0E0E0), strokeWidth: 1, dashArray: [6, 6])),
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
@@ -731,12 +725,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         'Nov',
                         'Dec'
                       ];
-                      if (val.toInt() >= 0 && val.toInt() < 12)
+                      if (val.toInt() >= 0 && val.toInt() < 12) {
                         return Text(m[val.toInt()],
                             style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold));
+                      }
                       return const Text("");
                     })),
             leftTitles: AxisTitles(
@@ -754,7 +749,12 @@ class _DashboardPageState extends State<DashboardPage> {
             rightTitles:
                 const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          borderData: FlBorderData(show: false),
+          borderData: FlBorderData(
+              show: true,
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFFBDBDBD), width: 1),
+                left: BorderSide(color: Color(0xFFBDBDBD), width: 1),
+              )),
           lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
                   tooltipBgColor: const Color(0xFF1E293B),
@@ -806,11 +806,11 @@ class _DashboardPageState extends State<DashboardPage> {
       dotData: const FlDotData(show: false),
       belowBarData: BarAreaData(
           show: fill,
-          color: color.withOpacity(0.15),
-          gradient: LinearGradient(
-              colors: [color.withOpacity(0.3), color.withOpacity(0.0)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter)),
+          color: color.withValues(alpha: 0.15),
+          gradient: LinearGradient(colors: [
+            color.withValues(alpha: 0.3),
+            color.withValues(alpha: 0.0)
+          ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
     );
   }
 
@@ -901,8 +901,11 @@ class _DashboardPageState extends State<DashboardPage> {
         _whItem("Warehouse B - Jakarta", "92%", 0.92, Colors.orangeAccent,
             "Near Capacity"),
         const SizedBox(height: 30),
-        _whItem("Warehouse C - Semarang", "45%", 0.45, Colors.greenAccent,
+        _whItem("Warehouse C - solo", "45%", 0.45, Colors.greenAccent,
             "Plenty Space"),
+        const SizedBox(height: 30),
+        _whItem("Warehouse C - cikarang", "70%", 0.70,
+            const Color.fromARGB(255, 105, 127, 240), " Lots Capacity"),
       ]),
     );
   }
@@ -973,7 +976,7 @@ class _DashboardPageState extends State<DashboardPage> {
             },
             dataSets: [
               RadarDataSet(
-                fillColor: const Color(0xFF3F51B5).withOpacity(0.3),
+                fillColor: const Color(0x4D3F51B5), // 0.3 opacity
                 borderColor: const Color(0xFF3F51B5),
                 entryRadius: 4,
                 borderWidth: 3,
@@ -1091,14 +1094,14 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: accentColor.withOpacity(0.3))),
+          border: Border.all(color: accentColor.withValues(alpha: 0.3))),
       child: Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(title,
               style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
-                  color: accentColor.withOpacity(0.8))),
+                  color: accentColor.withValues(alpha: 0.8))),
           Text(total,
               style: TextStyle(
                   fontWeight: FontWeight.w900,

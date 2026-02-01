@@ -31,32 +31,53 @@ class SidebarWidget extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    // Border putih tebal di logo
-                    border: Border.all(color: Colors.white, width: 2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
-                    Icons.bolt,
+                    Icons.bolt_rounded,
                     color: AppColors.primaryIndigo,
-                    size: 20,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  "SAMUDRA II ERP",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                const SizedBox(width: 16),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "SAMUDRA II",
+                      style: TextStyle(
+                        fontFamily: 'Orbitron',
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 20,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Text(
+                      "ERP System",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
+          const Divider(
+            color: Color(0x33FFFFFF),
+            height: 1,
+            indent: 24,
+            endIndent: 24,
+          ),
+          const SizedBox(height: 24),
 
           // --- MENU LIST ---
           Expanded(
@@ -65,7 +86,6 @@ class SidebarWidget extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 _buildSimpleMenu(Icons.grid_view_rounded, "Dashboard"),
-
                 _buildExpansionMenu(
                   context,
                   Icons.admin_panel_settings_rounded,
@@ -80,7 +100,6 @@ class SidebarWidget extends StatelessWidget {
                     _buildSubMenu("Approval Process", Icons.fact_check_rounded),
                   ],
                 ),
-
                 _buildExpansionMenu(
                   context,
                   Icons.account_balance_wallet_rounded,
@@ -100,7 +119,6 @@ class SidebarWidget extends StatelessWidget {
                       Icons.currency_exchange,
                     ),
                     _buildSubMenu("Cost Accounting", Icons.calculate_outlined),
-
                     _buildSubExpansionMenu(
                       context,
                       "Financial Report",
@@ -136,7 +154,6 @@ class SidebarWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 _buildExpansionMenu(
                   context,
                   Icons.shopping_bag_rounded,
@@ -166,13 +183,12 @@ class SidebarWidget extends StatelessWidget {
                       "open lock DO",
                       Icons.lock_open_rounded,
                     ),
-                      _buildSubMenu(
+                    _buildSubMenu(
                       "serah terima DO",
                       Icons.assignment_turned_in_rounded,
                     ),
                   ],
                 ),
-
                 _buildExpansionMenu(
                   context,
                   Icons.local_shipping_rounded,
@@ -207,7 +223,6 @@ class SidebarWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 _buildExpansionMenu(
                   context,
                   Icons.account_balance_rounded,
@@ -272,7 +287,6 @@ class SidebarWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 _buildExpansionMenu(
                   context,
                   Icons.inventory_2_rounded,
@@ -296,7 +310,6 @@ class SidebarWidget extends StatelessWidget {
                     _buildSubMenu("Inventory Report", Icons.bar_chart_rounded),
                   ],
                 ),
-
                 _buildSimpleMenu(Icons.assessment_rounded, "Reports"),
                 _buildSimpleMenu(
                   Icons.people_alt_rounded,
@@ -307,13 +320,10 @@ class SidebarWidget extends StatelessWidget {
                   Icons.admin_panel_settings_outlined,
                   "Data Admin",
                 ),
-
                 const SizedBox(height: 20),
                 const Divider(color: Colors.white24, indent: 20, endIndent: 20),
                 const SizedBox(height: 10),
-
                 _buildLogoutMenu(),
-
                 const SizedBox(height: 50),
               ],
             ),
@@ -322,8 +332,6 @@ class SidebarWidget extends StatelessWidget {
       ),
     );
   }
-
-  
 
   Widget _buildSimpleMenu(IconData icon, String title, {VoidCallback? onTap}) {
     bool isActive = currentView == title;
@@ -337,9 +345,8 @@ class SidebarWidget extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 50),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isActive
-                ? Colors.white.withOpacity(0.15)
-                : Colors.transparent,
+            color:
+                isActive ? Colors.white.withOpacity(0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isActive ? Colors.white : Colors.transparent,

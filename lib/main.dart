@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
-
-// Import DUA-DUANYA
 import 'desktop/pages/splash_page.dart'; 
 import 'tablet/tablet_splash_page.dart';
 
@@ -23,7 +21,6 @@ class SAPModernApp extends StatelessWidget {
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
       
-      //  LOGIC DETEKSI LAYAR 
       home: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 1000) {
