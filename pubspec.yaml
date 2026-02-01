@@ -23,6 +23,9 @@ dependencies:
   # 🔥 UPDATE KE VERSI INI BIAR ERROR WINDOWS HILANG 🔥
   file_picker: ^8.0.0   
 
+  fl_chart: ^0.66.0
+  google_fonts: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

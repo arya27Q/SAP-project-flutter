@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class DashboardPage extends StatefulWidget {
   final int userLevel;
@@ -13,7 +14,7 @@ class DashboardPage extends StatefulWidget {
     required this.userName,
     required this.userDivision,
     required this.onLogout,
-    this.currentDatabase = "DB_UTAMA",
+    this.currentDatabase = "DB_SAMUDRA_UTAMA",
   });
 
   @override
@@ -21,1192 +22,1162 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // --- COLOR PALETTE ---
-  final Color primaryIndigo = const Color(0xFF4F46E5);
-  final Color darkSlate = const Color(0xFF0F172A);
-  final Color borderWhite = Colors.white; // Border Putih Bersih
-  final Color softBg = const Color.fromARGB(
-    255,
-    255,
-    255,
-    255,
-  ); // BODY TETEP PUTIH
+  // --- STATE UNTUK INTERAKSI PIE CHART ---
+  int touchedPieIndex = -1; // Biar Pie Chart bisa gerak pas disentuh
 
-  // --- UTILS ---
-  Color parseStatusColor(int id) {
-    switch (id) {
-      case 1:
-        return Colors.teal;
-      case 2:
-        return Colors.orangeAccent;
-      case 0:
-        return Colors.redAccent;
-      default:
-        return Colors.grey;
-    }
+  // --- CONFIGURATION & STYLES ---
+  final Color bgPage = const Color(0xFFF2F4F8);
+
+  // Shadow Super Tebal & Melayang
+  final List<BoxShadow> floatingShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.15),
+      blurRadius: 30,
+      offset: const Offset(0, 15),
+      spreadRadius: 2,
+    ),
+  ];
+
+  final Color cardTeal = const Color(0xFF00BFA5);
+  final Color cardRed = const Color(0xFFFF1744);
+  final Color cardPurple = const Color(0xFFD500F9);
+  final Color darkHeader1 = const Color(0xFF0D1B2A);
+  final Color darkHeader2 = const Color(0xFF1E2749);
+
+  Color _getStatusColor(String status) {
+    if (status == "ONLINE") return const Color(0xFF00C853);
+    if (status == "SYNCING") return const Color(0xFFFF9100);
+    return const Color(0xFFD50000);
   }
 
-  String parseStatusText(int id) {
-    switch (id) {
-      case 1:
-        return "ONLINE";
-      case 2:
-        return "SYNCING";
-      case 0:
-        return "OFFLINE";
-      default:
-        return "UNKNOWN";
-    }
-  }
-
-  // --- ANIMATION WRAPPER BIAR MUNCUL HALUS ---
-  Widget _appearAnimation({required Widget child, int delayMs = 0}) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 800 + delayMs),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
-      child: child,
-    );
-  }
-
+  // --- MAIN BUILD ---
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double w = MediaQuery.of(context).size.width;
+    bool isMobile = w < 1200;
 
     return Scaffold(
-      backgroundColor: softBg,
+      backgroundColor: bgPage,
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenWidth < 600 ? 16 : 24,
-          vertical: 40,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _appearAnimation(child: _buildGlobalDatabaseHeader(screenWidth)),
-            const SizedBox(height: 32),
+            // HEADER
+            _buildHeader(),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Group Subsidiary Sync Status"),
-            const SizedBox(height: 16),
-            _appearAnimation(child: _buildBranchSyncStatusRow(), delayMs: 100),
-            const SizedBox(height: 32),
+            // SYNC STATUS
+            _buildSectionTitle("GROUP SUBSIDIARY SYNC STATUS"),
+            const SizedBox(height: 15),
+            _buildSyncStatusList(),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Critical Alerts & Approvals"),
-            const SizedBox(height: 16),
-            _appearAnimation(
-              child: _buildApprovalAlertGrid(screenWidth),
-              delayMs: 200,
-            ),
-            const SizedBox(height: 32),
+            // CRITICAL ALERTS
+            _buildSectionTitle("CRITICAL ALERTS & APPROVALS"),
+            const SizedBox(height: 15),
+            _buildAlertsGrid(w < 900),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Financials Summary"),
-            const SizedBox(height: 16),
-            _appearAnimation(child: _buildFinancialGrid(), delayMs: 300),
-            const SizedBox(height: 32),
+            // FINANCIAL SUMMARY
+            _buildSectionTitle("FINANCIAL SUMMARY"),
+            const SizedBox(height: 15),
+            _buildFinancialGrid(w < 900),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Strategic Intelligence Hub"),
-            const SizedBox(height: 16),
-            _appearAnimation(
-              delayMs: 400,
-              child: screenWidth < 600
-                  ? Column(
+            // --- STRATEGIC HUB (BAGIAN YG KAMU MINTA DIKASIH KETERANGAN) ---
+            _buildSectionTitle("STRATEGIC INTELLIGENCE HUB"),
+            const SizedBox(height: 15),
+            isMobile
+                ? Column(children: [
+                    _buildAnnualBarChart(),
+                    const SizedBox(height: 30),
+                    _buildResourcePieChart()
+                  ])
+                : IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildYearlyComparisonChart(),
-                        const SizedBox(height: 20),
-                        _buildModuleDistributionPie(),
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(flex: 3, child: _buildYearlyComparisonChart()),
-                        const SizedBox(width: 20),
-                        Expanded(flex: 2, child: _buildModuleDistributionPie()),
+                        Expanded(flex: 3, child: _buildAnnualBarChart()),
+                        const SizedBox(width: 30),
+                        Expanded(flex: 2, child: _buildResourcePieChart()),
                       ],
                     ),
-            ),
-            const SizedBox(height: 32),
+                  ),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Inventory & Warehouse Monitoring"),
-            const SizedBox(height: 16),
-            _appearAnimation(
-              child: _buildInventoryWarehouseGrid(screenWidth),
-              delayMs: 500,
-            ),
-            const SizedBox(height: 32),
+            // MONTHLY REVENUE
+            _buildSectionTitle("MONTHLY REVENUE VS EXPENSE ANALYSIS"),
+            const SizedBox(height: 15),
+            _buildRevenueLineChart(),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Operational Aging & Pipeline"),
-            const SizedBox(height: 16),
-            _appearAnimation(
-              delayMs: 600,
-              child: screenWidth < 600
-                  ? Column(
+            // INVENTORY & WAREHOUSE
+            _buildSectionTitle("INVENTORY & WAREHOUSE MONITORING"),
+            const SizedBox(height: 15),
+            isMobile
+                ? Column(children: [
+                    _buildInventoryCard(),
+                    const SizedBox(height: 20),
+                    _buildWarehouseCard(),
+                  ])
+                : IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildAgingReportCard(),
-                        const SizedBox(height: 20),
-                        _buildSupplyChainCard(
-                          "Operational Pipeline",
-                          Icons.shopping_bag,
-                          Colors.indigoAccent,
-                        ),
+                        Expanded(flex: 3, child: _buildInventoryCard()),
+                        const SizedBox(width: 30),
+                        Expanded(flex: 2, child: _buildWarehouseCard()),
                       ],
-                    )
-                  : IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: _buildAgingReportCard()),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: _buildSupplyChainCard(
-                              "Operational Pipeline",
-                              Icons.shopping_bag,
-                              Colors.indigoAccent,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-            ),
-            const SizedBox(height: 32),
+                  ),
+            const SizedBox(height: 40),
 
-            _buildSectionHeader("Operational Monthly Revenue vs Expense"),
-            const SizedBox(height: 16),
-            _appearAnimation(
-              child: _buildMonthlyDualChart(screenWidth),
-              delayMs: 700,
-            ),
-            const SizedBox(height: 32),
+            // RADAR CHART
+            _buildSectionTitle("OPERATIONAL METRICS"),
+            const SizedBox(height: 15),
+            _buildRadarChart(),
+            const SizedBox(height: 40),
 
-            _appearAnimation(child: _buildAuditTerminal(), delayMs: 800),
+            // AGING & PIPELINE
+            _buildSectionTitle("OPERATIONAL AGING & PIPELINE"),
+            const SizedBox(height: 15),
+            isMobile
+                ? Column(children: [
+                    _buildAgingAnalysisCard(),
+                    const SizedBox(height: 30),
+                    _buildPipelineCard()
+                  ])
+                : IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: _buildAgingAnalysisCard()),
+                        const SizedBox(width: 30),
+                        Expanded(child: _buildPipelineCard()),
+                      ],
+                    ),
+                  ),
+            const SizedBox(height: 50),
+
+            // AUDIT LOG
+            _buildAuditTerminal(),
+            const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
 
-  // --- WIDGET COMPONENTS ---
+  // ================= 3. WIDGET COMPONENTS =================
 
-  Widget _buildGlobalDatabaseHeader(double width) {
-    return Container(
-      padding: EdgeInsets.all(width < 400 ? 16 : 28),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [darkSlate, const Color(0xFF334155)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite.withOpacity(0.5), width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 25,
-            spreadRadius: 2,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
       child: Row(
         children: [
-          Icon(
-            Icons.hub_rounded,
-            color: Colors.tealAccent,
-            size: width < 400 ? 24 : 36,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "SAP B1 ENTERPRISE HUB",
-                  style: TextStyle(
-                    color: Colors.tealAccent,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.8,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    widget.currentDatabase,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (width > 350) _statusBadge("ONLINE", Colors.tealAccent),
-          IconButton(
-            onPressed: widget.onLogout,
-            icon: Container(
-              padding: const EdgeInsets.all(8),
+          Container(
+              height: 24,
+              width: 6,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.logout, color: Colors.white, size: 18),
-            ),
-          ),
+                  color: const Color(0xFF1A237E),
+                  borderRadius: BorderRadius.circular(5))),
+          const SizedBox(width: 12),
+          Text(title,
+              style: const TextStyle(
+                  color: Color(0xFF1A237E),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 1.2)),
         ],
       ),
     );
   }
 
-  Widget _buildBranchSyncStatusRow() {
-    final List<Map<String, dynamic>> branchSyncData = [
-      {"name": "PT. Dempo Laser Metalindo Surabaya", "status_id": 1},
-      {"name": "PT. Duta Laserindo Metal", "status_id": 1},
-      {"name": "PT. Senzo Feinmetal", "status_id": 2},
-      {"name": "PT. ATMI Duta Engineering", "status_id": 0},
-    ];
-
-    return SizedBox(
-      height: 75,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: branchSyncData.length,
-        itemBuilder: (context, index) {
-          int sId = branchSyncData[index]['status_id'];
-          return Container(
-            margin: const EdgeInsets.only(right: 14, bottom: 12, left: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderWhite, width: 4.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(radius: 5, backgroundColor: parseStatusColor(sId)),
-                const SizedBox(width: 12),
-                Text(
-                  branchSyncData[index]['name'],
-                  style: const TextStyle(
+  // --- HEADER ---
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 35),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+            colors: [darkHeader1, darkHeader2],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight),
+        boxShadow: floatingShadow,
+      ),
+      child: Row(
+        children: [
+          Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.dns_rounded,
+                  color: Colors.cyanAccent, size: 32)),
+          const SizedBox(width: 20),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text("ENTERPRISE SYSTEM HUB",
+                style: TextStyle(
+                    color: Colors.cyanAccent,
                     fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF1E293B),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  parseStatusText(sId),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: parseStatusColor(sId),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5)),
+            const SizedBox(height: 5),
+            Text(widget.currentDatabase,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900)),
+          ]),
+          const Spacer(),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.greenAccent),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.green.withOpacity(0.2)),
+              child: const Row(children: [
+                Icon(Icons.circle, size: 8, color: Colors.greenAccent),
+                SizedBox(width: 8),
+                Text("ONLINE",
+                    style: TextStyle(
+                        color: Colors.greenAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11))
+              ])),
+        ],
+      ),
+    );
+  }
+
+  // --- SYNC STATUS ---
+  Widget _buildSyncStatusList() {
+    final data = [
+      {
+        "name": "PT. Dempo Laser Metalindo Surabaya",
+        "status": "ONLINE",
+        "val": 1.0
+      },
+      {"name": "PT. Duta Laserindo Metal", "status": "ONLINE", "val": 1.0},
+      {"name": "PT. Senzo Feinmetal", "status": "SYNCING", "val": 0.67},
+      {"name": "PT. ATMI Duta Engineering", "status": "OFFLINE", "val": 0.0},
+    ];
+    return SizedBox(
+      height: 160,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: data.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 25),
+        itemBuilder: (context, index) {
+          final item = data[index];
+          final color = _getStatusColor(item['status'] as String);
+          return Container(
+            width: 280,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: floatingShadow),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(item['name'].toString(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: Color(0xFF2D3436),
+                          height: 1.2)),
+                  Row(children: [
+                    Icon(Icons.circle, size: 8, color: color),
+                    const SizedBox(width: 8),
+                    Text(item['status'].toString(),
+                        style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11))
+                  ]),
+                  Column(children: [
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Sync",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 11)),
+                          Text("${((item['val'] as double) * 100).toInt()}%",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 12))
+                        ]),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                        value: item['val'] as double,
+                        backgroundColor: Colors.grey.shade100,
+                        color: color,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(4))
+                  ])
+                ]),
           );
         },
       ),
     );
   }
 
-  Widget _buildApprovalAlertGrid(double width) {
+  // --- ALERTS GRID ---
+  Widget _buildAlertsGrid(bool isMobile) {
     return GridView.count(
       shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 15),
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: width < 600 ? 1 : 3,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: width < 600 ? 4 : 2.5,
+      crossAxisCount: isMobile ? 1 : 3,
+      crossAxisSpacing: 25,
+      mainAxisSpacing: 25,
+      childAspectRatio: isMobile ? 2.5 : 2.2,
       children: [
-        _alertCard(
-          "Approvals",
-          "12",
-          const Color(0xFF0D9488),
-          Icons.fact_check,
-        ),
-        _alertCard("Stock Low", "3", const Color(0xFFBE123C), Icons.inventory),
-        _alertCard(
-          "A/R Over",
-          "Rp 450M",
-          const Color(0xFF7E22CE),
-          Icons.receipt,
-        ),
+        _buildColorCard(cardTeal, "PENDING APPROVALS", "12",
+            "Requires immediate action", Icons.check_circle_outline),
+        _buildColorCard(cardRed, "CRITICAL STOCK", "3", "Items below minimum",
+            Icons.warning_amber_rounded),
+        _buildColorCard(cardPurple, "A/R OVERDUE", "Rp 450M", "Over 60 days",
+            Icons.access_time),
       ],
     );
   }
 
-  Widget _alertCard(String title, String val, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderWhite.withOpacity(0.6), width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.45),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                Text(
-                  val,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFinancialGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 15),
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 2.2,
-      children: [
-        _kpiSmallCard("Profit", "Rp 2.1B", Icons.insights, Colors.teal),
-        _kpiSmallCard("Income", "Rp 8.4B", Icons.file_download, Colors.indigo),
-        _kpiSmallCard(
-          "Expense",
-          "Rp 6.3B",
-          Icons.file_upload,
-          Colors.redAccent,
-        ),
-        _kpiSmallCard(
-          "Assets",
-          "Rp 42B",
-          Icons.account_balance,
-          const Color(0xFF0F172A),
-        ),
-      ],
-    );
-  }
-
-  Widget _kpiSmallCard(String title, String val, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 20),
-          const Spacer(),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Colors.black54,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          FittedBox(
-            child: Text(
-              val,
-              style: TextStyle(
-                fontSize: 18,
-                color: color,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildYearlyComparisonChart() {
+  Widget _buildColorCard(
+      Color color, String title, String val, String sub, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(24),
-      height: 280,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Annual Revenue Performance",
+          color: color,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+                color: color.withOpacity(0.5),
+                blurRadius: 20,
+                offset: const Offset(0, 10))
+          ]),
+      child: Stack(children: [
+        Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(title,
+                  style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              Text(val,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900)),
+              const SizedBox(height: 8),
+              Text(sub,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500)),
+            ]),
+        Positioned(
+            right: 0,
+            top: 0,
+            child: Icon(icon, color: Colors.white.withOpacity(0.25), size: 48))
+      ]),
+    );
+  }
+
+  // --- FINANCIALS ---
+  Widget _buildFinancialGrid(bool isMobile) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: isMobile ? 2 : 4,
+      crossAxisSpacing: 25,
+      mainAxisSpacing: 25,
+      childAspectRatio: 1.5,
+      children: [
+        _buildStatCard(
+            "NET PROFIT", "Rp 2.1B", "+12.5%", Colors.green, Icons.trending_up),
+        _buildStatCard("TOTAL INCOME", "Rp 8.4B", "+8.2%", Colors.blueAccent,
+            Icons.attach_money),
+        _buildStatCard("TOTAL EXPENSE", "Rp 6.3B", "-3.1%", Colors.redAccent,
+            Icons.trending_down),
+        _buildStatCard("TOTAL ASSETS", "Rp 42B", "+5.8%",
+            const Color(0xFF2C3E50), Icons.account_balance_wallet_outlined),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(
+      String title, String val, String trend, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(icon, color: color, size: 24),
+        const Spacer(),
+        Text(title,
+            style: const TextStyle(
+                color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        Text(val,
             style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              color: Colors.black,
-            ),
+                color: color, fontSize: 22, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 4),
+        Text(trend,
+            style: TextStyle(
+                color: color, fontSize: 11, fontWeight: FontWeight.w800)),
+      ]),
+    );
+  }
+
+  // --- CHART 1: ANNUAL BAR CHART (INTERAKTIF TOOLTIP AKTIF) ---
+  Widget _buildAnnualBarChart() {
+    return Container(
+      height: 420,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("ANNUAL REVENUE PERFORMANCE",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 30),
+        Expanded(
+            child: BarChart(BarChartData(
+          gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              getDrawingHorizontalLine: (v) => const FlLine(
+                  color: Color(0xFFEEEEEE), strokeWidth: 1, dashArray: [5, 5])),
+          titlesData: FlTitlesData(
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (val, _) => Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text((2021 + val.toInt()).toString(),
+                            style: const TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11))))),
+            leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    getTitlesWidget: (val, _) => Text("${val.toInt()}M",
+                        style: const TextStyle(
+                            color: Colors.grey, fontSize: 10)))),
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                double chartHeight = constraints.maxHeight - 25;
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(5, (idx) {
-                    double targetRatio = [0.4, 0.6, 0.7, 0.85, 1.0][idx];
-                    return TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: targetRatio),
-                      duration: Duration(milliseconds: 1500 + (idx * 200)),
-                      curve: Curves.easeOutBack,
-                      builder: (context, animValue, child) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 28,
-                              // Clamp biar aman
-                              height: (chartHeight * animValue).clamp(
-                                0,
-                                chartHeight,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    primaryIndigo,
-                                    primaryIndigo.withOpacity(0.4),
-                                  ],
-                                ),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(8),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              (2021 + idx).toString(),
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }),
+          borderData: FlBorderData(show: false),
+          // --- FITUR KOTAK KETERANGAN SAAT DITEKAN/HOVER ---
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor:
+                  Colors.black.withOpacity(0.8), // Background kotak hitam
+              tooltipRoundedRadius: 8,
+              tooltipPadding: const EdgeInsets.all(8),
+              // Isi Text Tooltip
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${2021 + group.x}\n', // Judul Tahun
+                  const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: 'Rev: ${rod.toY.toInt()}M', // Isi Angka
+                      style: const TextStyle(
+                          color: Colors.yellowAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ],
                 );
               },
             ),
           ),
-        ],
-      ),
+          barGroups: [
+            _makeBar(0, 42),
+            _makeBar(1, 58),
+            _makeBar(2, 65),
+            _makeBar(3, 78),
+            _makeBar(4, 92)
+          ],
+        ))),
+      ]),
     );
   }
 
-  Widget _buildInventoryWarehouseGrid(double width) {
-    Widget _card(Widget content, Color bg, {bool dark = false}) => Container(
-      padding: const EdgeInsets.all(20),
-      height: 180,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: dark ? borderWhite.withOpacity(0.3) : borderWhite,
-          width: 5.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(dark ? 0.3 : 0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: content,
-    );
-
-    return width < 600
-        ? Column(
-            children: [
-              _card(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.warning, color: Colors.red, size: 20),
-                        const SizedBox(width: 10),
-                        Text(
-                          "Critical Stock",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13,
-                            color: Colors.red.shade900,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    _stockLine("Plat Besi 5mm", "3 U", Colors.black),
-                    _stockLine("Oxygen Gas", "12 U", Colors.black),
-                    _stockLine("Hydraulic Oil", "5 L", Colors.black),
-                  ],
-                ),
-                Colors.white,
-              ),
-              const SizedBox(height: 20),
-              _card(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Warehouse A",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Text(
-                      "85% Occupied",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: 0.85,
-                      backgroundColor: Colors.white10,
-                      color: Colors.tealAccent,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    const Spacer(),
-                    const Text(
-                      "Safe Zone",
-                      style: TextStyle(
-                        color: Colors.tealAccent,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-                darkSlate,
-                dark: true,
-              ),
-            ],
-          )
-        : Row(
-            children: [
-              Expanded(
-                child: _card(
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.warning,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            "Critical Stock",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                              color: Colors.red.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      _stockLine("Plat Besi 5mm", "3 U", Colors.black),
-                      _stockLine("Oxygen Gas", "12 U", Colors.black),
-                      _stockLine("Hydraulic Oil", "5 L", Colors.black),
-                    ],
-                  ),
-                  Colors.white,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: _card(
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Warehouse A",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        "85% Occupied",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: 0.85,
-                        backgroundColor: Colors.white10,
-                        color: Colors.tealAccent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        "Safe Zone",
-                        style: TextStyle(
-                          color: Colors.tealAccent,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
-                  ),
-                  darkSlate,
-                  dark: true,
-                ),
-              ),
-            ],
-          );
+  BarChartGroupData _makeBar(int x, double y) {
+    return BarChartGroupData(x: x, barRods: [
+      BarChartRodData(
+          toY: y,
+          color: const Color(0xFF536DFE),
+          width: 40,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)))
+    ]);
   }
 
-  Widget _stockLine(String name, String qty, Color txtColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black87,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(
-            qty,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              color: txtColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAgingReportCard() {
+  // --- CHART 2: PIE CHART (INTERAKTIF MEMBESAR SAAT DITEKAN) ---
+  Widget _buildResourcePieChart() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      height: 420,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "A/R Aging Analysis",
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("RESOURCE UTILIZATION",
             style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 13,
-              color: Colors.black,
-            ),
-          ),
-          const Divider(height: 24),
-          _agingLine("Current", "Rp 1.2M", Colors.teal),
-          _agingLine("1-30 Days", "Rp 450M", Colors.orange),
-          _agingLine("> 60 Days", "Rp 45M", Colors.red),
-        ],
-      ),
-    );
-  }
-
-  Widget _agingLine(String label, String val, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(radius: 4, backgroundColor: color),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w700,
-                ),
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 30),
+        Expanded(
+            child: Row(children: [
+          Expanded(
+              child: PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(
+                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                  setState(() {
+                    if (!event.isInterestedForInteractions ||
+                        pieTouchResponse == null ||
+                        pieTouchResponse.touchedSection == null) {
+                      touchedPieIndex = -1;
+                      return;
+                    }
+                    touchedPieIndex =
+                        pieTouchResponse.touchedSection!.touchedSectionIndex;
+                  });
+                },
               ),
-            ],
-          ),
-          Text(
-            val,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-              color: Colors.black,
+              sectionsSpace: 2, centerSpaceRadius: 40,
+              sections: _showingSections(), // Panggil fungsi sections dinamis
             ),
-          ),
-        ],
-      ),
+          )),
+          const SizedBox(width: 20),
+          Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _legend("Production", "35%", const Color(0xFF00BFA5)),
+                const SizedBox(height: 8),
+                _legend("Sales", "25%", const Color(0xFF536DFE)),
+                const SizedBox(height: 8),
+                _legend("Logistics", "20%", const Color(0xFFFFA000)),
+                const SizedBox(height: 8),
+                _legend("Admin", "12%", const Color(0xFF7C4DFF)),
+                const SizedBox(height: 8),
+                _legend("Other", "8%", const Color(0xFF607D8B)),
+              ])
+        ])),
+      ]),
     );
   }
 
-  Widget _buildSupplyChainCard(String title, IconData icon, Color color) {
+  // Logika Pie Chart Interaktif (Membesar & Muncul Angka)
+  List<PieChartSectionData> _showingSections() {
+    return List.generate(5, (i) {
+      final isTouched = i == touchedPieIndex;
+      final fontSize = isTouched ? 16.0 : 0.0; // Muncul angka kalau disentuh
+      final radius = isTouched ? 60.0 : 50.0; // Membesar kalau disentuh
+
+      switch (i) {
+        case 0:
+          return PieChartSectionData(
+              color: const Color(0xFF00BFA5),
+              value: 35,
+              title: "35%",
+              radius: radius,
+              titleStyle: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white));
+        case 1:
+          return PieChartSectionData(
+              color: const Color(0xFF536DFE),
+              value: 25,
+              title: "25%",
+              radius: radius,
+              titleStyle: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white));
+        case 2:
+          return PieChartSectionData(
+              color: const Color(0xFFFFA000),
+              value: 20,
+              title: "20%",
+              radius: radius,
+              titleStyle: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white));
+        case 3:
+          return PieChartSectionData(
+              color: const Color(0xFF7C4DFF),
+              value: 12,
+              title: "12%",
+              radius: radius,
+              titleStyle: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white));
+        case 4:
+          return PieChartSectionData(
+              color: const Color(0xFF607D8B),
+              value: 8,
+              title: "8%",
+              radius: radius,
+              titleStyle: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white));
+        default:
+          throw Error();
+      }
+    });
+  }
+
+  Widget _legend(String title, String pct, Color color) {
+    return Row(children: [
+      Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+      const SizedBox(width: 8),
+      Text(title,
+          style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3436))),
+      const SizedBox(width: 5),
+      Text(pct,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900))
+    ]);
+  }
+
+  // --- CHART 3: LINE CHART (MONTHLY) ---
+  Widget _buildRevenueLineChart() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      height: 420,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          const Text("MONTHLY REVENUE VS EXPENSE",
+              style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 13,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _statusLine("Open Orders", "24"),
-          _statusLine("Closed", "102"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModuleDistributionPie() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      height: 280,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 15),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text(
-            "Resource Utilization",
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              color: Colors.black,
-            ),
-          ),
-          const Spacer(),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 110,
-                height: 110,
-                child: CircularProgressIndicator(
-                  value: 0.82,
-                  strokeWidth: 14,
-                  backgroundColor: Colors.grey.shade200,
-                  color: Colors.teal,
-                ),
-              ),
-              const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "82%",
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-                  ),
-                  Text(
-                    "OEE",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const Spacer(),
-          _statusLine("Production", "High"),
-          _statusLine("Logistics", "Med"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMonthlyDualChart(double width) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    Widget rev = _buildBarBox("Revenue", primaryIndigo, months, [
-      0.4,
-      0.5,
-      0.3,
-      0.7,
-      0.6,
-      0.9,
-      0.8,
-      0.5,
-      0.7,
-      1.0,
-      0.6,
-      0.9,
-    ]);
-    Widget exp = _buildBarBox("Expenses", Colors.redAccent, months, [
-      0.6,
-      0.4,
-      0.5,
-      0.5,
-      0.8,
-      0.6,
-      0.4,
-      0.7,
-      0.5,
-      0.4,
-      0.8,
-      0.7,
-    ]);
-    return width < 600
-        ? Column(children: [rev, const SizedBox(height: 20), exp])
-        : Row(
-            children: [
-              Expanded(child: rev),
-              const SizedBox(width: 20),
-              Expanded(child: exp),
-            ],
-          );
-  }
-
-  Widget _buildBarBox(
-    String title,
-    Color color,
-    List<String> labels,
-    List<double> values,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      height: 240,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: borderWhite, width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 20),
-          // --- WRAP DENGAN EXPANDED + CLIP BIAR GAK OVERFLOW KUNING ---
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                double availableHeight = constraints.maxHeight - 20;
-                return ClipRRect(
-                  // Potong bagian yang luber pas animasi
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: List.generate(
-                      labels.length,
-                      (i) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: values[i]),
-                            duration: Duration(milliseconds: 1200 + (i * 100)),
-                            curve: Curves.easeOutCubic,
-                            builder: (context, animVal, child) {
-                              return Container(
-                                width: 8,
-                                // Paksa clamp biar gak bisa ngelebihi batas tinggi sisa
-                                height: (availableHeight * animVal).clamp(
-                                  0.0,
-                                  availableHeight,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            labels[i],
+                  color: Color(0xFF2D3436))),
+          Row(children: [
+            _legendDot(const Color(0xFF5C6BC0), "Rev"),
+            const SizedBox(width: 12),
+            _legendDot(const Color(0xFFEF5350), "Exp"),
+            const SizedBox(width: 12),
+            _legendDot(const Color(0xFF26A69A), "Profit")
+          ]),
+        ]),
+        const SizedBox(height: 30),
+        Expanded(
+            child: LineChart(LineChartData(
+          gridData: FlGridData(
+              show: true,
+              drawVerticalLine: true,
+              getDrawingHorizontalLine: (v) => const FlLine(
+                  color: Color(0xFFEEEEEE), strokeWidth: 1, dashArray: [6, 6]),
+              getDrawingVerticalLine: (v) => const FlLine(
+                  color: Color(0xFFEEEEEE), strokeWidth: 1, dashArray: [6, 6])),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 32,
+                    interval: 1,
+                    getTitlesWidget: (val, _) {
+                      const m = [
+                        'Jan',
+                        'Feb',
+                        'Mar',
+                        'Apr',
+                        'May',
+                        'Jun',
+                        'Jul',
+                        'Aug',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dec'
+                      ];
+                      if (val.toInt() >= 0 && val.toInt() < 12)
+                        return Text(m[val.toInt()],
                             style: const TextStyle(
-                              fontSize: 7,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                                color: Colors.grey,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold));
+                      return const Text("");
+                    })),
+            leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    interval: 3,
+                    getTitlesWidget: (val, _) => Text("${val.toInt()}M",
+                        style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold)))),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-        ],
-      ),
+          borderData: FlBorderData(show: false),
+          lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                  tooltipBgColor: const Color(0xFF1E293B),
+                  tooltipRoundedRadius: 12,
+                  getTooltipItems: (spots) => spots.map((spot) {
+                        Color c = Colors.white;
+                        String l = "";
+                        if (spot.barIndex == 0) {
+                          l = "Revenue";
+                          c = const Color(0xFF5C6BC0);
+                        } else if (spot.barIndex == 1) {
+                          l = "Expense";
+                          c = const Color(0xFFEF5350);
+                        } else {
+                          l = "Profit";
+                          c = const Color(0xFF26A69A);
+                        }
+                        return LineTooltipItem(
+                            "$l : Rp ${spot.y}M\n",
+                            TextStyle(
+                                color: c,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12));
+                      }).toList())),
+          lineBarsData: [
+            _lineData([4, 5.5, 4.5, 6.5, 6, 7.5, 8.2, 7.5, 8.5, 9.2, 8.8, 10],
+                const Color(0xFF5C6BC0), true),
+            _lineData([3, 3.5, 3, 4.2, 3.8, 4.8, 5.2, 4.5, 5.0, 5.5, 5.2, 6.2],
+                const Color(0xFFEF5350), false),
+            _lineData([1, 2, 1.5, 2.3, 2.2, 2.7, 3, 3, 3.5, 3.7, 3.6, 4],
+                const Color(0xFF26A69A), false),
+          ],
+        ))),
+      ]),
+    );
+  }
+
+  LineChartBarData _lineData(List<double> yValues, Color color, bool fill) {
+    return LineChartBarData(
+      spots: yValues
+          .asMap()
+          .entries
+          .map((e) => FlSpot(e.key.toDouble(), e.value))
+          .toList(),
+      isCurved: true,
+      color: color,
+      barWidth: 4,
+      isStrokeCapRound: true,
+      dotData: const FlDotData(show: false),
+      belowBarData: BarAreaData(
+          show: fill,
+          color: color.withOpacity(0.15),
+          gradient: LinearGradient(
+              colors: [color.withOpacity(0.3), color.withOpacity(0.0)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter)),
+    );
+  }
+
+  Widget _legendDot(Color color, String label) {
+    return Row(children: [
+      Icon(Icons.circle, size: 8, color: color),
+      const SizedBox(width: 4),
+      Text(label,
+          style: const TextStyle(
+              fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey))
+    ]);
+  }
+
+  // --- INVENTORY LIST (KIRI) ---
+  Widget _buildInventoryCard() {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("CRITICAL INVENTORY",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 25),
+        _invItem("Plat Besi 5mm", "3 Unit", 0.3, Colors.red),
+        _invItem("Oxygen Gas", "12 Tabung", 0.6, Colors.orange),
+        _invItem("Hydraulic Oil", "5 Liter", 0.2, Colors.red),
+        _invItem("Welding Rod", "45 Kg", 0.8, Colors.teal),
+        _invItem("Steel Pipe 2\"", "18 Unit", 0.5, Colors.orange),
+      ]),
+    );
+  }
+
+  Widget _invItem(String name, String val, double pct, Color color) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 22),
+        child: Column(children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Row(children: [
+              Icon(Icons.warning_amber_rounded, size: 16, color: color),
+              const SizedBox(width: 10),
+              Text(name,
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF2D3436)))
+            ]),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(val,
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w900)),
+              const Text("Min: 10",
+                  style: TextStyle(fontSize: 10, color: Colors.grey))
+            ]),
+          ]),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+              value: pct,
+              backgroundColor: Colors.grey.shade100,
+              color: color,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(4)),
+        ]));
+  }
+
+  // --- WAREHOUSE CARD (DARK) ---
+  Widget _buildWarehouseCard() {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: const Color(0xFF141E30),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("WAREHOUSE CAPACITY",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Colors.white)),
+        const SizedBox(height: 35),
+        _whItem("Warehouse A - Surabaya", "85%", 0.85, Colors.tealAccent,
+            "Safe Zone"),
+        const SizedBox(height: 30),
+        _whItem("Warehouse B - Jakarta", "92%", 0.92, Colors.orangeAccent,
+            "Near Capacity"),
+        const SizedBox(height: 30),
+        _whItem("Warehouse C - Semarang", "45%", 0.45, Colors.greenAccent,
+            "Plenty Space"),
+      ]),
+    );
+  }
+
+  Widget _whItem(
+      String name, String val, double pct, Color color, String status) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(name,
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12)),
+        Text(val,
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.w900, fontSize: 13))
+      ]),
+      const SizedBox(height: 10),
+      LinearProgressIndicator(
+          value: pct,
+          backgroundColor: Colors.white10,
+          color: color,
+          minHeight: 10,
+          borderRadius: BorderRadius.circular(5)),
+      const SizedBox(height: 6),
+      Text(status,
+          style: TextStyle(
+              color: color, fontSize: 11, fontWeight: FontWeight.w800)),
+    ]);
+  }
+
+  // --- CHART 4: RADAR CHART ---
+  Widget _buildRadarChart() {
+    return Container(
+      height: 450,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("OPERATIONAL PERFORMANCE METRICS",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 30),
+        Expanded(
+          child: RadarChart(RadarChartData(
+            titleTextStyle: const TextStyle(
+                color: Colors.black54,
+                fontSize: 11,
+                fontWeight: FontWeight.bold),
+            tickCount: 3,
+            ticksTextStyle: const TextStyle(color: Colors.transparent),
+            gridBorderData: const BorderSide(color: Colors.black12, width: 1.5),
+            titlePositionPercentageOffset: 0.2,
+            getTitle: (index, angle) {
+              const t = [
+                'Quality',
+                'Efficiency',
+                'Delivery',
+                'Cost',
+                'Safety',
+                'Innovation'
+              ];
+              return RadarChartTitle(text: t[index], angle: 0);
+            },
+            dataSets: [
+              RadarDataSet(
+                fillColor: const Color(0xFF3F51B5).withOpacity(0.3),
+                borderColor: const Color(0xFF3F51B5),
+                entryRadius: 4,
+                borderWidth: 3,
+                dataEntries: const [
+                  RadarEntry(value: 90),
+                  RadarEntry(value: 75),
+                  RadarEntry(value: 80),
+                  RadarEntry(value: 60),
+                  RadarEntry(value: 85),
+                  RadarEntry(value: 70)
+                ],
+              )
+            ],
+          )),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildAgingAnalysisCard() {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("A/R AGING ANALYSIS",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 25),
+        _agingItem("Current", "Rp 1.2B", "45%", 0.45, Colors.teal),
+        _agingItem("1-30 Days", "Rp 0.8B", "32%", 0.32, Colors.orange),
+        _agingItem("31-60 Days", "Rp 0.4B", "15%", 0.15, Colors.deepOrange),
+        _agingItem("> 60 Days", "Rp 0.2B", "8%", 0.08, Colors.red),
+        const Divider(height: 35),
+        const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text("Total Outstanding",
+              style:
+                  TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          Text("Rp 2.66B",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF2D3436)))
+        ]),
+      ]),
+    );
+  }
+
+  Widget _agingItem(
+      String label, String val, String pct, double progress, Color color) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 18),
+        child: Column(children: [
+          Row(children: [
+            Icon(Icons.circle, size: 10, color: color),
+            const SizedBox(width: 10),
+            Text(label,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            const Spacer(),
+            Text(val,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+            const SizedBox(width: 6),
+            Text("($pct)",
+                style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold))
+          ]),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey.shade100,
+              color: color,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(4)),
+        ]));
+  }
+
+  Widget _buildPipelineCard() {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: floatingShadow),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("OPERATIONAL PIPELINE",
+            style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: Color(0xFF2D3436))),
+        const SizedBox(height: 25),
+        _pipelineBox("Sales Orders", "24", "Open: 18", "Processing: 6",
+            Colors.blue.shade50, Colors.blue),
+        const SizedBox(height: 18),
+        _pipelineBox("Purchase Orders", "31", "Pending: 12", "Approved: 19",
+            Colors.purple.shade50, Colors.purple),
+        const SizedBox(height: 18),
+        _pipelineBox("Production Orders", "15", "In Progress: 9",
+            "Completed: 6", Colors.teal.shade50, Colors.teal),
+      ]),
+    );
+  }
+
+  Widget _pipelineBox(String title, String total, String s1, String s2,
+      Color bgColor, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accentColor.withOpacity(0.3))),
+      child: Column(children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(title,
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: accentColor.withOpacity(0.8))),
+          Text(total,
+              style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  color: accentColor))
+        ]),
+        const SizedBox(height: 12),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(s1,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2D3436))),
+          Text(s2,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2D3436)))
+        ]),
+      ]),
     );
   }
 
   Widget _buildAuditTerminal() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderWhite.withOpacity(0.15), width: 5.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 25,
-            offset: const Offset(0, 15),
-          ),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            ">_ AUDIT_LOG_V6",
+          color: const Color(0xFF0F172A),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: floatingShadow),
+      child:
+          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.circle, size: 10, color: Colors.red),
+          SizedBox(width: 6),
+          Icon(Icons.circle, size: 10, color: Colors.yellow),
+          SizedBox(width: 6),
+          Icon(Icons.circle, size: 10, color: Colors.green),
+          SizedBox(width: 15),
+          Text(">_ AUDIT_LOG_V6",
+              style: TextStyle(
+                  color: Colors.tealAccent,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12))
+        ]),
+        SizedBox(height: 20),
+        Text("[SYSTEM] Data Sync Complete with Oracle/SQLServer",
             style: TextStyle(
-              color: Colors.tealAccent,
-              fontFamily: 'monospace',
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            "[SYSTEM] Data Sync Complete with Oracle/SQLSrv",
+                color: Colors.cyanAccent,
+                fontSize: 11,
+                fontFamily: 'monospace')),
+        SizedBox(height: 5),
+        Text("[AUTH] Session Verified for Admin Hub - User: ADMIN_001",
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "[AUTH] Session Verified for Admin Hub",
+                color: Colors.white70, fontSize: 11, fontFamily: 'monospace')),
+        SizedBox(height: 5),
+        Text("[SYNC] Subsidiary PT. Dempo Laser: Status OK - 100%",
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 7,
-          height: 24,
-          decoration: BoxDecoration(
-            color: primaryIndigo,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF1E293B),
-              letterSpacing: 1.5,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _statusBadge(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color, width: 3.0),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-
-  Widget _statusLine(String label, String val) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.black54,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            val,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
+                color: Colors.white70, fontSize: 11, fontFamily: 'monospace')),
+        SizedBox(height: 5),
+        Text("[WARN] Subsidiary PT. Senzo Feinmetal: Sync in progress - 67%",
+            style: TextStyle(
+                color: Colors.orangeAccent,
+                fontSize: 11,
+                fontFamily: 'monospace')),
+        SizedBox(height: 5),
+        Text(
+            "[ERROR] Subsidiary PT. ATMI Duta: Connection failed - Retrying...",
+            style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 11,
+                fontFamily: 'monospace')),
+        SizedBox(height: 5),
+        Text("[INFO] Dashboard metrics updated - 16.10.18",
+            style: TextStyle(
+                color: Colors.white54, fontSize: 11, fontFamily: 'monospace')),
+      ]),
     );
   }
 }

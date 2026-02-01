@@ -34,6 +34,26 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     );
   }
 
+  Future<void> _selectDate(BuildContext context, String key) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      String day = picked.day.toString().padLeft(2, '0');
+      String month = picked.month.toString().padLeft(2, '0');
+      String year = picked.year.toString();
+      String formattedDate = "$day/$month/$year";
+
+      setState(() {
+        _getCtrl(key).text = formattedDate;
+        _fieldValues[key] = formattedDate;
+      });
+    }
+  }
+
   @override
   void dispose() {
     for (var ctrl in _controllers.values) {
@@ -371,6 +391,82 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               const SizedBox(width: 8),
               const Text("Deferred Tax", style: TextStyle(fontSize: 12)),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderDate(String label, String key, String initial) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 102,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: secondarySlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 28),
+          Expanded(
+            child: InkWell(
+              onTap: () => _selectDate(context, key),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 39,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryIndigo.withOpacity(0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: primaryIndigo.withOpacity(0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: IgnorePointer(
+                          child: TextField(
+                            controller: _getCtrl(key, initial: initial),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        size: 14, // Sesuai permintaanmu
+                        color: primaryIndigo.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -1615,14 +1711,14 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       ],
                     ),
                     _buildModernFieldRow("Interest on Arreas %", "Interest"),
-                    const SizedBox(height: 20),
+                   
                     _buildSmallDropdownRowModern("Price List", "PriceList", [
                       "",
                     ]),
                     _buildModernFieldRow("Total Discount %", "total disc"),
                     _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
                     _buildSimpleFieldRow("Commitmen Limit", "commitmen Limit"),
-                    const SizedBox(height: 30),
+                   
                     _buildSmallDropdownRowModern(
                       "Effective Discount Group",
                       "Effective Discount Group",
@@ -1686,9 +1782,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       [""],
                     ),
                     _buildModernFieldRow("Credit Card No", "Credit Card No"),
-                    _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                    _buildHeaderDate("Expiration Date", "Expiration Date", ""),
                     _buildModernFieldRow("ID number", "Id number"),
-                    _buildModernFieldRow("Expiration Date", "Expiration Date"),
+                    _buildHeaderDate("Expiration Date", "Expiration Date 2",""),
                     _buildModernFieldRow("Average Delay", "Average Delay"),
                     _buildSmallDropdownRowModern("Priority", "priority", [""]),
                     _buildModernFieldRow("Default IBAN", " Default IBAN"),

@@ -259,7 +259,7 @@ class _GoodReceivePOPageState extends State<GoodReceiptPOPage>
           flex: 6,
           child: Column(
             children: [
-              _buildModernFieldRow("Customer", "h_cust"),
+              _buildModernFieldRow("Vendor", "h_ven"),
 
               _buildModernFieldRow("Name", "h_name"),
 
@@ -1437,7 +1437,7 @@ class _GoodReceivePOPageState extends State<GoodReceiptPOPage>
     ],
   );
 
-  // 1. Tambahkan parameter {double? customWidth}
+  
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
 
