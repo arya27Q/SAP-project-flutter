@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'constants.dart';
 
 // Import DUA-DUANYA
@@ -24,16 +23,14 @@ class SAPModernApp extends StatelessWidget {
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
       
-      // 🔥 LOGIC DETEKSI LAYAR 🔥
+      //  LOGIC DETEKSI LAYAR 
       home: LayoutBuilder(
         builder: (context, constraints) {
-          // Kalau lebar layar > 800px, anggap Desktop
           if (constraints.maxWidth > 1000) {
-            return const SplashPage(); // Masuk Desktop
+            return const SplashPage(); 
           } 
-          // Kalau lebih kecil, anggap Tablet
           else {
-            return const TabletSplashPage(); // Masuk Tablet
+            return const TabletSplashPage(); 
           }
         },
       ),
