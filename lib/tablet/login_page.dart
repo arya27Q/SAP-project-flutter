@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import '../services/api_services.dart';
 import '../constants.dart';
-// ❌ Hapus import splash karena tidak dipakai
 import 'lbts_form_page.dart';
 
 enum AuthMode { login, signup, forgotPassword }
@@ -50,8 +49,6 @@ class _TabletLoginPageState extends State<TabletLoginPage> {
     _signupPassController.dispose();
     super.dispose();
   }
-
-  // ❌ FUNGSI _backToSplash DIHAPUS KARENA INI HALAMAN PERTAMA
 
   // Dialog Helper
   void _showCustomDialog({
@@ -328,13 +325,7 @@ class _TabletLoginPageState extends State<TabletLoginPage> {
     );
   }
 
-  // ... (Bagian widget _buildLeftSideContent, _buildAnimatedAuthForms,
-  //      _getCurrentView, _buildLoginForm, _buildSignupForm, _buildForgotForm,
-  //      _buildLabel, _buildFixedCompanyField, _inputDecoration
-  //      SAMA PERSIS DENGAN SEBELUMNYA, TIDAK PERLU DIUBAH)
-
   Widget _buildLeftSideContent() {
-    // ... Copy paste isi widget ini dari kode sebelumnya
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,

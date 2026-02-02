@@ -22,16 +22,16 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // --- STATE UNTUK INTERAKSI PIE CHART ---
-  int touchedPieIndex = -1; // Biar Pie Chart bisa gerak pas disentuh
+ 
+  int touchedPieIndex = -1; 
 
-  // --- CONFIGURATION & STYLES ---
+  
   final Color bgPage = const Color(0xFFF2F4F8);
 
-  // Shadow Super Tebal & Melayang
+  
   final List<BoxShadow> floatingShadow = [
     const BoxShadow(
-      color: Color(0x26000000), // 0.15 opacity
+      color: Color(0x26000000), 
       blurRadius: 30,
       offset: Offset(0, 15),
       spreadRadius: 2,

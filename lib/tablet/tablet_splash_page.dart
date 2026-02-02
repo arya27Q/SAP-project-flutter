@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // Buat Timer
-import 'login_page.dart'; // Import halaman Login Tablet
+import 'dart:async'; 
+import 'login_page.dart'; 
 
 class TabletSplashPage extends StatefulWidget {
   const TabletSplashPage({super.key});
@@ -14,7 +14,7 @@ class _TabletSplashPageState extends State<TabletSplashPage> {
   @override
   void initState() {
     super.initState();
-    // 🔥 LOGIC TIMER: Tunggu 3 detik, lalu pindah ke Login
+    // LOGIC TIMER
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
@@ -26,7 +26,6 @@ class _TabletSplashPageState extends State<TabletSplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Background Gradient (Sama kayak Login)
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -35,16 +34,15 @@ class _TabletSplashPageState extends State<TabletSplashPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF311B92), // Deep Indigo
-              Color(0xFF4F46E5), // Primary Indigo
-              Color(0xFF7C4DFF), // Purple Accent
+              Color(0xFF311B92), 
+              Color(0xFF4F46E5), 
+              Color(0xFF7C4DFF), 
             ],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // --- LOGO ICON ---
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
