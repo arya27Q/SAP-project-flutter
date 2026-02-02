@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-
-// ✅ Pastikan import ini benar (arahkan ke Login Tablet)
+import 'package:dropdown_search/dropdown_search.dart';
 import 'login_page.dart';
 
 class LbtsFormPage extends StatefulWidget {
@@ -14,10 +13,9 @@ class LbtsFormPage extends StatefulWidget {
 }
 
 class _LbtsFormPageState extends State<LbtsFormPage> {
-  // --- Controllers & State ---
   final _formKey = GlobalKey<FormState>();
 
-  // Colors
+  // --- COLORS ---
   final Color indigo600 = const Color(0xFF4F46E5);
   final Color purple600 = const Color(0xFF9333EA);
   final Color green50 = const Color(0xFFF0FDF4);
@@ -27,18 +25,36 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   final Color gray800 = const Color(0xFF1F2937);
   final Color gray200 = const Color(0xFF9CA3AF);
 
-  // Form Data
-  final TextEditingController _noLbtsController = TextEditingController();
-  final TextEditingController _tglLbtsController = TextEditingController();
-  final TextEditingController _customerController = TextEditingController();
-  final TextEditingController _noPenggantiController = TextEditingController();
-  final TextEditingController _qtyController = TextEditingController();
-  final TextEditingController _remarkController = TextEditingController();
+  // --- CONTROLLERS (MAPPING DATABASE) ---
+  final TextEditingController _noLbtsController =
+      TextEditingController(); // DB: no_lbts
+  final TextEditingController _tglLbtsController =
+      TextEditingController(); // DB: tgl_lbts
+  final TextEditingController _noPenggantiController =
+      TextEditingController(); // DB: no_pengganti
+  final TextEditingController _qtyController =
+      TextEditingController(); // DB: qty_check
+  final TextEditingController _remarkController =
+      TextEditingController(); // DB: remark
 
-  String? _selectedProduct;
-  String? _selectedDivisi;
-  String? _status;
-  File? _pickedImage;
+  // --- STATE VARIABLES (MAPPING DATABASE) ---
+  String? _selectedProduct; // DB: jenis_produk
+  String? _selectedDivisi; // DB: divisi_reject
+  String? _status; // DB: status ('Lolos'/'Reject')
+  String? _selectedCustomer; // DB: customer_id (Nanti di-convert Backend)
+  File? _pickedImage; // DB: foto_produk_path (Disimpan di folder, path di DB)
+
+  // --- DATA DUMMY (CUSTOMER) ---
+  final List<String> _customerList = [
+    "PT. Sejahtera Bersama",
+    "CV. Maju Jaya",
+    "PT. Global Indonesia",
+    "UD. Karya Mandiri",
+    "PT. Teknologi Nusantara",
+    "PT. Dempo Laser Metalindo",
+    "PT. Senzo",
+    "PT. ATMI",
+  ];
 
   final List<String> _productOptions = [
     "Elektronik",
@@ -59,6 +75,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   @override
   void initState() {
     super.initState();
+    // Auto Generate No LBTS
     _noLbtsController.text =
         "LBTS-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}";
     _tglLbtsController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -160,11 +177,11 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
 
   void _resetForm() {
     _formKey.currentState?.reset();
-    _customerController.clear();
     _noPenggantiController.clear();
     _qtyController.clear();
     _remarkController.clear();
     setState(() {
+      _selectedCustomer = null;
       _selectedProduct = null;
       _selectedDivisi = null;
       _status = null;
@@ -183,7 +200,8 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text("Success"),
-          content: const Text("Data berhasil dikirim ke sistem (Simulasi)."),
+          content: const Text(
+              "Data form & gambar berhasil disiapkan untuk dikirim ke API."),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx), child: const Text("OK"))
@@ -193,7 +211,23 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     }
   }
 
-  // 🔥 KOLOM KIRI (Dipisah biar Rapi)
+  // --- REUSABLE SHADOW DECORATION ---
+  BoxDecoration _fieldShadowDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: indigo600.withOpacity(0.12),
+          blurRadius: 16,
+          offset: const Offset(0, 5),
+          spreadRadius: -2,
+        ),
+      ],
+    );
+  }
+
+  // 🔥 KOLOM KIRI (SESUAI DATABASE + FIX DROPDOWN V6 + SHADOW)
   Widget _buildLeftColumn() {
     return Column(
       children: [
@@ -205,8 +239,76 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
             icon: Icons.calendar_today,
             onTap: () => _selectDate(context)),
         const SizedBox(height: 28),
-        _buildInputGroup("Nama Customer", _customerController,
-            isRequired: true, hint: "Masukkan nama customer"),
+
+        // SEARCHABLE DROPDOWN (CUSTOMER)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLabel("Nama Customer", isRequired: true),
+            const SizedBox(height: 10),
+            Container(
+              decoration: _fieldShadowDecoration(),
+              child: DropdownSearch<String>(
+                // ✅ V6 Fix: Items pakai fungsi logic
+                items: (filter, loadProps) {
+                  if (filter.isEmpty) return _customerList;
+                  return _customerList
+                      .where((element) =>
+                          element.toLowerCase().contains(filter.toLowerCase()))
+                      .toList();
+                },
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    decoration: InputDecoration(
+                      hintText: "Cari PT...",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
+                  menuProps: MenuProps(borderRadius: BorderRadius.circular(12)),
+                ),
+                // ✅ V6 Fix: Pakai decoratorProps
+                decoratorProps: DropDownDecoratorProps(
+                  decoration: InputDecoration(
+                    hintText: "Pilih Customer...",
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.grey.withOpacity(0.1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: indigo600, width: 2),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.grey.withOpacity(0.1)),
+                    ),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCustomer = value;
+                  });
+                },
+                selectedItem: _selectedCustomer,
+                validator: (value) =>
+                    value == null ? "Customer wajib dipilih" : null,
+              ),
+            ),
+          ],
+        ),
+
         const SizedBox(height: 28),
         _buildInputGroup("No Pengganti", _noPenggantiController,
             hint: "Masukkan nomor pengganti"),
@@ -220,7 +322,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     );
   }
 
-  // 🔥 KOLOM KANAN (Dipisah biar Rapi)
+  // 🔥 KOLOM KANAN (SESUAI DATABASE)
   Widget _buildRightColumn() {
     return Column(
       children: [
@@ -308,7 +410,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                             ],
                           ),
                         ),
-                        // TOMBOL CLOSE (Balik ke Login)
+                        // TOMBOL CLOSE
                         Container(
                           decoration: BoxDecoration(
                               color: Colors.white,
@@ -374,16 +476,12 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                             padding: const EdgeInsets.all(40),
                             child: Form(
                               key: _formKey,
-                              // 🔥🔥🔥 LOGIC RESPONSIF ADA DI SINI 🔥🔥🔥
                               child: LayoutBuilder(
                                 builder: (context, constraints) {
-                                  // Kalau lebar < 900px (Potret/Tablet Kecil) -> Jadi 1 Kolom
-                                  // Kalau lebar > 900px (Landscape/Laptop) -> Jadi 2 Kolom
                                   bool isWideScreen =
                                       constraints.maxWidth > 900;
 
                                   if (isWideScreen) {
-                                    // MODE LANDSCAPE (2 Kolom Kiri Kanan)
                                     return Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -394,7 +492,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                       ],
                                     );
                                   } else {
-                                    // MODE PORTRAIT (1 Kolom Atas Bawah)
                                     return Column(
                                       children: [
                                         _buildLeftColumn(),
@@ -507,33 +604,38 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       children: [
         _buildLabel(label, isRequired: isRequired),
         const SizedBox(height: 10),
-        TextFormField(
-          controller: controller,
-          readOnly: onTap != null,
-          onTap: onTap,
-          maxLines: maxLines,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-          style: const TextStyle(fontSize: 15),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-            suffixIcon:
-                icon != null ? Icon(icon, color: Colors.grey[400]) : null,
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: gray200)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: gray200)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: indigo600, width: 2)),
+        // WRAPPER CONTAINER UNTUK SHADOW
+        Container(
+          decoration: _fieldShadowDecoration(),
+          child: TextFormField(
+            controller: controller,
+            readOnly: onTap != null,
+            onTap: onTap,
+            maxLines: maxLines,
+            keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+            style: const TextStyle(fontSize: 15),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              suffixIcon:
+                  icon != null ? Icon(icon, color: Colors.grey[400]) : null,
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: indigo600, width: 2)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+            ),
+            validator:
+                isRequired ? (v) => v!.isEmpty ? "Required" : null : null,
           ),
-          validator: isRequired ? (v) => v!.isEmpty ? "Required" : null : null,
         ),
       ],
     );
@@ -547,30 +649,34 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       children: [
         _buildLabel(label, isRequired: isRequired),
         const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: value,
-          items: items
-              .map((e) =>
-                  DropdownMenuItem(value: e.toLowerCase(), child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded),
-          decoration: InputDecoration(
-            hintText: "Pilih opsi...",
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: gray200)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: gray200)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: indigo600, width: 2)),
+        // WRAPPER CONTAINER UNTUK SHADOW
+        Container(
+          decoration: _fieldShadowDecoration(),
+          child: DropdownButtonFormField<String>(
+            value: value,
+            items: items
+                .map((e) =>
+                    DropdownMenuItem(value: e.toLowerCase(), child: Text(e)))
+                .toList(),
+            onChanged: onChanged,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            decoration: InputDecoration(
+              hintText: "Pilih opsi...",
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: indigo600, width: 2)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+            ),
           ),
         ),
         if (label == "Jenis Produk")
@@ -610,12 +716,18 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
         duration: const Duration(milliseconds: 200),
         height: 60,
         decoration: BoxDecoration(
-          color: isSelected ? activeBg : Colors.white,
-          border: Border.all(
-              color: isSelected ? activeColor : gray200,
-              width: isSelected ? 2 : 1),
-          borderRadius: BorderRadius.circular(12),
-        ),
+            color: isSelected ? activeBg : Colors.white,
+            border: Border.all(
+                color: isSelected ? activeColor : gray200,
+                width: isSelected ? 2 : 1),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: indigo600.withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ]),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -636,6 +748,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   Widget _buildPhotoUploadArea() {
     return GestureDetector(
       onTap: _showPickerOptions,
+      // CONTAINER UPLOAD JUGA DIKASIH SHADOW
       child: Container(
         height: 220,
         width: double.infinity,
@@ -646,6 +759,13 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
               color: Colors.indigo.shade200,
               width: 2,
               style: BorderStyle.solid),
+          boxShadow: [
+            BoxShadow(
+              color: indigo600.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: _pickedImage != null
             ? Stack(

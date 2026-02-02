@@ -26,7 +26,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int touchedPieIndex = -1; 
 
   
-  final Color bgPage = const Color(0xFFF2F4F8);
+  final Color bgPage = const Color.fromARGB(255, 255, 255, 255);
 
   
   final List<BoxShadow> floatingShadow = [
@@ -101,13 +101,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
             const SizedBox(height: 40),
 
-            // MONTHLY REVENUE
             _buildSectionTitle("MONTHLY REVENUE VS EXPENSE ANALYSIS"),
             const SizedBox(height: 15),
             _buildRevenueLineChart(),
             const SizedBox(height: 40),
 
-            // INVENTORY & WAREHOUSE
             _buildSectionTitle("INVENTORY & WAREHOUSE MONITORING"),
             const SizedBox(height: 15),
             isMobile
@@ -128,13 +126,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
             const SizedBox(height: 40),
 
-            // RADAR CHART
             _buildSectionTitle("OPERATIONAL METRICS"),
             const SizedBox(height: 15),
             _buildRadarChart(),
             const SizedBox(height: 40),
 
-            // AGING & PIPELINE
             _buildSectionTitle("OPERATIONAL AGING & PIPELINE"),
             const SizedBox(height: 15),
             isMobile
@@ -164,7 +160,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ================= 3. WIDGET COMPONENTS =================
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -189,7 +184,8 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // --- HEADER ---
+
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 35),
