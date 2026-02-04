@@ -34,6 +34,7 @@ import 'desktop/pages/inventory/item_master_data.dart';
 
 import 'desktop/pages/Quality_Control_page.dart';
 
+
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 

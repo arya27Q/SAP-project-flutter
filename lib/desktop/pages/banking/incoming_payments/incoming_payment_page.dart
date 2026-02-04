@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'payment_incoming_mean_page.dart'; 
 
 class IncomingPaymentPage extends StatefulWidget {
   const IncomingPaymentPage({super.key});
@@ -27,11 +28,10 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, bool> _checkStates = {};
 
-  // --- STYLE SETTINGS (UPDATED) ---
-  final double _inputHeight = 40.0; // Tinggi 40 biar sama kayak referensi
-  final BorderRadius _inputRadius = BorderRadius.circular(10); // Radius 10
+ 
+  final double _inputHeight = 40.0; 
+  final BorderRadius _inputRadius = BorderRadius.circular(10); 
 
-  // Shadow Ungu Halus
   List<BoxShadow> get _softShadow => [
     BoxShadow(
       color: const Color(0xFF4F46E5).withOpacity(0.08),
@@ -46,7 +46,6 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     ),
   ];
 
-  // Border Tipis Indigo
   Border get _thinBorder =>
       Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
 
@@ -751,6 +750,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Bagian Kiri (Remarks dll) ---
               Expanded(
                 child: Column(
                   children: [
@@ -806,6 +806,8 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                 ),
               ),
               const SizedBox(width: 60),
+              
+              // --- Bagian Kanan (Total & Button Payment Means) ---
               SizedBox(
                 width: 450,
                 child: Column(
@@ -823,6 +825,41 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                       isBold: true,
                       isReadOnly: true,
                     ),
+                    
+                   
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight, 
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PaymentIncomingMeanPage(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.payment, size: 18),
+                        label: const Text(
+                          "Payment Means",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade700, 
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24, 
+                            vertical: 16
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 3,
+                          shadowColor: Colors.orange.withOpacity(0.4),
+                        ),
+                      ),
+                    ),
+                   
                   ],
                 ),
               ),
