@@ -1,17 +1,17 @@
-import 'dart:async';
-import 'dart:math';
+import 'dart:async'; 
+import 'dart:math'; 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class PaymentIncomingMeanPage extends StatefulWidget {
-  const PaymentIncomingMeanPage({super.key});
+class PaymentOutgoingMeanPage extends StatefulWidget {
+  const PaymentOutgoingMeanPage({super.key});
 
   @override
-  State<PaymentIncomingMeanPage> createState() =>
-      _PaymentIncomingMeanPageState();
+  State<PaymentOutgoingMeanPage> createState() =>
+      _PaymentOutgoingMeanPageState();
 }
 
-class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
+class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -53,12 +53,12 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
     );
   }
 
-  //  LOGIKA PEMBAYARAN
+  // --- LOGIKA PEMBAYARAN (BARU) ---
   void _processPayment() {
-    // 1. Tampilkan Loading Dialog
+    // 1. Tampilkan Loading Dialog dulu
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: false, 
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(color: Colors.white),
@@ -66,9 +66,10 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
       },
     );
 
+   
     Timer(const Duration(seconds: 2), () {
       Navigator.pop(context);
-      bool isSuccess = Random().nextBool();
+      bool isSuccess = Random().nextBool(); 
       _showResultDialog(isSuccess);
     });
   }
@@ -86,13 +87,14 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min, 
               children: [
+               
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSuccess
-                        ? Colors.green.withOpacity(0.1)
+                    color: isSuccess 
+                        ? Colors.green.withOpacity(0.1) 
                         : Colors.red.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
@@ -103,6 +105,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                   ),
                 ),
                 const SizedBox(height: 24),
+                
                 Text(
                   isSuccess ? "Payment Successful!" : "Payment Failed!",
                   style: TextStyle(
@@ -112,23 +115,25 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                   ),
                 ),
                 const SizedBox(height: 12),
+                
                 Text(
-                  isSuccess
-                      ? "Your transaction has been processed successfully."
-                      : "Something went wrong. Please try again later.",
+                  isSuccess 
+                    ? "Your transaction has been processed successfully."
+                    : "Something went wrong. Please try again later.",
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
+
                 SizedBox(
                   width: double.infinity,
                   height: 45,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
-
+                      Navigator.pop(context); 
+                      
                       if (isSuccess) {
-                        Navigator.pop(context);
+                        Navigator.pop(context); 
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -139,9 +144,10 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                       ),
                       elevation: 0,
                     ),
-                    child: const Text("OK",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      "OK", 
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
+                    ),
                   ),
                 ),
               ],
@@ -151,6 +157,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
       },
     );
   }
+  // ---------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +166,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
       body: SafeArea(
         child: Column(
           children: [
+          
             _buildFloatingHeader(),
             _buildFloatingTabBar(),
             const SizedBox(height: 16),
@@ -180,14 +188,16 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildCheckTab(),
-                    _buildBankTransferTab(),
-                    _buildCreditCardTab(),
-                    _buildCashTab(),
+                    _buildCheckTab(),        
+                    _buildBankTransferTab(), 
+                    _buildCreditCardTab(),   
+                    _buildCashTab(),        
                   ],
                 ),
               ),
             ),
+
+           
             const SizedBox(height: 16),
             _buildFooterSummary(),
             const SizedBox(height: 16),
@@ -352,9 +362,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
           const Text(
             "* Ensure the transfer date matches the bank statement date.",
             style: TextStyle(
-                fontSize: 11,
-                color: Colors.orange,
-                fontStyle: FontStyle.italic),
+                fontSize: 11, color: Colors.orange, fontStyle: FontStyle.italic),
           )
         ],
       ),
@@ -440,12 +448,12 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16), 
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 4), 
           ),
         ],
       ),
@@ -531,9 +539,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                 ? Align(
                     alignment: Alignment.centerLeft,
                     child: Checkbox(
-                        value: true,
-                        onChanged: (v) {},
-                        activeColor: primaryIndigo),
+                        value: true, onChanged: (v) {}, activeColor: primaryIndigo),
                   )
                 : Container(
                     height: 38,
@@ -553,8 +559,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                     child: TextField(
                       controller: _getCtrl(key),
                       textAlign: isCurrency ? TextAlign.right : TextAlign.left,
-                      style:
-                          const TextStyle(fontSize: 13, color: Colors.black87),
+                      style: const TextStyle(fontSize: 13, color: Colors.black87),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         isDense: true,

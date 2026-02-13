@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'payment_outgoing_mean_page.dart';
 
 class OutgoingPaymentPage extends StatefulWidget {
   const OutgoingPaymentPage({super.key});
@@ -826,6 +827,40 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                       isBold: true,
                       isReadOnly: true,
                     ),
+
+                  const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight, 
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PaymentOutgoingMeanPage(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.payment, size: 18),
+                        label: const Text(
+                          "Payment Means",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade700, 
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24, 
+                            vertical: 16
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 3,
+                          shadowColor: Colors.orange.withOpacity(0.4),
+                        ),
+                      ),
+                    ),
+                   
                   ],
                 ),
               ),

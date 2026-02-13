@@ -52,7 +52,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       double screenWidth = MediaQuery.of(context).size.width;
 
       bool isTablet = screenWidth < 900;
-     
 
       // 2. Tentukan Tujuan Halaman
       Widget destinationPage;
@@ -140,18 +139,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Spacer(),
-
                     _buildRobotWithGlow(),
                     const SizedBox(height: 50),
-
                     _buildBrandingSection(),
                     const SizedBox(height: 60),
-
                     _buildActionSection(),
-
                     const SizedBox(height: 40),
                     _buildFooterText(),
-
                     const Spacer(),
                   ],
                 ),
@@ -210,7 +204,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 ),
               ),
               child: const Text(
-                "ERP SYSTEM DLM GROUP",
+                "ERP SYSTEM SAMUDRA II",
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,
@@ -315,39 +309,40 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   }
 
   Widget _buildCyberGrid() => Opacity(
-    opacity: 0.15,
-    child: CustomPaint(
-      size: Size.infinite,
-      painter: GridPainter(gridColor: accentYellow),
-    ),
-  );
+        opacity: 0.15,
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: GridPainter(gridColor: accentYellow),
+        ),
+      );
 
   Widget _buildFloatingParticle({
     required double top,
     required double left,
     required double size,
-  }) => Positioned(
-    top: top,
-    left: MediaQuery.of(context).size.width * left,
-    child: AnimatedOpacity(
-      opacity: _showContent ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 2000),
-      child: AnimatedBuilder(
-        animation: _floatingController,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(0, 50 * _floatingController.value),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: primaryIndigo.withOpacity(0.2),
+  }) =>
+      Positioned(
+        top: top,
+        left: MediaQuery.of(context).size.width * left,
+        child: AnimatedOpacity(
+          opacity: _showContent ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 2000),
+          child: AnimatedBuilder(
+            animation: _floatingController,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(0, 50 * _floatingController.value),
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primaryIndigo.withOpacity(0.2),
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 
   Widget _buildRobotWithGlow() {
     return AnimatedOpacity(
@@ -402,80 +397,81 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     double? bottom,
     double? left,
     int delayMs = 0,
-  }) => Positioned(
-    top: top,
-    right: right,
-    bottom: bottom,
-    left: left,
-    child: TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 1600 + delayMs),
-      curve: Curves.elasticOut,
-      builder: (context, value, child) => Transform.scale(
-        scale: value,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-            border: Border.all(color: color.withOpacity(0.15), width: 25),
+  }) =>
+      Positioned(
+        top: top,
+        right: right,
+        bottom: bottom,
+        left: left,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: Duration(milliseconds: 1600 + delayMs),
+          curve: Curves.elasticOut,
+          builder: (context, value, child) => Transform.scale(
+            scale: value,
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                border: Border.all(color: color.withOpacity(0.15), width: 25),
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 
   Widget _buildActionSection() => AnimatedSwitcher(
-    duration: const Duration(milliseconds: 1000),
-    child: _isLoading
-        ? CircularProgressIndicator(
-            strokeWidth: 4,
-            color: primaryIndigo.withOpacity(0.6),
-          )
-        : Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryIndigo.withOpacity(0.3),
-                  blurRadius: 40,
-                  offset: const Offset(0, 15),
-                ),
-              ],
-            ),
-            child: ElevatedButton(
-              onPressed: _navigateToDashboard,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryIndigo,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 65,
-                  vertical: 26,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                side: const BorderSide(color: Colors.white, width: 4.5),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "GET STARTED",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2.5,
-                      fontSize: 13,
+        duration: const Duration(milliseconds: 1000),
+        child: _isLoading
+            ? CircularProgressIndicator(
+                strokeWidth: 4,
+                color: primaryIndigo.withOpacity(0.6),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryIndigo.withOpacity(0.3),
+                      blurRadius: 40,
+                      offset: const Offset(0, 15),
                     ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: _navigateToDashboard,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryIndigo,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 65,
+                      vertical: 26,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    side: const BorderSide(color: Colors.white, width: 4.5),
                   ),
-                  SizedBox(width: 15),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                ],
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "GET STARTED",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.5,
+                          fontSize: 13,
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-  );
+      );
 }
 
 class GridPainter extends CustomPainter {

@@ -14,7 +14,7 @@ class DashboardPage extends StatefulWidget {
     required this.userName,
     required this.userDivision,
     required this.onLogout,
-    this.currentDatabase = "Selamat Datang Administrator",
+    this.currentDatabase = "Welcome Back Administrator",
   });
 
   @override
@@ -22,16 +22,13 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
- 
-  int touchedPieIndex = -1; 
+  int touchedPieIndex = -1;
 
-  
   final Color bgPage = const Color.fromARGB(255, 255, 255, 255);
 
-  
   final List<BoxShadow> floatingShadow = [
     const BoxShadow(
-      color: Color(0x26000000), 
+      color: Color(0x26000000),
       blurRadius: 30,
       offset: Offset(0, 15),
       spreadRadius: 2,
@@ -160,7 +157,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 5),
@@ -183,8 +179,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-
 
   Widget _buildHeader() {
     return Container(
@@ -356,7 +350,7 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               Text(title,
                   style: const TextStyle(
-                      color: Colors.white70,
+                      color: Color.fromARGB(255, 255, 255, 255),
                       fontSize: 11,
                       fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
@@ -375,7 +369,8 @@ class _DashboardPageState extends State<DashboardPage> {
         Positioned(
             right: 0,
             top: 0,
-            child: Icon(icon, color: const Color(0x40FFFFFF), size: 48))
+            child: Icon(icon,
+                color: const Color.fromARGB(255, 255, 255, 255), size: 48))
       ]),
     );
   }

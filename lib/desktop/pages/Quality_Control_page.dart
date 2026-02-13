@@ -12,8 +12,8 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
   final Color primaryPurple = const Color(0xFF6366F1); // Indigo / Purple
   final Color successGreen = const Color(0xFF10B981);
   final Color dangerRed = const Color(0xFFEF4444);
-  final Color bgSlate =
-      const Color.fromARGB(255, 255, 255, 255); // Background yang kontras untuk shadow
+  final Color bgSlate = const Color.fromARGB(
+      255, 255, 255, 255); // Background yang kontras untuk shadow
   final Color textDark = const Color(0xFF1E293B);
 
   // --- Stronger Shadows for "Floating" Effect ---
@@ -61,12 +61,10 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
                             color: textDark.withOpacity(0.5), fontSize: 16)),
                   ],
                 ),
-                // Icon Profil sudah dihapus
               ],
             ),
             const SizedBox(height: 48),
 
-            // 1. STATS ROW (Dibuat proporsional agar sejajar dengan container bawah)
             Row(
               children: [
                 Expanded(
@@ -103,14 +101,12 @@ class _DesktopQcPageState extends State<DesktopQcPage> {
             ),
             const SizedBox(height: 40),
 
-            // 2. CHART SECTION
             _buildShadowCard(
               title: "Tren Pengecekan Bulanan",
               child: _buildBarChartWithGuidelines(),
             ),
             const SizedBox(height: 40),
 
-            // 3. MIDDLE SECTION
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -36,11 +36,11 @@ class _SapAuthPageState extends State<SapAuthPage> {
   bool _obscureSignup = true;
 
   final List<Map<String, String>> companies = [
-  {"name": "PT. Dempo Laser Metalindo", "value": "pt1"},   
-  {"name": "PT. ATMI Duta Engineering", "value": "pt2"},   
-  {"name": "PT. Senzo Feinmetal", "value": "pt3"},         
-  {"name": "PT. Duta Laserindo Metal", "value": "pt4"},    
-];
+    {"name": "PT. Dempo Laser Metalindo", "value": "pt1"},
+    {"name": "PT. ATMI Duta Engineering", "value": "pt2"},
+    {"name": "PT. Senzo Feinmetal", "value": "pt3"},
+    {"name": "PT. Duta Laserindo Metal", "value": "pt4"},
+  ];
 
   final List<Map<String, dynamic>> features = [
     {"title": "Real-time Dashboard Monitoring"},
@@ -167,17 +167,17 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }
 
   void _showErrorDialog(String message) => _showCustomDialog(
-    title: "Oops!",
-    message: message,
-    icon: Icons.warning_amber_rounded,
-    color: const Color(0xFFB71C1C),
-  );
+        title: "Oops!",
+        message: message,
+        icon: Icons.warning_amber_rounded,
+        color: const Color(0xFFB71C1C),
+      );
   void _showSuccessDialog(String message) => _showCustomDialog(
-    title: "Success!",
-    message: message,
-    icon: Icons.check_circle_outline_rounded,
-    color: const Color(0xFF2E7D32),
-  );
+        title: "Success!",
+        message: message,
+        icon: Icons.check_circle_outline_rounded,
+        color: const Color(0xFF2E7D32),
+      );
 
   // --- HANDLE LOGIN ---
   Future<void> handleLogin() async {
@@ -192,7 +192,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
       return;
     }
 
-     debugPrint("Attempting Login to: $selectedCompanyValue");
+    debugPrint("Attempting Login to: $selectedCompanyValue");
 
     setState(() => _isLoading = true);
 
@@ -234,7 +234,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
     }
 
     debugPrint("Attempting Register to: $selectedCompanyValue | Name: $name");
-    
+
     setState(() => _isLoading = true);
 
     // Kirim value (nama koneksi DB) ke API
@@ -330,11 +330,11 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }
 
   Widget _buildStatusOverlay() => Container(
-    color: Colors.black.withOpacity(0.5),
-    child: const Center(
-      child: CircularProgressIndicator(color: AppColors.primaryIndigo),
-    ),
-  );
+        color: Colors.black.withOpacity(0.5),
+        child: const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryIndigo),
+        ),
+      );
 
   Widget _buildDesktopCardLayout() {
     return Container(
@@ -398,7 +398,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    "Enterprise System DLM Group",
+                    "Samudra II Enterprise System",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -564,8 +564,8 @@ class _SapAuthPageState extends State<SapAuthPage> {
             : const Offset(0.1, 0.0);
         final slideAnimation =
             Tween<Offset>(begin: beginOffset, end: Offset.zero).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            );
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        );
         final fadeAnimation = Tween<double>(
           begin: 0.0,
           end: 1.0,
@@ -591,17 +591,17 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }
 
   TextStyle get _headerStyle => const TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      );
   TextStyle get _subHeaderStyle =>
       const TextStyle(color: Colors.white70, fontSize: 14);
   TextStyle get _labelStyle => const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    color: Colors.white,
-  );
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+      );
 
   // --- LOGIN FORM UI ---
   Widget _buildLoginForm({Key? key, required bool isDark}) {
@@ -633,18 +633,18 @@ class _SapAuthPageState extends State<SapAuthPage> {
           controller: _passController,
           obscureText: _obscureText,
           style: const TextStyle(color: Colors.white),
-          decoration: _inputDecoration(Icons.lock_outline, "********", isDark)
-              .copyWith(
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureText
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: Colors.white70,
-                  ),
-                  onPressed: () => setState(() => _obscureText = !_obscureText),
-                ),
+          decoration:
+              _inputDecoration(Icons.lock_outline, "********", isDark).copyWith(
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureText
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: Colors.white70,
               ),
+              onPressed: () => setState(() => _obscureText = !_obscureText),
+            ),
+          ),
         ),
         Align(
           alignment: Alignment.centerRight,
@@ -749,19 +749,18 @@ class _SapAuthPageState extends State<SapAuthPage> {
           controller: _signupPassController,
           obscureText: _obscureSignup,
           style: const TextStyle(color: Colors.white),
-          decoration: _inputDecoration(Icons.lock_outline, "********", isDark)
-              .copyWith(
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureSignup
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    color: Colors.white70,
-                  ),
-                  onPressed: () =>
-                      setState(() => _obscureSignup = !_obscureSignup),
-                ),
+          decoration:
+              _inputDecoration(Icons.lock_outline, "********", isDark).copyWith(
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureSignup
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: Colors.white70,
               ),
+              onPressed: () => setState(() => _obscureSignup = !_obscureSignup),
+            ),
+          ),
         ),
         const SizedBox(height: 30),
         SizedBox(
@@ -871,83 +870,88 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }
 
   Widget _buildLabel(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 10, left: 2),
-    child: Text(text, style: _labelStyle),
-  );
+        padding: const EdgeInsets.only(bottom: 10, left: 2),
+        child: Text(text, style: _labelStyle),
+      );
 
   // 🔥 UPDATE: Dropdown Menggunakan Map (Name vs Value)
   Widget _buildCompanyDropdown(bool isDark) => DropdownButtonFormField<String>(
-    value: selectedCompanyValue,
-    isExpanded: true,
-    dropdownColor: const Color(0xFF2E2E48),
-    style: const TextStyle(color: Colors.white),
-    hint: const Text("Select Company", style: TextStyle(color: Colors.white)),
-    decoration: _inputDecoration(
-      Icons.business_rounded,
-      "Select Company",
-      isDark,
-    ),
-    items: companies
-        .map(
-          (item) => DropdownMenuItem(
-            value: item['value'], // Mengirim Value (nama DB connection)
-            child: Text(
-              item['name']!,
-              style: const TextStyle(color: Colors.white),
-            ), // Menampilkan Nama PT
-          ),
-        )
-        .toList(),
-    onChanged: (v) => setState(() => selectedCompanyValue = v),
-  );
+        value: selectedCompanyValue,
+        isExpanded: true,
+        dropdownColor: const Color(0xFF2E2E48),
+        style: const TextStyle(color: Colors.white),
+        hint:
+            const Text("Select Company", style: TextStyle(color: Colors.white)),
+        decoration: _inputDecoration(
+          Icons.business_rounded,
+          "Select Company",
+          isDark,
+        ),
+        items: companies
+            .map(
+              (item) => DropdownMenuItem(
+                value: item['value'], // Mengirim Value (nama DB connection)
+                child: Text(
+                  item['name']!,
+                  style: const TextStyle(color: Colors.white),
+                ), // Menampilkan Nama PT
+              ),
+            )
+            .toList(),
+        onChanged: (v) => setState(() => selectedCompanyValue = v),
+      );
 
   InputDecoration _inputDecoration(
     IconData icon,
     String hint,
     bool isDark,
-  ) => InputDecoration(
-    prefixIcon: Icon(icon, size: 20, color: Colors.white),
-    hintText: hint,
-    hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.1),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide.none,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide.none,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(color: AppColors.primaryIndigo, width: 1.5),
-    ),
-  );
+  ) =>
+      InputDecoration(
+        prefixIcon: Icon(icon, size: 20, color: Colors.white),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide:
+              const BorderSide(color: AppColors.primaryIndigo, width: 1.5),
+        ),
+      );
 
   Widget _buildWarningBox(String message) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Colors.amber.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.amber.withOpacity(0.3)),
-    ),
-    child: Row(
-      children: [
-        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            message,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.amberAccent,
-              height: 1.3,
-            ),
-          ),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.amber.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.amber.withOpacity(0.3)),
         ),
-      ],
-    ),
-  );
+        child: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: Colors.amber, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.amberAccent,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 }
