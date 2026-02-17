@@ -9,11 +9,10 @@ class DesktopQcPage extends StatefulWidget {
 
 class _DesktopQcPageState extends State<DesktopQcPage> {
   // --- Theme Colors ---
-  final Color primaryPurple = const Color(0xFF6366F1); // Indigo / Purple
+  final Color primaryPurple = const Color(0xFF6366F1);
   final Color successGreen = const Color(0xFF10B981);
   final Color dangerRed = const Color(0xFFEF4444);
-  final Color bgSlate = const Color.fromARGB(
-      255, 255, 255, 255); // Background yang kontras untuk shadow
+  final Color bgSlate = const Color.fromARGB(255, 255, 255, 255);
   final Color textDark = const Color(0xFF1E293B);
 
   // --- Stronger Shadows for "Floating" Effect ---

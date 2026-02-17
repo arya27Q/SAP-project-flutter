@@ -5,7 +5,6 @@ class AppColors {
   static const Color darkIndigo = Color(0xFF3730A3);
   static const Color backgroundGrey = Color(0xFFF1F5F9);
   static const Color textWhite = Colors.white;
-
   static const Color vibrantPurple = Color(0xFF7C3AED);
   static const Color vibrantPink = Color(0xFFDB2777);
 }

@@ -1,12 +1,14 @@
 import 'dart:convert';
-import 'dart:io'; // Untuk deteksi SocketException
+import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart'; // Untuk debugPrint
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static const String baseUrl = "http://127.0.0.1:8000/api";
 
-  // --- LOGIN ---
+  // LOGIC DESKTOP (JANGAN DIUBAH - SESUAI REQUEST)
+
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
@@ -28,7 +30,6 @@ class ApiService {
         }),
       );
 
-     
       debugPrint("Login Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
@@ -45,7 +46,6 @@ class ApiService {
         };
       }
     } catch (e) {
-      
       String userMessage =
           'Your connection is unstable / Koneksi tidak stabil.';
       if (e is SocketException) {
@@ -57,7 +57,7 @@ class ApiService {
     }
   }
 
-  // --- REGISTER ---
+  // --- REGISTER DESKTOP ---
   static Future<Map<String, dynamic>> register(
     String name,
     String email,
@@ -86,8 +86,7 @@ class ApiService {
       } else if (response.statusCode == 404) {
         return {
           'success': false,
-          'message':
-              'Error 404: Data Not Found.',
+          'message': 'Error 404: Data Not Found.',
         };
       } else {
         return {
@@ -96,13 +95,58 @@ class ApiService {
         };
       }
     } catch (e) {
-  
       return {
         'success': false,
         'message': e is SocketException
             ? 'Your connection is unstable / Koneksi tidak stabil.'
             : 'Terjadi kesalahan sistem.',
       };
+    }
+  }
+
+  // LOGIC TABLET (KHUSUS QC)
+
+  static Future<Map<String, dynamic>> loginTablet(
+      String email, String password) async {
+    // ⚠️ URL KHUSUS TABLET (Nembak ke TabletAuthController Laravel)
+    final url = Uri.parse('$baseUrl/tablet/login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      debugPrint("Tablet Login Status: ${response.statusCode}");
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        // Simpan Token Khusus Tablet ke Memory HP
+        final prefs = await SharedPreferences.getInstance();
+
+        // Simpan token & nama user biar bisa dipakai di dashboard nanti
+        await prefs.setString(
+            'tablet_token', responseData['data']['access_token']);
+        await prefs.setString(
+            'tablet_user', responseData['data']['user']['nama_lengkap']);
+
+        return {'success': true, 'data': responseData};
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Login Tablet Gagal'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Koneksi Error: $e'};
     }
   }
 }

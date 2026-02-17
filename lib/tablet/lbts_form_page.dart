@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // 1. TAMBAH INI
+import 'login_page.dart'; // Pastikan import ini sesuai nama file login kamu
+import 'dart:math';
 
 class LbtsFormPage extends StatefulWidget {
   const LbtsFormPage({super.key});
@@ -15,9 +17,8 @@ class LbtsFormPage extends StatefulWidget {
 class _LbtsFormPageState extends State<LbtsFormPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // --- COLORS ---
   final Color indigo600 = const Color(0xFF4F46E5);
-  final Color purple600 = const Color(0xFF9333EA);
+  final Color purple600 = const Color.fromARGB(168, 19, 2, 53);
   final Color green50 = const Color(0xFFF0FDF4);
   final Color green500 = const Color(0xFF22C55E);
   final Color red50 = const Color(0xFFFEF2F2);
@@ -26,23 +27,20 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   final Color gray200 = const Color(0xFF9CA3AF);
 
   // --- CONTROLLERS (MAPPING DATABASE) ---
-  final TextEditingController _noLbtsController =
-      TextEditingController(); // DB: no_lbts
-  final TextEditingController _tglLbtsController =
-      TextEditingController(); // DB: tgl_lbts
-  final TextEditingController _noPenggantiController =
-      TextEditingController(); // DB: no_pengganti
-  final TextEditingController _qtyController =
-      TextEditingController(); // DB: qty_check
-  final TextEditingController _remarkController =
-      TextEditingController(); // DB: remark
+  final TextEditingController _noLbtsController = TextEditingController();
+  final TextEditingController _tglLbtsController = TextEditingController();
+  final TextEditingController _noPenggantiController = TextEditingController();
+  final TextEditingController _qtyController = TextEditingController();
+  final TextEditingController _remarkController = TextEditingController();
+  final TextEditingController _noSoController = TextEditingController();
 
   // --- STATE VARIABLES (MAPPING DATABASE) ---
-  String? _selectedProduct; // DB: jenis_produk
-  String? _selectedDivisi; // DB: divisi_reject
-  String? _status; // DB: status ('Lolos'/'Reject')
-  String? _selectedCustomer; // DB: customer_id (Nanti di-convert Backend)
-  File? _pickedImage; // DB: foto_produk_path (Disimpan di folder, path di DB)
+  String? _selectedProduct;
+  String? _selectedDivisi;
+  String? _status;
+  String? _selectedCustomer;
+  File? _pickedImage;
+  String _loggedInName = "Inspector"; // 2. VARIABLE BUAT NAMA
 
   // --- DATA DUMMY (CUSTOMER) ---
   final List<String> _customerList = [
@@ -75,10 +73,24 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   @override
   void initState() {
     super.initState();
-    // Auto Generate No LBTS
+    _loadUserData(); // 3. PANGGIL FUNGSI LOAD NAMA
+
     _noLbtsController.text =
         "LBTS-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}";
+    String yearShort = DateTime.now().year.toString().substring(2);
+    int randomSeven = 1000000 + Random().nextInt(9000000);
+
+    _noSoController.text = "$yearShort$randomSeven";
     _tglLbtsController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  // 4. FUNGSI AMBIL NAMA DARI STORAGE
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // Ambil 'tablet_user' yg disimpan pas login tadi
+      _loggedInName = prefs.getString('tablet_user') ?? "Inspector";
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -227,10 +239,16 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     );
   }
 
-  // 🔥 KOLOM KIRI (SESUAI DATABASE + FIX DROPDOWN V6 + SHADOW)
+  // KOLOM KIRI (SESUAI DATABASE + FIX DROPDOWN V6 + SHADOW)
   Widget _buildLeftColumn() {
     return Column(
       children: [
+        _buildInputGroup("No Sales Order (SO)", _noSoController,
+            isRequired: true,
+            hint: "Auto Generated",
+            isNumber: true,
+            onTap: () {}),
+        const SizedBox(height: 28),
         _buildInputGroup("No LBTS", _noLbtsController,
             isRequired: true, hint: "Masukkan nomor LBTS"),
         const SizedBox(height: 28),
@@ -390,27 +408,31 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                     blurRadius: 12,
                                     offset: const Offset(0, 6))
                               ]),
-                          child: const Icon(Icons.description_outlined,
-                              color: Colors.white, size: 26),
+                          child: const Icon(
+                              Icons
+                                  .account_circle_outlined, // Ganti icon biar cocok
+                              color: Colors.white,
+                              size: 26),
                         ),
                         const SizedBox(width: 18),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Form Input Pengecekan Produk",
+                              // 5. GANTI TEKS DI SINI
+                              Text("Selamat Datang, $_loggedInName",
                                   style: TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.bold,
                                       color: gray800)),
                               const SizedBox(height: 4),
-                              Text("Tablet Input Mode - LBTS Quality Check",
+                              Text("Form Input Pengecekan Produk - LBTS",
                                   style: TextStyle(
                                       fontSize: 15, color: Colors.grey[600])),
                             ],
                           ),
                         ),
-                        // TOMBOL CLOSE
+                        // TOMBOL CLOSE (LOGOUT/BACK)
                         Container(
                           decoration: BoxDecoration(
                               color: Colors.white,
@@ -425,8 +447,9 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (c) => const TabletLoginPage())),
-                            icon: const Icon(Icons.close),
-                            color: Colors.grey[500],
+                            icon: const Icon(Icons
+                                .logout), // Ganti jadi icon logout biar make sense
+                            color: Colors.redAccent,
                           ),
                         )
                       ],

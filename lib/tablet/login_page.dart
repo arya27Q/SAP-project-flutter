@@ -30,7 +30,6 @@ class _TabletLoginPageState extends State<TabletLoginPage> {
   bool _isLoading = false;
 
   bool _obscureText = true;
-  bool _obscureSignup = true;
 
   final List<Map<String, dynamic>> qcFeatures = [
     {"title": "Digital QC Inspection"},
@@ -147,24 +146,52 @@ class _TabletLoginPageState extends State<TabletLoginPage> {
         color: const Color(0xFF00E676),
       );
 
+  // --- LOGIC LOGIN SUDAH DITAMBAH DELAY & DIALOG ---
   Future<void> handleLogin() async {
-    // String email = _userController.text.trim();
-    // String password = _passController.text.trim();
+    // 1. Ambil input dari user
+    String email = _userController.text.trim();
+    String password = _passController.text.trim();
 
-    // if (email.isEmpty || password.isEmpty) {
-    //   _showErrorDialog("Please enter your username/email and password.");
-    //   return;
-    // }
+    // 2. Validasi Input Kosong
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorDialog("Please enter your username/email and password.");
+      return;
+    }
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1500));
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LbtsFormPage()),
-      );
+    try {
+      // 3. Panggil API KHUSUS TABLET
+      final result = await ApiService.loginTablet(email, password);
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (result['success'] == true) {
+          // A. TAMPILKAN DIALOG SUKSES (HIJAU)
+          _showSuccessDialog("Login Verified! Welcome back, Inspector.");
+
+          // B. TAHAN SEBENTAR (1.5 Detik) BIAR SEMPAT DIBACA
+          await Future.delayed(const Duration(milliseconds: 1500));
+
+          if (mounted) {
+            // C. BARU PINDAH KE DASHBOARD
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LbtsFormPage()),
+            );
+          }
+        } else {
+          // LOGIN GAGAL -> Tampilkan Pesan dari API
+          _showErrorDialog(result['message'] ?? "Login Failed");
+        }
+      }
+    } catch (e) {
+      // ERROR KONEKSI
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showErrorDialog("Connection Error: $e");
+      }
     }
   }
 

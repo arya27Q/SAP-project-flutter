@@ -1,28 +1,31 @@
 name: flutter_project_sap
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # --- Icons & UI ---
   cupertino_icons: ^1.0.6
-  lottie: ^3.1.0
-  intl: ^0.19.0         
-  
-  http: ^1.2.0
-  image_picker: ^1.0.7
-  
-  file_picker: ^8.0.0   
-
-  fl_chart: ^0.66.0
   google_fonts: ^6.1.0
+  lottie: ^3.1.0
+  fl_chart: ^0.66.0
   dropdown_search: ^6.0.2
+
+  # --- Logic & Utilities ---
+  intl: ^0.19.0
+  image_picker: ^1.0.7
+  file_picker: ^8.0.0
+
+  # --- Networking & Storage
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
