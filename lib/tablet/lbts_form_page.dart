@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // 1. TAMBAH INI
-import 'login_page.dart'; // Pastikan import ini sesuai nama file login kamu
+import 'package:shared_preferences/shared_preferences.dart';
+import 'login_page.dart'; // Pastikan import ini sesuai
 import 'dart:math';
 
 class LbtsFormPage extends StatefulWidget {
@@ -17,6 +17,13 @@ class LbtsFormPage extends StatefulWidget {
 class _LbtsFormPageState extends State<LbtsFormPage> {
   final _formKey = GlobalKey<FormState>();
 
+  // --- STATE VARIABLE UNTUK TEMA ---
+  // false = Mode Terang (Desain Awal Kamu)
+  // true  = Mode Gelap (Desain Baru Saya)
+  bool _isDarkMode = false;
+
+  // --- PALET WARNA (LIGHT & DARK) ---
+  // Light (Original)
   final Color indigo600 = const Color(0xFF4F46E5);
   final Color purple600 = const Color.fromARGB(168, 19, 2, 53);
   final Color green50 = const Color(0xFFF0FDF4);
@@ -26,7 +33,15 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   final Color gray800 = const Color(0xFF1F2937);
   final Color gray200 = const Color(0xFF9CA3AF);
 
-  // --- CONTROLLERS (MAPPING DATABASE) ---
+  // Dark (New)
+  final Color bgBlack = const Color(0xFF050505);
+  final Color surfaceDark = const Color(0xFF121212);
+  final Color inputBgDark = const Color(0xFF1E1E1E);
+  final Color borderGrey = const Color(0xFF333333);
+  final Color textWhite = const Color(0xFFFFFFFF);
+  final Color textGrey = const Color(0xFFA1A1AA);
+
+  // --- CONTROLLERS ---
   final TextEditingController _noLbtsController = TextEditingController();
   final TextEditingController _tglLbtsController = TextEditingController();
   final TextEditingController _noPenggantiController = TextEditingController();
@@ -34,15 +49,15 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   final TextEditingController _remarkController = TextEditingController();
   final TextEditingController _noSoController = TextEditingController();
 
-  // --- STATE VARIABLES (MAPPING DATABASE) ---
+  // --- STATE VARIABLES ---
   String? _selectedProduct;
   String? _selectedDivisi;
   String? _status;
   String? _selectedCustomer;
   File? _pickedImage;
-  String _loggedInName = "Inspector"; // 2. VARIABLE BUAT NAMA
+  String _loggedInName = "Inspector";
 
-  // --- DATA DUMMY (CUSTOMER) ---
+  // --- DATA DUMMY ---
   final List<String> _customerList = [
     "PT. Sejahtera Bersama",
     "CV. Maju Jaya",
@@ -73,23 +88,31 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // 3. PANGGIL FUNGSI LOAD NAMA
-
+    _loadUserData();
     _noLbtsController.text =
         "LBTS-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}";
     String yearShort = DateTime.now().year.toString().substring(2);
     int randomSeven = 1000000 + Random().nextInt(9000000);
-
     _noSoController.text = "$yearShort$randomSeven";
     _tglLbtsController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 
-  // 4. FUNGSI AMBIL NAMA DARI STORAGE
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Ambil 'tablet_user' yg disimpan pas login tadi
       _loggedInName = prefs.getString('tablet_user') ?? "Inspector";
+    });
+  }
+
+  // --- HELPERS WARNA DINAMIS ---
+  Color get _textColor => _isDarkMode ? textWhite : gray800;
+  Color get _labelColor => _isDarkMode ? textGrey : gray800;
+  Color get _cardColor => _isDarkMode ? surfaceDark : Colors.white;
+
+  // --- LOGIC GANTI THEME ---
+  void _toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
     });
   }
 
@@ -100,9 +123,19 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       builder: (context, child) {
+        // Theme DatePicker Dinamis
         return Theme(
-            data: Theme.of(context)
-                .copyWith(colorScheme: ColorScheme.light(primary: indigo600)),
+            data: _isDarkMode
+                ? Theme.of(context).copyWith(
+                    colorScheme: const ColorScheme.dark(
+                      primary: Colors.white,
+                      onPrimary: Colors.black,
+                      surface: Color(0xFF1E1E1E),
+                      onSurface: Colors.white,
+                    ),
+                    dialogBackgroundColor: const Color(0xFF1E1E1E))
+                : Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(primary: indigo600)),
             child: child!);
       },
     );
@@ -125,7 +158,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   void _showPickerOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: _isDarkMode ? surfaceDark : Colors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => Padding(
@@ -135,7 +168,9 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
           children: [
             Text("Ambil Foto Produk",
                 style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold, color: gray800)),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: _textColor)),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -143,7 +178,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                 _buildOptionBtn(
                     icon: Icons.camera_alt_rounded,
                     label: "Kamera",
-                    color: indigo600,
+                    color: _isDarkMode ? textWhite : indigo600,
                     onTap: () {
                       Navigator.pop(ctx);
                       _pickImage(ImageSource.camera);
@@ -151,7 +186,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                 _buildOptionBtn(
                     icon: Icons.photo_library_rounded,
                     label: "Galeri",
-                    color: purple600,
+                    color: _isDarkMode ? textWhite : purple600,
                     onTap: () {
                       Navigator.pop(ctx);
                       _pickImage(ImageSource.gallery);
@@ -177,11 +212,15 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
           Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: color.withOpacity(0.1), shape: BoxShape.circle),
+                  color: _isDarkMode ? inputBgDark : color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: _isDarkMode ? Border.all(color: borderGrey) : null),
               child: Icon(icon, size: 32, color: color)),
           const SizedBox(height: 8),
           Text(label,
-              style: TextStyle(fontWeight: FontWeight.w600, color: gray800)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _isDarkMode ? textGrey : gray800)),
         ],
       ),
     );
@@ -211,9 +250,11 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text("Success"),
-          content: const Text(
-              "Data form & gambar berhasil disiapkan untuk dikirim ke API."),
+          backgroundColor: _isDarkMode ? surfaceDark : Colors.white,
+          title: Text("Success", style: TextStyle(color: _textColor)),
+          content: Text(
+              "Data form & gambar berhasil disiapkan untuk dikirim ke API.",
+              style: TextStyle(color: _isDarkMode ? textGrey : Colors.black87)),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx), child: const Text("OK"))
@@ -223,23 +264,73 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     }
   }
 
-  // --- REUSABLE SHADOW DECORATION ---
-  BoxDecoration _fieldShadowDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: indigo600.withOpacity(0.12),
-          blurRadius: 16,
-          offset: const Offset(0, 5),
-          spreadRadius: -2,
-        ),
-      ],
-    );
+  // --- DECORATION DINAMIS (KUNCI PERUBAHAN TEMA) ---
+  BoxDecoration _fieldContainerDecoration() {
+    if (_isDarkMode) {
+      // Style Mode Gelap: No Shadow, Solid Border
+      return const BoxDecoration(); // Kosongkan wrapper, style pindah ke InputDecor
+    } else {
+      // Style Mode Terang: Shadow, White Box
+      return BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: indigo600.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
+            spreadRadius: -2,
+          ),
+        ],
+      );
+    }
   }
 
-  // KOLOM KIRI (SESUAI DATABASE + FIX DROPDOWN V6 + SHADOW)
+  InputDecoration _dynamicInputDecoration({String? hint, IconData? icon}) {
+    if (_isDarkMode) {
+      // DARK INPUT STYLE
+      return InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+        suffixIcon: icon != null ? Icon(icon, color: Colors.grey[500]) : null,
+        filled: true,
+        fillColor: inputBgDark,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderGrey)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.white)),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderGrey)),
+      );
+    } else {
+      // LIGHT INPUT STYLE (Original)
+      return InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+        suffixIcon: icon != null ? Icon(icon, color: Colors.grey[400]) : null,
+        filled: true,
+        fillColor: Colors.transparent, // Karena wrapper container udah putih
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: indigo600, width: 2)),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
+      );
+    }
+  }
+
+  // KOLOM KIRI
   Widget _buildLeftColumn() {
     return Column(
       children: [
@@ -257,17 +348,14 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
             icon: Icons.calendar_today,
             onTap: () => _selectDate(context)),
         const SizedBox(height: 28),
-
-        // SEARCHABLE DROPDOWN (CUSTOMER)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildLabel("Nama Customer", isRequired: true),
             const SizedBox(height: 10),
             Container(
-              decoration: _fieldShadowDecoration(),
+              decoration: _fieldContainerDecoration(),
               child: DropdownSearch<String>(
-                // ✅ V6 Fix: Items pakai fungsi logic
                 items: (filter, loadProps) {
                   if (filter.isEmpty) return _customerList;
                   return _customerList
@@ -277,48 +365,27 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                 },
                 popupProps: PopupProps.menu(
                   showSearchBox: true,
+                  menuProps: MenuProps(
+                      backgroundColor: _isDarkMode ? surfaceDark : Colors.white,
+                      borderRadius: BorderRadius.circular(12)),
+                  itemBuilder: (context, item, isDisabled, isSelected) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: Text(item, style: TextStyle(color: _textColor)),
+                    );
+                  },
                   searchFieldProps: TextFieldProps(
-                    decoration: InputDecoration(
-                      hintText: "Cari PT...",
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                    ),
+                    style: TextStyle(color: _textColor),
+                    decoration: _dynamicInputDecoration(hint: "Cari PT..."),
                   ),
-                  menuProps: MenuProps(borderRadius: BorderRadius.circular(12)),
                 ),
-                // ✅ V6 Fix: Pakai decoratorProps
                 decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                    hintText: "Pilih Customer...",
-                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 16),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: Colors.grey.withOpacity(0.1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: indigo600, width: 2),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: Colors.grey.withOpacity(0.1)),
-                    ),
-                  ),
+                  baseStyle: TextStyle(color: _textColor),
+                  decoration:
+                      _dynamicInputDecoration(hint: "Pilih Customer..."),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCustomer = value;
-                  });
-                },
+                onChanged: (value) => setState(() => _selectedCustomer = value),
                 selectedItem: _selectedCustomer,
                 validator: (value) =>
                     value == null ? "Customer wajib dipilih" : null,
@@ -326,7 +393,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
             ),
           ],
         ),
-
         const SizedBox(height: 28),
         _buildInputGroup("No Pengganti", _noPenggantiController,
             hint: "Masukkan nomor pengganti"),
@@ -340,7 +406,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     );
   }
 
-  // 🔥 KOLOM KANAN (SESUAI DATABASE)
+  // KOLOM KANAN
   Widget _buildRightColumn() {
     return Column(
       children: [
@@ -375,18 +441,22 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // BACKGROUND DINAMIS
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFEEF2FF), Colors.white, Color(0xFFFAF5FF)],
-          ),
+        decoration: BoxDecoration(
+          color: _isDarkMode ? bgBlack : null, // Dark Mode: Solid Black
+          gradient: _isDarkMode
+              ? null
+              : const LinearGradient(
+                  // Light Mode: Gradient
+                  begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  colors: [Color(0xFFEEF2FF), Colors.white, Color(0xFFFAF5FF)],
+                ),
         ),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1150),
                 child: Column(
@@ -399,75 +469,99 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                           width: 52,
                           height: 52,
                           decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  colors: [indigo600, purple600]),
+                              color: _isDarkMode ? inputBgDark : null,
+                              gradient: _isDarkMode
+                                  ? null
+                                  : LinearGradient(
+                                      colors: [indigo600, purple600]),
                               borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: indigo600.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6))
-                              ]),
-                          child: const Icon(
-                              Icons
-                                  .account_circle_outlined, // Ganti icon biar cocok
-                              color: Colors.white,
-                              size: 26),
+                              border: _isDarkMode
+                                  ? Border.all(color: borderGrey)
+                                  : null,
+                              boxShadow: _isDarkMode
+                                  ? []
+                                  : [
+                                      BoxShadow(
+                                          color: indigo600.withOpacity(0.3),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6))
+                                    ]),
+                          child: Icon(Icons.account_circle_outlined,
+                              color: Colors.white, size: 26),
                         ),
                         const SizedBox(width: 18),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 5. GANTI TEKS DI SINI
                               Text("Selamat Datang, $_loggedInName",
                                   style: TextStyle(
-                                      fontSize: 26,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold,
-                                      color: gray800)),
+                                      color: _textColor)),
                               const SizedBox(height: 4),
                               Text("Form Input Pengecekan Produk - LBTS",
                                   style: TextStyle(
-                                      fontSize: 15, color: Colors.grey[600])),
+                                      fontSize: 14,
+                                      color: _isDarkMode
+                                          ? textGrey
+                                          : Colors.grey[600])),
                             ],
                           ),
                         ),
-                        // TOMBOL CLOSE (LOGOUT/BACK)
+
+                        // TOMBOL GANTI TEMA
+                        IconButton(
+                          onPressed: _toggleTheme,
+                          icon: Icon(_isDarkMode
+                              ? Icons.light_mode_rounded
+                              : Icons.dark_mode_rounded),
+                          color: _isDarkMode ? Colors.yellow : indigo600,
+                          tooltip: "Ganti Tema",
+                        ),
+                        const SizedBox(width: 10),
+
+                        // TOMBOL LOGOUT
                         Container(
                           decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: _isDarkMode ? inputBgDark : Colors.white,
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 10)
-                              ]),
+                              boxShadow: _isDarkMode
+                                  ? []
+                                  : [
+                                      BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 10)
+                                    ]),
                           child: IconButton(
                             onPressed: () => Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                     builder: (c) => const TabletLoginPage())),
-                            icon: const Icon(Icons
-                                .logout), // Ganti jadi icon logout biar make sense
+                            icon: const Icon(Icons.logout),
                             color: Colors.redAccent,
                           ),
                         )
                       ],
                     ),
-                    const SizedBox(height: 35),
+                    const SizedBox(height: 30),
 
                     // MAIN CARD
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: _cardColor,
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.indigo.withOpacity(0.08),
-                              blurRadius: 40,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 20))
-                        ],
+                        border:
+                            _isDarkMode ? Border.all(color: borderGrey) : null,
+                        boxShadow: _isDarkMode
+                            ? []
+                            : [
+                                BoxShadow(
+                                    color: Colors.indigo.withOpacity(0.08),
+                                    blurRadius: 40,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 20))
+                              ],
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: Column(
@@ -477,9 +571,16 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 32, vertical: 28),
                             decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                    colors: [indigo600, purple600])),
-                            child: const Column(
+                                color: _isDarkMode ? inputBgDark : null,
+                                gradient: _isDarkMode
+                                    ? null
+                                    : LinearGradient(
+                                        colors: [indigo600, purple600]),
+                                border: _isDarkMode
+                                    ? Border(
+                                        bottom: BorderSide(color: borderGrey))
+                                    : null),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Data Pengecekan",
@@ -487,10 +588,12 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white)),
-                                SizedBox(height: 6),
+                                const SizedBox(height: 6),
                                 Text("Silakan lengkapi semua informasi produk",
                                     style: TextStyle(
-                                        color: Color(0xFFE0E7FF),
+                                        color: _isDarkMode
+                                            ? textGrey
+                                            : const Color(0xFFE0E7FF),
                                         fontSize: 15)),
                               ],
                             ),
@@ -503,25 +606,21 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                 builder: (context, constraints) {
                                   bool isWideScreen =
                                       constraints.maxWidth > 900;
-
                                   if (isWideScreen) {
                                     return Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(child: _buildLeftColumn()),
-                                        const SizedBox(width: 50),
-                                        Expanded(child: _buildRightColumn()),
-                                      ],
-                                    );
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(child: _buildLeftColumn()),
+                                          const SizedBox(width: 50),
+                                          Expanded(child: _buildRightColumn()),
+                                        ]);
                                   } else {
-                                    return Column(
-                                      children: [
-                                        _buildLeftColumn(),
-                                        const SizedBox(height: 30),
-                                        _buildRightColumn(),
-                                      ],
-                                    );
+                                    return Column(children: [
+                                      _buildLeftColumn(),
+                                      const SizedBox(height: 30),
+                                      _buildRightColumn()
+                                    ]);
                                   }
                                 },
                               ),
@@ -530,8 +629,11 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                           Container(
                             padding: const EdgeInsets.all(32),
                             decoration: BoxDecoration(
-                                border:
-                                    Border(top: BorderSide(color: gray200))),
+                                border: Border(
+                                    top: BorderSide(
+                                        color: _isDarkMode
+                                            ? borderGrey
+                                            : gray200))),
                             child: Row(
                               children: [
                                 Expanded(
@@ -540,12 +642,15 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                     style: OutlinedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 22),
-                                      side:
-                                          BorderSide(color: gray200, width: 2),
+                                      side: BorderSide(
+                                          color: _isDarkMode
+                                              ? borderGrey
+                                              : gray200,
+                                          width: 2),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(12)),
-                                      foregroundColor: gray800,
+                                      foregroundColor: _textColor,
                                     ),
                                     child: const Text("Reset Form",
                                         style: TextStyle(
@@ -557,42 +662,53 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                 Expanded(
                                   child: ElevatedButton.icon(
                                     onPressed: _submitData,
-                                    icon: const Icon(Icons.upload_file),
-                                    label: const Text("Submit Data",
+                                    icon: Icon(Icons.save_alt_rounded,
+                                        color: _isDarkMode
+                                            ? Colors.black
+                                            : Colors.white),
+                                    label: Text("Submit Data",
                                         style: TextStyle(
                                             fontSize: 16,
-                                            fontWeight: FontWeight.bold)),
+                                            fontWeight: FontWeight.bold,
+                                            color: _isDarkMode
+                                                ? Colors.black
+                                                : Colors.white)),
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 22),
-                                      backgroundColor: Colors.transparent,
-                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors
+                                          .transparent, // Buat gradient light mode
                                       elevation: 0,
                                       shadowColor: Colors.transparent,
                                     ).copyWith(
-                                      backgroundColor:
-                                          MaterialStateProperty.resolveWith(
-                                              (states) => null),
-                                      backgroundBuilder:
-                                          (context, states, child) {
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                              gradient: LinearGradient(colors: [
-                                                indigo600,
-                                                purple600
-                                              ]),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    color: indigo600
-                                                        .withOpacity(0.3),
-                                                    blurRadius: 16,
-                                                    offset: const Offset(0, 8))
-                                              ]),
-                                          child: child,
-                                        );
-                                      },
+                                      backgroundColor: MaterialStateProperty
+                                          .resolveWith((states) => _isDarkMode
+                                              ? Colors.white
+                                              : null), // Darkmode putih solid
+                                      backgroundBuilder: _isDarkMode
+                                          ? null
+                                          : (context, states, child) {
+                                              return Container(
+                                                decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                        colors: [
+                                                          indigo600,
+                                                          purple600
+                                                        ]),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                          color: indigo600
+                                                              .withOpacity(0.3),
+                                                          blurRadius: 16,
+                                                          offset: const Offset(
+                                                              0, 8))
+                                                    ]),
+                                                child: child,
+                                              );
+                                            },
                                     ),
                                   ),
                                 ),
@@ -613,8 +729,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     );
   }
 
-  // --- WIDGET HELPER ---
-
+  // --- WIDGET BUILDER ---
   Widget _buildInputGroup(String label, TextEditingController controller,
       {bool isRequired = false,
       String? hint,
@@ -627,35 +742,16 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       children: [
         _buildLabel(label, isRequired: isRequired),
         const SizedBox(height: 10),
-        // WRAPPER CONTAINER UNTUK SHADOW
         Container(
-          decoration: _fieldShadowDecoration(),
+          decoration: _fieldContainerDecoration(),
           child: TextFormField(
             controller: controller,
             readOnly: onTap != null,
             onTap: onTap,
             maxLines: maxLines,
             keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-            style: const TextStyle(fontSize: 15),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              suffixIcon:
-                  icon != null ? Icon(icon, color: Colors.grey[400]) : null,
-              filled: true,
-              fillColor: Colors.transparent,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: indigo600, width: 2)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
-            ),
+            style: TextStyle(fontSize: 15, color: _textColor),
+            decoration: _dynamicInputDecoration(hint: hint, icon: icon),
             validator:
                 isRequired ? (v) => v!.isEmpty ? "Required" : null : null,
           ),
@@ -672,34 +768,20 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       children: [
         _buildLabel(label, isRequired: isRequired),
         const SizedBox(height: 10),
-        // WRAPPER CONTAINER UNTUK SHADOW
         Container(
-          decoration: _fieldShadowDecoration(),
+          decoration: _fieldContainerDecoration(),
           child: DropdownButtonFormField<String>(
             value: value,
+            dropdownColor: _isDarkMode ? inputBgDark : Colors.white,
             items: items
-                .map((e) =>
-                    DropdownMenuItem(value: e.toLowerCase(), child: Text(e)))
+                .map((e) => DropdownMenuItem(
+                    value: e.toLowerCase(),
+                    child: Text(e, style: TextStyle(color: _textColor))))
                 .toList(),
             onChanged: onChanged,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-            decoration: InputDecoration(
-              hintText: "Pilih opsi...",
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              filled: true,
-              fillColor: Colors.transparent,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: indigo600, width: 2)),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
-            ),
+            icon: Icon(Icons.keyboard_arrow_down_rounded,
+                color: Colors.grey[400]),
+            decoration: _dynamicInputDecoration(hint: "Pilih opsi..."),
           ),
         ),
         if (label == "Jenis Produk")
@@ -721,7 +803,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
         style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: gray800,
+            color: _labelColor,
             letterSpacing: 0.3),
         children: isRequired
             ? [const TextSpan(text: " *", style: TextStyle(color: Colors.red))]
@@ -731,26 +813,35 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   }
 
   Widget _buildStatusButton(String label, String value, IconData icon,
-      Color activeColor, Color activeBg) {
+      Color activeColor, Color activeBgLight) {
     bool isSelected = _status == value;
+    // Dark mode active color adjustment
+    Color activeBg =
+        _isDarkMode ? activeColor.withOpacity(0.15) : activeBgLight;
+
     return GestureDetector(
       onTap: () => setState(() => _status = value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: 60,
         decoration: BoxDecoration(
-            color: isSelected ? activeBg : Colors.white,
+            color: isSelected
+                ? activeBg
+                : (_isDarkMode ? Colors.transparent : Colors.white),
             border: Border.all(
-                color: isSelected ? activeColor : gray200,
+                color: isSelected
+                    ? activeColor
+                    : (_isDarkMode ? borderGrey : gray200),
                 width: isSelected ? 2 : 1),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: indigo600.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ]),
+            boxShadow: _isDarkMode
+                ? []
+                : [
+                    BoxShadow(
+                        color: indigo600.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4))
+                  ]),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -771,24 +862,26 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   Widget _buildPhotoUploadArea() {
     return GestureDetector(
       onTap: _showPickerOptions,
-      // CONTAINER UPLOAD JUGA DIKASIH SHADOW
       child: Container(
         height: 220,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFFEEF2FF).withOpacity(0.6),
+          color: _isDarkMode
+              ? inputBgDark
+              : const Color(0xFFEEF2FF).withOpacity(0.6),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: Colors.indigo.shade200,
-              width: 2,
+              color: _isDarkMode ? borderGrey : Colors.indigo.shade200,
+              width: _isDarkMode ? 1 : 2,
               style: BorderStyle.solid),
-          boxShadow: [
-            BoxShadow(
-              color: indigo600.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: _isDarkMode
+              ? []
+              : [
+                  BoxShadow(
+                      color: indigo600.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4))
+                ],
         ),
         child: _pickedImage != null
             ? Stack(
@@ -823,20 +916,32 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                       width: 70,
                       height: 70,
                       decoration: BoxDecoration(
-                          color: const Color(0xFFE0E7FF),
-                          shape: BoxShape.circle),
-                      child:
-                          Icon(Icons.camera_alt, color: indigo600, size: 36)),
+                          color: _isDarkMode
+                              ? surfaceDark
+                              : const Color(0xFFE0E7FF),
+                          shape: BoxShape.circle,
+                          border: _isDarkMode
+                              ? Border.all(color: borderGrey)
+                              : null),
+                      child: Icon(
+                          _isDarkMode
+                              ? Icons.camera_alt_outlined
+                              : Icons.camera_alt,
+                          color: _isDarkMode ? textWhite : indigo600,
+                          size: 36)),
                   const SizedBox(height: 16),
                   Text("Upload Foto Produk",
                       style: TextStyle(
-                          color: indigo600,
+                          color: _isDarkMode ? textWhite : indigo600,
                           fontWeight: FontWeight.bold,
                           fontSize: 16)),
                   const SizedBox(height: 6),
                   Text("JPG, PNG (Max 5MB)",
                       style: TextStyle(
-                          color: indigo600.withOpacity(0.7), fontSize: 13)),
+                          color: _isDarkMode
+                              ? textGrey
+                              : indigo600.withOpacity(0.7),
+                          fontSize: 13)),
                 ],
               ),
       ),
