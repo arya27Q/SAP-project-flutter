@@ -6,6 +6,9 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart'; // Pastikan import ini sesuai
 import 'dart:math';
+// Tambahkan import ini nanti kalau mau nembak API asli:
+// import 'package:http/http.dart' as http;
+// import 'dart:convert';
 
 class LbtsFormPage extends StatefulWidget {
   const LbtsFormPage({super.key});
@@ -50,6 +53,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   final TextEditingController _noSoController = TextEditingController();
 
   // --- STATE VARIABLES ---
+  Map<String, dynamic>? _selectedSoData;
   String? _selectedProduct;
   String? _selectedDivisi;
   String? _status;
@@ -59,6 +63,8 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
 
   // --- DATA DUMMY ---
   final List<String> _customerList = [
+    "PT. SINAR JAYA MAKMUR",
+    "PT. ABC BERSAMA",
     "PT. Sejahtera Bersama",
     "CV. Maju Jaya",
     "PT. Global Indonesia",
@@ -123,7 +129,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       builder: (context, child) {
-        // Theme DatePicker Dinamis
         return Theme(
             data: _isDarkMode
                 ? Theme.of(context).copyWith(
@@ -237,6 +242,7 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
       _selectedDivisi = null;
       _status = null;
       _pickedImage = null;
+      _selectedSoData = null;
     });
   }
 
@@ -264,13 +270,10 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     }
   }
 
-  // --- DECORATION DINAMIS (KUNCI PERUBAHAN TEMA) ---
   BoxDecoration _fieldContainerDecoration() {
     if (_isDarkMode) {
-      // Style Mode Gelap: No Shadow, Solid Border
-      return const BoxDecoration(); // Kosongkan wrapper, style pindah ke InputDecor
+      return const BoxDecoration();
     } else {
-      // Style Mode Terang: Shadow, White Box
       return BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -288,7 +291,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
 
   InputDecoration _dynamicInputDecoration({String? hint, IconData? icon}) {
     if (_isDarkMode) {
-      // DARK INPUT STYLE
       return InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
@@ -308,13 +310,12 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
             borderSide: BorderSide(color: borderGrey)),
       );
     } else {
-      // LIGHT INPUT STYLE (Original)
       return InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
         suffixIcon: icon != null ? Icon(icon, color: Colors.grey[400]) : null,
         filled: true,
-        fillColor: Colors.transparent, // Karena wrapper container udah putih
+        fillColor: Colors.transparent,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         enabledBorder: OutlineInputBorder(
@@ -333,12 +334,84 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   // KOLOM KIRI
   Widget _buildLeftColumn() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInputGroup("No Sales Order (SO)", _noSoController,
-            isRequired: true,
-            hint: "Auto Generated",
-            isNumber: true,
-            onTap: () {}),
+        _buildLabel("No Sales Order (SO)", isRequired: true),
+        const SizedBox(height: 10),
+        Container(
+          decoration: _fieldContainerDecoration(),
+          child: DropdownSearch<Map<String, dynamic>>(
+            // INI DIA COMPARE_FN NYA BIAR GAK ERROR
+            compareFn: (item1, item2) => item1["no_so"] == item2["no_so"],
+
+            items: (filter, loadProps) async {
+              if (filter.isEmpty) return [];
+
+              await Future.delayed(const Duration(milliseconds: 300));
+              List<Map<String, dynamic>> dataDummyDariAzure = [
+                {
+                  "no_so": "SO2026001",
+                  "customer": {"nama_customer": "PT. SINAR JAYA MAKMUR"}
+                },
+                {
+                  "no_so": "SO2026002",
+                  "customer": {"nama_customer": "PT. SINAR JAYA MAKMUR"}
+                },
+                {
+                  "no_so": "SO2026003",
+                  "customer": {"nama_customer": "PT. ABC BERSAMA"}
+                },
+              ];
+              return dataDummyDariAzure
+                  .where((element) => element["no_so"]
+                      .toString()
+                      .toLowerCase()
+                      .contains(filter.toLowerCase()))
+                  .toList();
+            },
+            itemAsString: (item) => item["no_so"].toString(),
+            popupProps: PopupProps.menu(
+              showSearchBox: true,
+              searchDelay: const Duration(milliseconds: 500),
+              menuProps: MenuProps(
+                  backgroundColor: _isDarkMode ? surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(12)),
+              itemBuilder: (context, item, isDisabled, isSelected) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Text(item["no_so"].toString(),
+                      style: TextStyle(color: _textColor)),
+                );
+              },
+              searchFieldProps: TextFieldProps(
+                style: TextStyle(color: _textColor),
+                decoration: _dynamicInputDecoration(
+                    hint: "Ketik min. 3 huruf (misal: SO20)..."),
+              ),
+              emptyBuilder: (context, searchEntry) => Center(
+                child: Text("Data SO tidak ditemukan",
+                    style: TextStyle(color: _labelColor)),
+              ),
+            ),
+            decoratorProps: DropDownDecoratorProps(
+              baseStyle: TextStyle(color: _textColor),
+              decoration: _dynamicInputDecoration(hint: "Cari No SO..."),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _selectedSoData = value;
+                _noSoController.text = value?["no_so"]?.toString() ?? "";
+
+                if (value != null && value["customer"] != null) {
+                  _selectedCustomer = value["customer"]["nama_customer"];
+                }
+              });
+            },
+            selectedItem: _selectedSoData,
+            validator: (value) => value == null ? "No SO wajib dipilih" : null,
+          ),
+        ),
         const SizedBox(height: 28),
         _buildInputGroup("No LBTS", _noLbtsController,
             isRequired: true, hint: "Masukkan nomor LBTS"),
@@ -441,15 +514,14 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BACKGROUND DINAMIS
       body: Container(
         decoration: BoxDecoration(
-          color: _isDarkMode ? bgBlack : null, // Dark Mode: Solid Black
+          color: _isDarkMode ? bgBlack : null,
           gradient: _isDarkMode
               ? null
               : const LinearGradient(
-                  // Light Mode: Gradient
-                  begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [Color(0xFFEEF2FF), Colors.white, Color(0xFFFAF5FF)],
                 ),
         ),
@@ -462,7 +534,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // HEADER
                     Row(
                       children: [
                         Container(
@@ -509,8 +580,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                             ],
                           ),
                         ),
-
-                        // TOMBOL GANTI TEMA
                         IconButton(
                           onPressed: _toggleTheme,
                           icon: Icon(_isDarkMode
@@ -520,8 +589,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                           tooltip: "Ganti Tema",
                         ),
                         const SizedBox(width: 10),
-
-                        // TOMBOL LOGOUT
                         Container(
                           decoration: BoxDecoration(
                               color: _isDarkMode ? inputBgDark : Colors.white,
@@ -545,8 +612,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                       ],
                     ),
                     const SizedBox(height: 30),
-
-                    // MAIN CARD
                     Container(
                       decoration: BoxDecoration(
                         color: _cardColor,
@@ -676,15 +741,15 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 22),
-                                      backgroundColor: Colors
-                                          .transparent, // Buat gradient light mode
+                                      backgroundColor: Colors.transparent,
                                       elevation: 0,
                                       shadowColor: Colors.transparent,
                                     ).copyWith(
-                                      backgroundColor: MaterialStateProperty
-                                          .resolveWith((states) => _isDarkMode
-                                              ? Colors.white
-                                              : null), // Darkmode putih solid
+                                      backgroundColor:
+                                          MaterialStateProperty.resolveWith(
+                                              (states) => _isDarkMode
+                                                  ? Colors.white
+                                                  : null),
                                       backgroundBuilder: _isDarkMode
                                           ? null
                                           : (context, states, child) {
@@ -729,7 +794,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
     );
   }
 
-  // --- WIDGET BUILDER ---
   Widget _buildInputGroup(String label, TextEditingController controller,
       {bool isRequired = false,
       String? hint,
@@ -815,7 +879,6 @@ class _LbtsFormPageState extends State<LbtsFormPage> {
   Widget _buildStatusButton(String label, String value, IconData icon,
       Color activeColor, Color activeBgLight) {
     bool isSelected = _status == value;
-    // Dark mode active color adjustment
     Color activeBg =
         _isDarkMode ? activeColor.withOpacity(0.15) : activeBgLight;
 
