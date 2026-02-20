@@ -24,6 +24,7 @@ import 'desktop/pages/purchasing/ap_credit_memo_page.dart';
 import 'desktop/pages/banking/incoming_payments/incoming_payment_page.dart';
 import 'desktop/pages/banking/outgoing_payments/outgoing_payment_page.dart';
 import 'desktop/pages/financials/journal_entry_page.dart';
+import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
 import 'desktop/pages/Quality_Control_page.dart';
 
@@ -364,6 +365,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Quality Control":
         return const DesktopQcPage();
+
+      case "Chart of Accounts":
+        return const ChartOfAccountsPage();
 
       default:
         return Center(
