@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_split_view/multi_split_view.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 
@@ -36,13 +37,11 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  // --- STATE MULTI-TAB ---
+  // --- STATE MULTI-SPLIT VIEW ---
   // List Judul halaman yang sedang terbuka (sebagai ID)
   List<String> _openPageKeys = [];
   // List Widget halaman yang sedang terbuka (disimpan di memori)
   List<Widget> _openPageWidgets = [];
-  // Index tab yang sedang aktif
-  int _activeTabIndex = 0;
 
   bool isLoggedIn = false;
   int userLevel = 1;
@@ -56,14 +55,13 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     // Default buka Dashboard saat pertama kali load (jika sudah login)
     if (isLoggedIn) {
-      _addInitialTab();
+      _addInitialWindow();
     }
   }
 
-  void _addInitialTab() {
+  void _addInitialWindow() {
     _openPageKeys = ["Dashboard"];
     _openPageWidgets = [_buildPageContent("Dashboard")];
-    _activeTabIndex = 0;
   }
 
   @override
@@ -73,7 +71,7 @@ class _MainLayoutState extends State<MainLayout> {
         onLoginSuccess: () {
           setState(() {
             isLoggedIn = true;
-            _addInitialTab(); // Reset tab saat login baru
+            _addInitialWindow(); // Reset window saat login baru
           });
         },
       );
@@ -82,9 +80,179 @@ class _MainLayoutState extends State<MainLayout> {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 850;
 
-    // String ID halaman yang aktif sekarang (untuk highlight sidebar)
+    // String ID halaman yang aktif (yang terakhir diklik)
     String currentActiveKey =
-        _openPageKeys.isNotEmpty ? _openPageKeys[_activeTabIndex] : "Dashboard";
+        _openPageKeys.isNotEmpty ? _openPageKeys.last : "Dashboard";
+
+    // --- CONTROLLER SPLIT VIEW ---
+    MultiSplitViewController contentSplitController = MultiSplitViewController(
+      areas: _openPageKeys.asMap().entries.map((entry) {
+        int index = entry.key;
+        String title = entry.value;
+        Widget content = _openPageWidgets[index];
+
+        return Area(
+          builder: (context, area) {
+            return Container(
+              margin: const EdgeInsets.all(4), // Jarak antar window
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0,
+                          0.05), // FIX: Menggunakan format yang tidak deprecated
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    )
+                  ]),
+              child: Column(
+                children: [
+                  // --- HEADER WINDOW (JUDUL & CLOSE) ---
+                  Container(
+                    height: 45,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(8)),
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade200)),
+                    ),
+                    // 🔥 FIX: Pelindung biar header nggak error kalau layar super sempit
+                    child: ClipRect(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          const double minHeaderWidth = 140.0;
+                          bool needScroll =
+                              constraints.maxWidth < minHeaderWidth;
+
+                          Widget headerContent = Container(
+                            width: needScroll
+                                ? minHeaderWidth
+                                : constraints.maxWidth,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        title == "Dashboard"
+                                            ? Icons.dashboard_rounded
+                                            : Icons.article_rounded,
+                                        size: 16,
+                                        color: const Color(0xFF4F46E5),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              color: Color(0xFF2D3748)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (title != "Dashboard" ||
+                                    _openPageKeys.length > 1)
+                                  InkWell(
+                                    onTap: () => _closeWindow(index),
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.close,
+                                          size: 14, color: Colors.red.shade400),
+                                    ),
+                                  )
+                              ],
+                            ),
+                          );
+
+                          // Kalau terlalu sempit, biarkan scroll (tapi disembunyikan pakai ClipRect)
+                          if (needScroll) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              child: headerContent,
+                            );
+                          }
+                          return headerContent;
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // --- ISI HALAMAN (ANTI KEPOTONG / OVERFLOW) ---
+                  Expanded(
+                    child: ClipRect(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Ukuran minimum form agar tidak nabrak (sesuaikan jika perlu)
+                          const double minSafeWidth = 1050.0;
+                          const double minSafeHeight = 600.0;
+
+                          bool needHorizontalScroll =
+                              constraints.maxWidth < minSafeWidth;
+                          bool needVerticalScroll =
+                              constraints.maxHeight < minSafeHeight;
+
+                          // Kunci ukuran form, kalau layar kekecilan, form tetap utuh
+                          Widget pageWrapper = SizedBox(
+                            width: needHorizontalScroll
+                                ? minSafeWidth
+                                : constraints.maxWidth,
+                            height: needVerticalScroll
+                                ? minSafeHeight
+                                : constraints.maxHeight,
+                            child: content,
+                          );
+
+                          // Otomatis kasih scroll kalau sempit
+                          if (needHorizontalScroll && needVerticalScroll) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: pageWrapper,
+                              ),
+                            );
+                          } else if (needHorizontalScroll) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: pageWrapper,
+                            );
+                          } else if (needVerticalScroll) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: pageWrapper,
+                            );
+                          }
+
+                          // Tampil normal kalau layar lebar
+                          return pageWrapper;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }).toList(),
+    );
 
     return Scaffold(
       key: _scaffoldKey,
@@ -97,154 +265,60 @@ class _MainLayoutState extends State<MainLayout> {
           : null,
       body: Row(
         children: [
+          // ==========================================
+          // SIDEBAR MENU (KIRI)
+          // ==========================================
           if (!isMobile)
             Container(
               decoration: const BoxDecoration(
-                border: Border(
-                  right: BorderSide(
-                    color: Colors.white10,
-                    width: 1,
-                  ),
-                ),
+                border:
+                    Border(right: BorderSide(color: Colors.white10, width: 1)),
               ),
               child: SidebarWidget(
                 currentView: currentActiveKey,
                 onViewChanged: (view) => _handleViewChange(view),
               ),
             ),
+
+          // ==========================================
+          // AREA KERJA KONTEN (KANAN) DENGAN SPLIT VIEW
+          // ==========================================
           Expanded(
             child: Column(
               children: [
+                // Tombol Menu untuk Mobile
                 if (isMobile)
                   Container(
                     padding: const EdgeInsets.all(10),
                     alignment: Alignment.centerLeft,
                     color: Colors.white,
                     child: IconButton(
-                      icon: Icon(Icons.menu,
-                          color: const Color.fromARGB(255, 63, 55, 179)),
+                      icon: const Icon(Icons.menu,
+                          color: Color.fromARGB(255, 63, 55, 179)),
                       onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                     ),
                   ),
 
-                // --- TAB BAR AREA (CUSTOM - FLOATING STYLE) ---
-                // Hanya muncul jika ada tab terbuka (logic desktop)
-                Container(
-                  height: 55, // Lebih tinggi dikit biar muat shadownya
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 60, 54, 179),
-                    // --- FIX: GARIS BAWAH (HEADER) ---
-                    border: Border(
-                      bottom: BorderSide(
-                          color: Colors.white10,
-                          width: 1), // Garis pembatas bawah
-                    ),
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _openPageKeys.length,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    itemBuilder: (context, index) {
-                      bool isActive = _activeTabIndex == index;
-                      String title = _openPageKeys[index];
-
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            _activeTabIndex = index;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? Colors.white
-                                : Colors.transparent, // Tab aktif jadi putih
-                            borderRadius:
-                                BorderRadius.circular(12), // Sudut tumpul
-                            boxShadow: isActive
-                                ? [
-                                    BoxShadow(
-                                      color: Colors.black
-                                          .withOpacity(0.08), // Bayangan halus
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          child: Row(
-                            children: [
-                              // Icon penanda tipe halaman
-                              Icon(
-                                title == "Dashboard"
-                                    ? Icons.dashboard_rounded
-                                    : Icons.article_rounded,
-                                size: 16,
-                                color: isActive
-                                    ? AppColors.darkIndigo
-                                    : const Color.fromARGB(255, 255, 255, 255),
-                              ),
-                              const SizedBox(width: 8),
-
-                              Text(
-                                title,
-                                style: TextStyle(
-                                  color: isActive
-                                      ? AppColors.darkIndigo
-                                      : const Color.fromARGB(
-                                          255, 255, 255, 255),
-                                  fontWeight: isActive
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                                  fontSize: 13,
-                                ),
-                              ),
-
-                              // Tombol Close (X)
-                              // Dashboard tidak boleh di-close
-                              if (title != "Dashboard") ...[
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: () => _closeTab(index),
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: isActive
-                                          ? Colors.grey[100]
-                                          : Colors.transparent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 14,
-                                      color: isActive
-                                          ? Colors.red[300]
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                )
-                              ]
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // --- ISI KONTEN (INDEXED STACK) ---
+                // Area Kerja Multi Split View
                 Expanded(
-                  child: IndexedStack(
-                    index: _activeTabIndex,
-                    children: _openPageWidgets,
+                  child: Container(
+                    color: const Color(0xFFF1F5F9),
+                    padding: const EdgeInsets.all(8.0),
+                    // Theme untuk mengatur garis pembatas (divider)
+                    child: MultiSplitViewTheme(
+                      data: MultiSplitViewThemeData(
+                        dividerPainter: DividerPainters.grooved1(
+                          color: Colors.grey.shade400,
+                          highlightedColor:
+                              const Color(0xFF4F46E5), // Biru Indigo
+                          size: 30, // Panjang titik-titik
+                        ),
+                        dividerThickness: 8, // Ketebalan area drag
+                      ),
+                      child: MultiSplitView(
+                        controller: contentSplitController,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -255,7 +329,7 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  // --- LOGIC MULTI-TAB ---
+  // --- LOGIC MULTI-SPLIT WINDOW ---
 
   void _handleViewChange(String view) {
     if (view == "Login") {
@@ -266,46 +340,51 @@ class _MainLayoutState extends State<MainLayout> {
         _openPageWidgets.clear();
       });
     } else {
-      // Logic Buka Tab Baru / Pindah Tab
+      // Logic Buka Halaman Baru Sebelahan
       setState(() {
         int existingIndex = _openPageKeys.indexOf(view);
 
-        if (existingIndex != -1) {
-          // 1. Jika tab sudah ada, pindah fokus ke tab tersebut
-          _activeTabIndex = existingIndex;
-        } else {
-          // 2. Jika belum ada, tambahkan ke list dan buat widgetnya
+        // Kalau halaman udah kebuka, nggak usah nambah lagi (biar nggak dobel)
+        if (existingIndex == -1) {
+          // Limit maksimal 3 halaman biar nggak terlalu kecil layarnya
+          if (_openPageKeys.length >= 4) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'Maksimal buka 4 layar bersamaan! Tutup salah satu dulu ya!.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            return;
+          }
+
+          // Tambah ke list dan generate widgetnya
           _openPageKeys.add(view);
-          _openPageWidgets.add(_buildPageContent(view)); // Generate widget baru
-          _activeTabIndex = _openPageKeys.length - 1; // Fokus ke tab baru
+          _openPageWidgets.add(_buildPageContent(view));
         }
       });
     }
 
+    // Tutup drawer kalau di mode mobile
     if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
       Navigator.pop(context);
     }
   }
 
-  void _closeTab(int index) {
+  void _closeWindow(int index) {
     setState(() {
-      // Hapus dari list key dan list widget
+      // Hapus dari list
       _openPageKeys.removeAt(index);
       _openPageWidgets.removeAt(index);
 
-      // Adjust active index supaya tidak error
-      if (_activeTabIndex >= index) {
-        _activeTabIndex = _activeTabIndex - 1;
-        // Pastikan tidak minus (minimal 0)
-        if (_activeTabIndex < 0 && _openPageKeys.isNotEmpty) {
-          _activeTabIndex = 0;
-        }
+      // Kalau semua ditutup, kembalikan ke dashboard biar layar nggak kosong hitam
+      if (_openPageKeys.isEmpty) {
+        _addInitialWindow();
       }
     });
   }
 
   // --- BUILD CONTENT (FACTORY) ---
-  // Diubah menerima parameter 'viewName' agar dinamis
   Widget _buildPageContent(String viewName) {
     switch (viewName) {
       case "Dashboard":
@@ -374,11 +453,11 @@ class _MainLayoutState extends State<MainLayout> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.construction, size: 80, color: Colors.grey),
+              const Icon(Icons.construction, size: 80, color: Colors.grey),
               const SizedBox(height: 20),
               Text(
                 "Halaman '$viewName' belum tersedia.",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.darkIndigo,

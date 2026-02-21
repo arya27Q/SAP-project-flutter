@@ -64,9 +64,11 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 40),
 
             _buildSectionTitle("GROUP SUBSIDIARY SYNC STATUS"),
-            const SizedBox(height: 15),
+            const SizedBox(
+                height:
+                    5), // Disesuaikan biar nggak terlalu jauh dari bayangan atas
             _buildSyncStatusList(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 25), // Disesuaikan sisa jaraknya
 
             _buildSectionTitle("CRITICAL ALERTS & APPROVALS"),
             const SizedBox(height: 15),
@@ -221,7 +223,7 @@ class _DashboardPageState extends State<DashboardPage> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.greenAccent),
                   borderRadius: BorderRadius.circular(20),
-                  color: Color(0x334CAF50)), // 0.2 opacity
+                  color: const Color(0x334CAF50)), // 0.2 opacity
               child: const Row(children: [
                 Icon(Icons.circle, size: 8, color: Colors.greenAccent),
                 SizedBox(width: 8),
@@ -237,6 +239,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // --- SYNC STATUS ---
+  // --- SYNC STATUS ---
   Widget _buildSyncStatusList() {
     final data = [
       {
@@ -249,10 +252,15 @@ class _DashboardPageState extends State<DashboardPage> {
       {"name": "PT. ATMI Duta Engineering", "status": "OFFLINE", "val": 0.0},
     ];
     return SizedBox(
-      height: 160,
+      height: 180, // Tinggi diseimbangkan lagi
       child: ListView.separated(
+        // 🔥 INI OBATNYA: Biar bayangannya bebas meluber tanpa digunting
+        clipBehavior: Clip.none,
+
         scrollDirection: Axis.horizontal,
         itemCount: data.length,
+        // Paddingnya disesuaikan biar kartu awal/akhir bayangannya nggak kepotong layar
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         separatorBuilder: (_, __) => const SizedBox(width: 25),
         itemBuilder: (context, index) {
           final item = data[index];
@@ -476,7 +484,7 @@ class _DashboardPageState extends State<DashboardPage> {
               )),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              tooltipBgColor: Color(0xCC000000), // 0.8 opacity
+              tooltipBgColor: const Color(0xCC000000), // 0.8 opacity
               tooltipRoundedRadius: 8,
               tooltipPadding: const EdgeInsets.all(8),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {

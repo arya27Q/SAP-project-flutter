@@ -26,6 +26,7 @@ dependencies:
   # --- Networking & Storage
   http: ^1.2.0
   shared_preferences: ^2.2.2
+  multi_split_view: ^3.6.1
 
 dev_dependencies:
   flutter_test:
