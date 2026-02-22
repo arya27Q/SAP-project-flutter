@@ -27,7 +27,7 @@ import 'desktop/pages/banking/outgoing_payments/outgoing_payment_page.dart';
 import 'desktop/pages/financials/journal_entry_page.dart';
 import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
-import 'desktop/pages/Quality_Control_page.dart';
+import 'desktop/pages/inventory/good_issue_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -442,8 +442,8 @@ class _MainLayoutState extends State<MainLayout> {
       case "Item Master Data":
         return const ItemMasterDataPage();
 
-      case "Quality Control":
-        return const DesktopQcPage();
+      case "Good Issue":
+        return const GoodIssuePage();
 
       case "Chart of Accounts":
         return const ChartOfAccountsPage();

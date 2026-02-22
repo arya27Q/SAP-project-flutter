@@ -34,18 +34,18 @@ class _JournalEntryPageState extends State<JournalEntryPage>
 
   // Shadow Ungu Halus
   List<BoxShadow> get _softShadow => [
-    BoxShadow(
-      color: const Color(0xFF4F46E5).withOpacity(0.08),
-      offset: const Offset(0, 4),
-      blurRadius: 12,
-      spreadRadius: -2,
-    ),
-    BoxShadow(
-      color: Colors.black.withOpacity(0.03),
-      offset: const Offset(0, 2),
-      blurRadius: 4,
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF4F46E5).withOpacity(0.08),
+          offset: const Offset(0, 4),
+          blurRadius: 12,
+          spreadRadius: -2,
+        ),
+        BoxShadow(
+          color: Colors.black.withOpacity(0.03),
+          offset: const Offset(0, 2),
+          blurRadius: 4,
+        ),
+      ];
 
   // Border Tipis Indigo
   Border get _thinBorder =>
@@ -89,8 +89,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             return;
           }
 
-          bool isNumericField =
-              key.contains("qty") ||
+          bool isNumericField = key.contains("qty") ||
               key.contains("stock") ||
               key.contains("price") ||
               key.contains("total") ||
@@ -162,10 +161,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String cleanVal =
+          val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
       return double.tryParse(cleanVal) ?? 0.0;
     }
 
@@ -235,378 +232,380 @@ class _JournalEntryPageState extends State<JournalEntryPage>
 
   // --- HEADER UTAMA ---
   Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // --- KOLOM KIRI ---
-        Expanded(
-          flex: 7,
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernNoFieldRow(
-                      "Series",
-                      "h_series",
-                      ["26S", "25S"],
-                      "h_no",
-                      initialNo: "263301173",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Posting Date",
-                      "h_post",
-                      "21.January.2026",
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: Text(
-                            "Origin",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: secondarySlate,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 28),
-                        Expanded(
-                          child: _buildSmallDropdown("h_origin", [
-                            "IN",
-                            "OUT",
-                            "CN",
-                          ]),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildSimpleTextField(
-                            "h_origin_no",
-                            initial: "261300204",
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Due Date",
-                      "h_due",
-                      "20.February.2026",
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernFieldRow(
-                      "Trans. No.",
-                      "h_trans_no",
-                      initial: "241251",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderDate(
-                      "Doc. Date",
-                      "h_doc_date",
-                      "21.January.2026",
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: Text(
-                            "Trans. Code",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: secondarySlate,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 28),
-                        Expanded(
-                          child: _buildSmallDropdown("h_trans_code", [
-                            "",
-                            "Code 1",
-                            "Code 2",
-                          ]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildModernFieldRow(
-                      "Ref. 1",
-                      "h_ref1",
-                      initial: "261300204",
-                      labelWidth: 90,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildModernFieldRow(
-                      "Ref. 2",
-                      "h_ref2",
-                      initial: "7100003678",
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: _buildModernFieldRow(
-                      "Ref. 3",
-                      "h_ref3",
-                      labelWidth: 90,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Blanket Agreement", "h_blanket"),
-            ],
-          ),
-        ),
-        const SizedBox(width: 40),
-
-        // --- KOLOM KANAN ---
-        Expanded(
-          flex: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Remarks",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: secondarySlate,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    height: _inputHeight,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF9C4),
-                      borderRadius: _inputRadius,
-                      border: _thinBorder, // Border Ungu
-                      boxShadow: _softShadow, // Shadow
-                    ),
-                    child: TextField(
-                      controller: _getCtrl(
-                        "h_remarks",
-                        initial: "A/R Invoices - C-01058",
-                      ),
-                      style: const TextStyle(fontSize: 12),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSmallDropdown("h_temp_type", [
-                      "Template Type",
-                    ]),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildSmallDropdown("h_template", ["Template"]),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSmallDropdown("h_indicator", ["Indicator"]),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildSmallDropdown("h_project", ["Project"]),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildCompactCheckbox(
-                "Revaluation Reporting Exch. Rate",
-                "cb_reval",
-              ),
-              _buildCompactCheckbox("Automatic Tax", "cb_auto_tax"),
-              _buildCompactCheckbox("Manage Deferred Tax", "cb_def_tax"),
-              _buildCompactCheckbox("Manage WTax", "cb_wtax"),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
-  // --- MIDDLE HEADER ---
-  Widget _buildMiddleHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Column(
-      children: [
-        Row(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- KOLOM KIRI ---
             Expanded(
-              flex: 1,
+              flex: 7,
               child: Column(
                 children: [
-                  _buildModernFieldRow(
-                    "G/L Acct/BP Code",
-                    "h_bp_code",
-                    initial: "C-01058",
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: _buildModernNoFieldRow(
+                          "Series",
+                          "h_series",
+                          ["26S", "25S"],
+                          "h_no",
+                          initialNo: "263301173",
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildHeaderDate(
+                          "Posting Date",
+                          "h_post",
+                          "21.January.2026",
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildModernFieldRow(
-                    "G/L Acct/BP Name",
-                    "h_bp_name",
-                    initial: "PT REKAINDO GLOBAL JASA",
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              child: Text(
+                                "Origin",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: secondarySlate,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 28),
+                            Expanded(
+                              child: _buildSmallDropdown("h_origin", [
+                                "IN",
+                                "OUT",
+                                "CN",
+                              ]),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _buildSimpleTextField(
+                                "h_origin_no",
+                                initial: "261300204",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildHeaderDate(
+                          "Due Date",
+                          "h_due",
+                          "20.February.2026",
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildModernFieldRow(
-                    "Ref. 1",
-                    "h_ref1",
-                    initial: "261300204",
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: _buildModernFieldRow(
+                          "Trans. No.",
+                          "h_trans_no",
+                          initial: "241251",
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildHeaderDate(
+                          "Doc. Date",
+                          "h_doc_date",
+                          "21.January.2026",
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildModernFieldRow(
-                    "Ref. 2",
-                    "h_ref2",
-                    initial: "7100003678",
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              child: Text(
+                                "Trans. Code",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: secondarySlate,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 28),
+                            Expanded(
+                              child: _buildSmallDropdown("h_trans_code", [
+                                "",
+                                "Code 1",
+                                "Code 2",
+                              ]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildModernFieldRow(
+                          "Ref. 1",
+                          "h_ref1",
+                          initial: "261300204",
+                          labelWidth: 90,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildModernFieldRow("Ref. 3", "h_ref3", initial: "1"),
-                  const SizedBox(height: 12),
-                  _buildModernFieldRow(
-                    "Offset Account",
-                    "h_offset",
-                    initial: "4111101-1-1-02",
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: _buildModernFieldRow(
+                          "Ref. 2",
+                          "h_ref2",
+                          initial: "7100003678",
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: _buildModernFieldRow(
+                          "Ref. 3",
+                          "h_ref3",
+                          labelWidth: 90,
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Blanket Agreement", "h_blanket"),
                 ],
               ),
             ),
             const SizedBox(width: 40),
+
             // --- KOLOM KANAN ---
             Expanded(
-              flex: 1,
+              flex: 3,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderDate("Posting Date", "h_post", "21.January.2026"),
-                  const SizedBox(height: 12),
-                  _buildHeaderDate("Due Date", "h_due", "20.February.2026"),
-                  const SizedBox(height: 12),
-                  _buildHeaderDate(
-                    "Doc. Date",
-                    "h_doc_date",
-                    "21.January.2026",
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Remarks",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: secondarySlate,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        height: _inputHeight,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF9C4),
+                          borderRadius: _inputRadius,
+                          border: _thinBorder, // Border Ungu
+                          boxShadow: _softShadow, // Shadow
+                        ),
+                        child: TextField(
+                          controller: _getCtrl(
+                            "h_remarks",
+                            initial: "A/R Invoices - C-01058",
+                          ),
+                          style: const TextStyle(fontSize: 12),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildFieldRow("Project", "h_project", initial: ""),
-                  const SizedBox(height: 12),
-                  _buildFieldRow("Tax Group", "h_tax_group", initial: ""),
-                  const SizedBox(height: 12),
-                  _buildFieldRow(
-                    "Distr. Rule",
-                    "h_distr_rule",
-                    initial: "",
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSmallDropdown("h_temp_type", [
+                          "Template Type",
+                        ]),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildSmallDropdown("h_template", ["Template"]),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child:
+                            _buildSmallDropdown("h_indicator", ["Indicator"]),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildSmallDropdown("h_project", ["Project"]),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCompactCheckbox(
+                    "Revaluation Reporting Exch. Rate",
+                    "cb_reval",
+                  ),
+                  _buildCompactCheckbox("Automatic Tax", "cb_auto_tax"),
+                  _buildCompactCheckbox("Manage Deferred Tax", "cb_def_tax"),
+                  _buildCompactCheckbox("Manage WTax", "cb_wtax"),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        _buildModernFieldRow(
-          "Primary Form Item",
-          "h_primary_form",
-          initial: "",
+      );
+
+  // --- MIDDLE HEADER ---
+  Widget _buildMiddleHeader() => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- KOLOM KIRI ---
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      _buildModernFieldRow(
+                        "G/L Acct/BP Code",
+                        "h_bp_code",
+                        initial: "C-01058",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildModernFieldRow(
+                        "G/L Acct/BP Name",
+                        "h_bp_name",
+                        initial: "PT REKAINDO GLOBAL JASA",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildModernFieldRow(
+                        "Ref. 1",
+                        "h_ref1",
+                        initial: "261300204",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildModernFieldRow(
+                        "Ref. 2",
+                        "h_ref2",
+                        initial: "7100003678",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildModernFieldRow("Ref. 3", "h_ref3", initial: "1"),
+                      const SizedBox(height: 12),
+                      _buildModernFieldRow(
+                        "Offset Account",
+                        "h_offset",
+                        initial: "4111101-1-1-02",
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 40),
+                // --- KOLOM KANAN ---
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      _buildHeaderDate(
+                          "Posting Date", "h_post", "21.January.2026"),
+                      const SizedBox(height: 12),
+                      _buildHeaderDate("Due Date", "h_due", "20.February.2026"),
+                      const SizedBox(height: 12),
+                      _buildHeaderDate(
+                        "Doc. Date",
+                        "h_doc_date",
+                        "21.January.2026",
+                      ),
+                      const SizedBox(height: 12),
+                      _buildFieldRow("Project", "h_project", initial: ""),
+                      const SizedBox(height: 12),
+                      _buildFieldRow("Tax Group", "h_tax_group", initial: ""),
+                      const SizedBox(height: 12),
+                      _buildFieldRow(
+                        "Distr. Rule",
+                        "h_distr_rule",
+                        initial: "",
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildModernFieldRow(
+              "Primary Form Item",
+              "h_primary_form",
+              initial: "",
+            ),
+          ],
+        ),
+      );
 
   Widget _buildSimpleTextField(
     String key, {
@@ -874,8 +873,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }) {
     final controller = _getCtrl(key, initial: initial);
 
-    bool isNumeric =
-        key.contains("qty") ||
+    bool isNumeric = key.contains("qty") ||
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
@@ -1001,10 +999,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     for (int i = 0; i < _rowCount; i++) {
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String cleanVal =
+          val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
       totalAllRows += double.tryParse(cleanVal) ?? 0;
     }
 
@@ -1021,117 +1017,123 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }
 
   Widget _buildLogisticsTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
-                "",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildModernCheckbox("Print Picking Sheet", "cb_print"),
-              _buildModernCheckbox(
-                "Proc. Doc. For Non Drop-Ship",
-                "cb_non_drop",
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Ship To", "log_ship_to",
+                      isTextArea: true),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Bill To", "log_bill_to",
+                      isTextArea: true),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Shipping Type", "log_ship_type", [
+                    "",
+                  ]),
+                ],
               ),
-              _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
-              _buildModernCheckbox("Approved", "cb_approved"),
-              _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
-              const SizedBox(height: 20),
-              _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "BP Channel Contact",
-                "log_bp_cont",
-                [""],
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModernCheckbox("Print Picking Sheet", "cb_print"),
+                  _buildModernCheckbox(
+                    "Proc. Doc. For Non Drop-Ship",
+                    "cb_non_drop",
+                  ),
+                  _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
+                  _buildModernCheckbox("Approved", "cb_approved"),
+                  _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
+                  const SizedBox(height: 20),
+                  _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("BP Channel Name", "log_bp_name"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "BP Channel Contact",
+                    "log_bp_cont",
+                    [""],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildAccountingTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Journal Remark", "acc_journal"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "Central Bank Ind.",
-                "acc_central_bank",
-                [""],
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Journal Remark", "acc_journal"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Payment Terms", "acc_pay_terms", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Payment Method", "acc_pay_method", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "Central Bank Ind.",
+                    "acc_central_bank",
+                    [""],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Manually\nRecalculate Due Date",
+                    "acc_manual_due",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Cash Discount\nDate Offset",
+                    "acc_cash_disc",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernCheckbox(
+                    "Use Shipped Goods Account",
+                    "cb_shipped_acc",
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Manually\nRecalculate Due Date",
-                "acc_manual_due",
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("BP Project", "acc_bp_proj"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Required Date", "acc_req_date"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Indicator", "acc_indicator", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Order Number", "acc_order_no"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
+                ],
               ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Cash Discount\nDate Offset",
-                "acc_cash_disc",
-              ),
-              const SizedBox(height: 12),
-              _buildModernCheckbox(
-                "Use Shipped Goods Account",
-                "cb_shipped_acc",
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("BP Project", "acc_bp_proj"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Required Date", "acc_req_date"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Order Number", "acc_order_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
@@ -1224,30 +1226,30 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }
 
   Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        const SizedBox(
-          width: 140,
-          child: Text("Discount", style: TextStyle(fontSize: 12)),
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 140,
+              child: Text("Discount", style: TextStyle(fontSize: 12)),
+            ),
+            const SizedBox(width: 28),
+            SizedBox(
+              width: 40,
+              child: _buildSummaryBox(
+                "f_disc_pct",
+                isPercent: true,
+                defaultValue: "0",
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4),
+              child: Text("%", style: TextStyle(fontSize: 12)),
+            ),
+            Expanded(child: _buildSummaryBox("f_disc_val")),
+          ],
         ),
-        const SizedBox(width: 28),
-        SizedBox(
-          width: 40,
-          child: _buildSummaryBox(
-            "f_disc_pct",
-            isPercent: true,
-            defaultValue: "0",
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text("%", style: TextStyle(fontSize: 12)),
-        ),
-        Expanded(child: _buildSummaryBox("f_disc_val")),
-      ],
-    ),
-  );
+      );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Row(
@@ -1312,65 +1314,67 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }
 
   Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["cb_rounding"] ?? false,
-                  activeColor: primaryIndigo,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 140,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _checkStates["cb_rounding"] ?? false,
+                      activeColor: primaryIndigo,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      side: BorderSide(color: borderGrey, width: 1.5),
+                      onChanged: (v) =>
+                          setState(() => _checkStates["cb_rounding"] = v!),
+                    ),
                   ),
-                  side: BorderSide(color: borderGrey, width: 1.5),
-                  onChanged: (v) =>
-                      setState(() => _checkStates["cb_rounding"] = v!),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Rounding",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: secondarySlate,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                "Rounding",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: secondarySlate,
-                  fontWeight: FontWeight.w500,
-                ),
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: _buildSummaryBox(
+                "f_rounding",
+                isReadOnly: !(_checkStates["cb_rounding"] ?? false),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: _buildSummaryBox(
-            "f_rounding",
-            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Delete", isDanger: true),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
-      ],
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _buildSAPActionButton("Add", isPrimary: true),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Delete", isDanger: true),
+            const Spacer(),
+            _buildSAPActionButton("Copy From",
+                customColor: Colors.blue.shade700),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Copy To",
+                customColor: Colors.orange.shade600),
+          ],
+        ),
+      );
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
@@ -1470,15 +1474,14 @@ class _JournalEntryPageState extends State<JournalEntryPage>
               _fieldValues[key] = val;
               if (key == "f_disc_pct") {
                 double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
+                double before = double.tryParse(
                       _getCtrl(
                         "f_before_disc",
                       ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
                     ) ??
                     0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
+                _getCtrl("f_disc_val").text =
+                    (before * pct / 100).toStringAsFixed(2);
                 _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
               }
             });
@@ -1626,119 +1629,123 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
-  }) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: Container(
-            height: _inputHeight,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: _inputRadius,
-              border: _thinBorder, // Border Ungu
-              boxShadow: _softShadow, // Shadow
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 70,
-                  height: _inputHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(10),
-                    ),
-                    border: Border(
-                      right: _thinBorder.top,
-                    ), // Border tipis kanan
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value:
-                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                      isDense: true,
-                      style: const TextStyle(fontSize: 11, color: Colors.black),
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: primaryIndigo.withOpacity(0.6), // Icon Indigo
-                      ),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropdownKey] = v!),
-                      items: seriesOptions
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
-                    ),
-                  ),
+  }) =>
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
                 ),
-                Expanded(
-                  child: Container(
-                    height: _inputHeight,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(10),
+              ),
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: Container(
+                height: _inputHeight,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: _inputRadius,
+                  border: _thinBorder, // Border Ungu
+                  boxShadow: _softShadow, // Shadow
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 70,
+                      height: _inputHeight,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.horizontal(
+                          left: Radius.circular(10),
+                        ),
+                        border: Border(
+                          right: _thinBorder.top,
+                        ), // Border tipis kanan
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _dropdownValues[dropdownKey] ??
+                              seriesOptions.first,
+                          isDense: true,
+                          style: const TextStyle(
+                              fontSize: 11, color: Colors.black),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 18,
+                            color:
+                                primaryIndigo.withOpacity(0.6), // Icon Indigo
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _dropdownValues[dropdownKey] = v!),
+                          items: seriesOptions
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
-                    child: Center(
-                      child: TextField(
-                        controller: _getCtrl(textKey, initial: initialNo),
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
+                    Expanded(
+                      child: Container(
+                        height: _inputHeight,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.horizontal(
+                            right: Radius.circular(10),
                           ),
                         ),
-                        onChanged: (val) {
-                          _fieldValues[textKey] = val;
-                        },
+                        child: Center(
+                          child: TextField(
+                            controller: _getCtrl(textKey, initial: initialNo),
+                            style: const TextStyle(fontSize: 12),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                            ),
+                            onChanged: (val) {
+                              _fieldValues[textKey] = val;
+                            },
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildModernCheckbox(String label, String key) => Row(
-    children: [
-      SizedBox(
-        width: 24,
-        height: 32,
-        child: Checkbox(
-          value: _checkStates[key] ?? false,
-          activeColor: primaryIndigo,
-          onChanged: (val) => setState(() => _checkStates[key] = val!),
-        ),
-      ),
-      const SizedBox(width: 8),
-      Text(label, style: const TextStyle(fontSize: 12)),
-    ],
-  );
+        children: [
+          SizedBox(
+            width: 24,
+            height: 32,
+            child: Checkbox(
+              value: _checkStates[key] ?? false,
+              activeColor: primaryIndigo,
+              onChanged: (val) => setState(() => _checkStates[key] = val!),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
@@ -1774,96 +1781,98 @@ class _JournalEntryPageState extends State<JournalEntryPage>
     String label,
     String key,
     List<String> items,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+  ) =>
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 28),
+            Expanded(child: _buildSmallDropdown(key, items)),
+          ],
         ),
-        const SizedBox(width: 28),
-        Expanded(child: _buildSmallDropdown(key, items)),
-      ],
-    ),
-  );
+      );
 
   Widget _buildChooseFromListField(
     String label,
     String key,
     List<String> data,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () => _showSearchDialog(label, key, data),
-            child: Container(
-              height: _inputHeight,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: _inputRadius,
-                border: _thinBorder, // Border Ungu
-                boxShadow: _softShadow, // Shadow
+  ) =>
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _getCtrl(key).text.isEmpty
-                              ? (data.isNotEmpty ? data.first : "")
-                              : _getCtrl(key).text,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () => _showSearchDialog(label, key, data),
+                child: Container(
+                  height: _inputHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: _inputRadius,
+                    border: _thinBorder, // Border Ungu
+                    boxShadow: _softShadow, // Shadow
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _getCtrl(key).text.isEmpty
+                                  ? (data.isNotEmpty ? data.first : "")
+                                  : _getCtrl(key).text,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(
+                          Icons.search,
+                          size: 16,
+                          color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Icon(
-                      Icons.search,
-                      size: 16,
-                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
@@ -1912,71 +1921,71 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }
 
   Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: bgSlate,
-                border: Border.all(color: borderGrey),
-                borderRadius: BorderRadius.circular(6),
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () async {
+                  FilePickerResult? res = await FilePicker.platform.pickFiles();
+                  if (res != null) {
+                    setState(() => _formValues[key] = res.files.first.name);
+                  }
+                },
+                child: Container(
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: bgSlate,
+                    border: Border.all(color: borderGrey),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _formValues[key] ?? "No file selected",
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black87,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          Icons.upload_file,
+                          size: 16,
+                          color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildSAPActionButton(
     String label, {
@@ -2002,156 +2011,161 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   }
 
   Widget _buildFloatingSidePanel() => Container(
-    width: 380,
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
-      ],
-    ),
-    child: Column(
-      children: [
-        AppBar(
-          backgroundColor: primaryIndigo,
-          title: const Text(
-            "Sales Order",
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => setState(() => showSidePanel = false),
-              icon: const Icon(Icons.close),
-              color: Colors.white,
+        width: 380,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+          ],
+        ),
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: primaryIndigo,
+              title: const Text(
+                "Sales Order",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => setState(() => showSidePanel = false),
+                  icon: const Icon(Icons.close),
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+                  const SizedBox(height: 12),
+                  _buildFileUploadRow("File 1", "cfg_f1"),
+                  const SizedBox(height: 8),
+                  _buildFileUploadRow("File 2", "cfg_f2"),
+                  const SizedBox(height: 8),
+                  _buildFileUploadRow("File 3", "cfg_f3"),
+                  const SizedBox(height: 8),
+                  _buildFileUploadRow("File 4", "cfg_f4"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Create By", "cfg_by"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
+                    "No",
+                    "Yes",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Punching", "cfg_punch", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Bending", "cfg_bend", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Assy", "cfg_assy", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Internal Memo",
+                    "cfg_memo",
+                    isTextArea: true,
+                  ),
+                  const Divider(height: 45, thickness: 3),
+                  _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("AP Tax Date", "cfg_tax_date", ""),
+                  const SizedBox(height: 12),
+                  _buildChooseFromListField(
+                      "Kode Faktur Pajak", "cfg_tax_code", [
+                    "010",
+                    "020",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Area", "cfg_area"),
+                  const SizedBox(height: 12),
+                  _buildChooseFromListField("Kategori SO", "cfg_cat", [
+                    "SO Resmi",
+                    "SO Sample",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Customer Name", "cfg_cust_name"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "alasan rubah duedate",
+                    "cfg_duedate",
+                    isTextArea: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
+                    "Lengkap",
+                    "Tidak Lengkap",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "PIC Engineering",
+                    "cfg_pic",
+                    isTextArea: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Transfer Dempo", "Tf_demp", [""]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Status Pengiriman", "status", [""]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "kelengkapan Utama", "kelengkapan", [
+                    "",
+                  ]),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => showSidePanel = false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "APPLY",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ],
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
-              const SizedBox(height: 12),
-              _buildFileUploadRow("File 1", "cfg_f1"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 2", "cfg_f2"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 3", "cfg_f3"),
-              const SizedBox(height: 8),
-              _buildFileUploadRow("File 4", "cfg_f4"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Create By", "cfg_by"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Upload Status", "cfg_up", [
-                "No",
-                "Yes",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Punching", "cfg_punch", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Bending", "cfg_bend", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Assy", "cfg_assy", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Internal Memo",
-                "cfg_memo",
-                isTextArea: true,
-              ),
-              const Divider(height: 45, thickness: 3),
-              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("AP Tax Date", "cfg_tax_date", ""),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kode Faktur Pajak", "cfg_tax_code", [
-                "010",
-                "020",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Area", "cfg_area"),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("Kategori SO", "cfg_cat", [
-                "SO Resmi",
-                "SO Sample",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Name", "cfg_cust_name"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "alasan rubah duedate",
-                "cfg_duedate",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildChooseFromListField("validasi PO", "cfg_validasi_po", [
-                "Lengkap",
-                "Tidak Lengkap",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "PIC Engineering",
-                "cfg_pic",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer DLM", "TF_dlm", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Transfer Dempo", "Tf_demp", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Status Pengiriman", "status", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("kelengkapan Utama", "kelengkapan", [
-                "",
-              ]),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => setState(() => showSidePanel = false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "APPLY",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }

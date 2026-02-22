@@ -350,7 +350,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                       _buildSubMenu("Item Master Data", Icons.category_rounded),
                       _buildSubMenu("Goods Receipt", Icons.add_box_outlined),
                       _buildSubMenu(
-                        "Goods Issue",
+                        "Good Issue",
                         Icons.indeterminate_check_box_outlined,
                       ),
                       _buildSubMenu(
@@ -372,7 +372,6 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.people_alt_rounded,
                     "Business Partner Master Data",
                   ),
-                  _buildSimpleMenu(Icons.fact_check, "Quality Control"),
                   _buildSimpleMenu(
                     Icons.admin_panel_settings_outlined,
                     "Data Admin",

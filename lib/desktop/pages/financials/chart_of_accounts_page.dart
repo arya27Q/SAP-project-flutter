@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChartOfAccountsPage extends StatefulWidget {
-  const ChartOfAccountsPage({Key? key}) : super(key: key);
+  const ChartOfAccountsPage({super.key});
 
   @override
   State<ChartOfAccountsPage> createState() => _ChartOfAccountsPageState();
@@ -534,12 +534,12 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
                   _nameCtrl.clear();
                 },
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4F46E5),
+                    backgroundColor: const Color.fromARGB(255, 255, 0, 0),
                     foregroundColor: const Color.fromARGB(221, 255, 255, 255),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                         side: const BorderSide(
-                            color: Color.fromARGB(255, 79, 70, 229))),
+                            color: Color.fromARGB(255, 255, 0, 0))),
                     elevation: 0,
                     padding: EdgeInsets.zero),
                 child: const Text('Cancel',
@@ -553,12 +553,12 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
+                  backgroundColor: const Color.fromARGB(255, 255, 166, 0),
                   foregroundColor: const Color.fromARGB(221, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
                       side: const BorderSide(
-                          color: Color.fromARGB(255, 79, 70, 229))),
+                          color: Color.fromARGB(255, 255, 166, 0))),
                   elevation: 0,
                 ),
                 child: const Text('Account Details',
