@@ -720,7 +720,6 @@ class _GoodIssuePageState extends State<GoodIssuePage>
   // ==========================================
 
   // Custom Widget Khusus Untuk Item No (Ada Panah Kuning)
-  // Custom Widget Khusus Untuk Item No (Ada Panah Kuning)
   DataCell _buildItemNoCell(String key) {
     return DataCell(
       Padding(
