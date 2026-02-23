@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
+import 'floating_window_widget.dart'; // 🔥 IMPORT BARU: File Floating Widget kamu
 
 // --- IMPORTS HALAMAN (TIDAK BERUBAH) ---
 import 'desktop/pages/account/sap_auth_page.dart';
@@ -37,11 +38,13 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  // --- STATE MULTI-SPLIT VIEW ---
-  // List Judul halaman yang sedang terbuka (sebagai ID)
+  // --- STATE MULTI-SPLIT VIEW & FLOATING ---
   List<String> _openPageKeys = [];
-  // List Widget halaman yang sedang terbuka (disimpan di memori)
   List<Widget> _openPageWidgets = [];
+
+  // 🔥 STATE BARU: Saklar Mode Layar & Fokus Jendela
+  bool isFloatingMode = false;
+  String focusedWindowKey = "Dashboard";
 
   bool isLoggedIn = false;
   int userLevel = 1;
@@ -53,7 +56,6 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   void initState() {
     super.initState();
-    // Default buka Dashboard saat pertama kali load (jika sudah login)
     if (isLoggedIn) {
       _addInitialWindow();
     }
@@ -62,6 +64,25 @@ class _MainLayoutState extends State<MainLayout> {
   void _addInitialWindow() {
     _openPageKeys = ["Dashboard"];
     _openPageWidgets = [_buildPageContent("Dashboard")];
+    focusedWindowKey = "Dashboard";
+  }
+
+  // 🔥 FUNGSI BARU: Bawa Jendela ke Paling Depan (MDI)
+  void _bringToFront(String key) {
+    int index = _openPageKeys.indexOf(key);
+    if (index != -1 && index != _openPageKeys.length - 1) {
+      setState(() {
+        String k = _openPageKeys.removeAt(index);
+        Widget w = _openPageWidgets.removeAt(index);
+        _openPageKeys.add(k);
+        _openPageWidgets.add(w);
+        focusedWindowKey = key;
+      });
+    } else if (index == _openPageKeys.length - 1) {
+      setState(() {
+        focusedWindowKey = key;
+      });
+    }
   }
 
   @override
@@ -71,7 +92,7 @@ class _MainLayoutState extends State<MainLayout> {
         onLoginSuccess: () {
           setState(() {
             isLoggedIn = true;
-            _addInitialWindow(); // Reset window saat login baru
+            _addInitialWindow();
           });
         },
       );
@@ -80,7 +101,6 @@ class _MainLayoutState extends State<MainLayout> {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 850;
 
-    // String ID halaman yang aktif (yang terakhir diklik)
     String currentActiveKey =
         _openPageKeys.isNotEmpty ? _openPageKeys.last : "Dashboard";
 
@@ -94,22 +114,21 @@ class _MainLayoutState extends State<MainLayout> {
         return Area(
           builder: (context, area) {
             return Container(
-              margin: const EdgeInsets.all(4), // Jarak antar window
+              margin: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0,
-                          0.05), // FIX: Menggunakan format yang tidak deprecated
+                      color: Color.fromRGBO(0, 0, 0, 0.05),
                       blurRadius: 10,
                       offset: Offset(0, 4),
                     )
                   ]),
               child: Column(
                 children: [
-                  // --- HEADER WINDOW (JUDUL & CLOSE) ---
+                  // --- HEADER WINDOW (SPLIT VIEW) ---
                   Container(
                     height: 45,
                     decoration: BoxDecoration(
@@ -119,76 +138,71 @@ class _MainLayoutState extends State<MainLayout> {
                       border: Border(
                           bottom: BorderSide(color: Colors.grey.shade200)),
                     ),
-                    // 🔥 FIX: Pelindung biar header nggak error kalau layar super sempit
                     child: ClipRect(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          const double minHeaderWidth = 140.0;
-                          bool needScroll =
-                              constraints.maxWidth < minHeaderWidth;
+                          double headerWidth = constraints.maxWidth < 160
+                              ? 160
+                              : constraints.maxWidth;
 
-                          Widget headerContent = Container(
-                            width: needScroll
-                                ? minHeaderWidth
-                                : constraints.maxWidth,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        title == "Dashboard"
-                                            ? Icons.dashboard_rounded
-                                            : Icons.article_rounded,
-                                        size: 16,
-                                        color: const Color(0xFF4F46E5),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Color(0xFF2D3748)),
+                          return OverflowBox(
+                            alignment: Alignment.centerLeft,
+                            minWidth: headerWidth,
+                            maxWidth: headerWidth,
+                            child: Container(
+                              width: headerWidth,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          title == "Dashboard"
+                                              ? Icons.dashboard_rounded
+                                              : Icons.article_rounded,
+                                          size: 16,
+                                          color: const Color(0xFF4F46E5),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                if (title != "Dashboard" ||
-                                    _openPageKeys.length > 1)
-                                  InkWell(
-                                    onTap: () => _closeWindow(index),
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.shade50,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(Icons.close,
-                                          size: 14, color: Colors.red.shade400),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: Color(0xFF2D3748)),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  )
-                              ],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  if (title != "Dashboard" ||
+                                      _openPageKeys.length > 1)
+                                    InkWell(
+                                      onTap: () => _closeWindow(index),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.shade50,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(Icons.close,
+                                            size: 14,
+                                            color: Colors.red.shade400),
+                                      ),
+                                    )
+                                ],
+                              ),
                             ),
                           );
-
-                          // Kalau terlalu sempit, biarkan scroll (tapi disembunyikan pakai ClipRect)
-                          if (needScroll) {
-                            return SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              physics: const NeverScrollableScrollPhysics(),
-                              child: headerContent,
-                            );
-                          }
-                          return headerContent;
                         },
                       ),
                     ),
@@ -199,7 +213,6 @@ class _MainLayoutState extends State<MainLayout> {
                     child: ClipRect(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          // Ukuran minimum form agar tidak nabrak (sesuaikan jika perlu)
                           const double minSafeWidth = 1050.0;
                           const double minSafeHeight = 600.0;
 
@@ -208,7 +221,6 @@ class _MainLayoutState extends State<MainLayout> {
                           bool needVerticalScroll =
                               constraints.maxHeight < minSafeHeight;
 
-                          // Kunci ukuran form, kalau layar kekecilan, form tetap utuh
                           Widget pageWrapper = SizedBox(
                             width: needHorizontalScroll
                                 ? minSafeWidth
@@ -219,7 +231,6 @@ class _MainLayoutState extends State<MainLayout> {
                             child: content,
                           );
 
-                          // Otomatis kasih scroll kalau sempit
                           if (needHorizontalScroll && needVerticalScroll) {
                             return SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -240,7 +251,6 @@ class _MainLayoutState extends State<MainLayout> {
                             );
                           }
 
-                          // Tampil normal kalau layar lebar
                           return pageWrapper;
                         },
                       ),
@@ -281,7 +291,7 @@ class _MainLayoutState extends State<MainLayout> {
             ),
 
           // ==========================================
-          // AREA KERJA KONTEN (KANAN) DENGAN SPLIT VIEW
+          // AREA KERJA KONTEN (KANAN)
           // ==========================================
           Expanded(
             child: Column(
@@ -299,26 +309,119 @@ class _MainLayoutState extends State<MainLayout> {
                     ),
                   ),
 
-                // Area Kerja Multi Split View
+                // 🔥 TOP BAR: TOMBOL SAKLAR MODE WORKSPACE
+                Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade300)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ]),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Enterprise Workspace",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF1E293B),
+                            fontSize: 14),
+                      ),
+                      Row(
+                        children: [
+                          Text("Split View",
+                              style: TextStyle(
+                                  color: !isFloatingMode
+                                      ? const Color(0xFF4F46E5)
+                                      : Colors.grey.shade500,
+                                  fontWeight: !isFloatingMode
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  fontSize: 12)),
+                          Switch(
+                            value: isFloatingMode,
+                            activeColor: const Color(0xFF4F46E5),
+                            inactiveThumbColor: Colors.grey.shade400,
+                            inactiveTrackColor: Colors.grey.shade200,
+                            onChanged: (val) {
+                              setState(() {
+                                isFloatingMode = val;
+                                // Kalau balik ke Split View dan layarnya kebanyakan (> 4), kita pangkas otomatis
+                                if (!isFloatingMode &&
+                                    _openPageKeys.length > 4) {
+                                  _openPageKeys.removeRange(
+                                      0, _openPageKeys.length - 4);
+                                  _openPageWidgets.removeRange(
+                                      0, _openPageWidgets.length - 4);
+                                }
+                              });
+                            },
+                          ),
+                          Text("Floating MDI",
+                              style: TextStyle(
+                                  color: isFloatingMode
+                                      ? const Color(0xFF4F46E5)
+                                      : Colors.grey.shade500,
+                                  fontWeight: isFloatingMode
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  fontSize: 12)),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+
+                // AREA KERJA UTAMA (Bisa Split View / Floating tergantung saklar)
                 Expanded(
                   child: Container(
                     color: const Color(0xFFF1F5F9),
-                    padding: const EdgeInsets.all(8.0),
-                    // Theme untuk mengatur garis pembatas (divider)
-                    child: MultiSplitViewTheme(
-                      data: MultiSplitViewThemeData(
-                        dividerPainter: DividerPainters.grooved1(
-                          color: Colors.grey.shade400,
-                          highlightedColor:
-                              const Color(0xFF4F46E5), // Biru Indigo
-                          size: 30, // Panjang titik-titik
-                        ),
-                        dividerThickness: 8, // Ketebalan area drag
-                      ),
-                      child: MultiSplitView(
-                        controller: contentSplitController,
-                      ),
-                    ),
+                    padding: isFloatingMode
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.all(8.0),
+                    child: isFloatingMode
+                        // 🔥 MODE 1: FLOATING WINDOWS (MDI)
+                        ? Stack(
+                            children: _openPageKeys.map<Widget>((key) {
+                              int index = _openPageKeys.indexOf(key);
+                              // Biar jendelanya kalau buka banyak nggak numpuk 100% di titik yang sama (kayak di Windows)
+                              double initOffset = 20.0 + (index * 30.0);
+
+                              return FloatingWindowWidget(
+                                key: ValueKey(
+                                    key), // Wajib pakai Key biar posisinya nggak ketuker
+                                title: key,
+                                content: _openPageWidgets[index],
+                                initialX: initOffset,
+                                initialY: initOffset,
+                                isFocused: focusedWindowKey == key,
+                                onClose: () => _closeWindow(index),
+                                onFocus: () => _bringToFront(
+                                    key), // Maju ke depan kalau di-klik
+                              );
+                            }).toList(),
+                          )
+                        // 🔥 MODE 2: MULTI SPLIT VIEW (DEFAULT)
+                        : MultiSplitViewTheme(
+                            data: MultiSplitViewThemeData(
+                              dividerPainter: DividerPainters.grooved1(
+                                color: Colors.grey.shade400,
+                                highlightedColor: const Color(0xFF4F46E5),
+                                size: 30,
+                              ),
+                              dividerThickness: 8,
+                            ),
+                            child: MultiSplitView(
+                              controller: contentSplitController,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -329,43 +432,57 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  // --- LOGIC MULTI-SPLIT WINDOW ---
+  // --- LOGIC MULTI-SPLIT WINDOW & FLOATING ---
 
   void _handleViewChange(String view) {
     if (view == "Login") {
-      // Logic Logout
       setState(() {
         isLoggedIn = false;
         _openPageKeys.clear();
         _openPageWidgets.clear();
       });
     } else {
-      // Logic Buka Halaman Baru Sebelahan
       setState(() {
         int existingIndex = _openPageKeys.indexOf(view);
 
-        // Kalau halaman udah kebuka, nggak usah nambah lagi (biar nggak dobel)
         if (existingIndex == -1) {
-          // Limit maksimal 3 halaman biar nggak terlalu kecil layarnya
-          if (_openPageKeys.length >= 4) {
+          // Limit maksimal 4 halaman untuk Split View
+          if (!isFloatingMode && _openPageKeys.length >= 4) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                    'Maksimal buka 4 layar bersamaan! Tutup salah satu dulu ya!.'),
+                    'Mode Split View maksimal 4 layar! Tutup salah satu dulu atau ganti ke Mode Floating.'),
                 backgroundColor: Colors.orange,
               ),
             );
             return;
           }
 
-          // Tambah ke list dan generate widgetnya
+          // Limit maksimal 10 halaman untuk Floating biar RAM gak meledak
+          if (isFloatingMode && _openPageKeys.length >= 10) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'Mode Floating maksimal 10 layar! Silakan tutup dokumen yang tidak terpakai.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+
+          // Tambah halaman baru
           _openPageKeys.add(view);
           _openPageWidgets.add(_buildPageContent(view));
+          focusedWindowKey = view; // Fokus ke halaman yang baru dibuka
+        } else {
+          // Kalau halaman udah kebuka, dan kita di Mode Floating, bawa dia ke paling depan!
+          if (isFloatingMode) {
+            _bringToFront(view);
+          }
         }
       });
     }
 
-    // Tutup drawer kalau di mode mobile
     if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
       Navigator.pop(context);
     }
@@ -373,13 +490,14 @@ class _MainLayoutState extends State<MainLayout> {
 
   void _closeWindow(int index) {
     setState(() {
-      // Hapus dari list
       _openPageKeys.removeAt(index);
       _openPageWidgets.removeAt(index);
 
-      // Kalau semua ditutup, kembalikan ke dashboard biar layar nggak kosong hitam
       if (_openPageKeys.isEmpty) {
         _addInitialWindow();
+      } else {
+        // Pindah fokus ke jendela terakhir setelah di-close
+        focusedWindowKey = _openPageKeys.last;
       }
     });
   }
