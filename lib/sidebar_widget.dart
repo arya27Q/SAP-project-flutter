@@ -228,7 +228,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                         Icons.credit_card_off_rounded,
                       ),
                       _buildSubMenu(
-                        "Cancel & Read Off",
+                        "Cancel Write Off",
                         Icons.cancel_presentation_rounded,
                       ),
                       _buildSubMenu(

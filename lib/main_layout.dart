@@ -30,6 +30,9 @@ import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
 import 'desktop/pages/inventory/good_issue_page.dart';
 
+import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
+
+
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -527,6 +530,9 @@ class _MainLayoutState extends State<MainLayout> {
         return const ArCreditMemoPage();
       case "Return":
         return const ReturnPage();
+
+      case "Cancel Write Off":
+        return const CancelWritteOffPage(); 
 
       case "Business Partner Master Data":
         return const BpMasterDataPage();
