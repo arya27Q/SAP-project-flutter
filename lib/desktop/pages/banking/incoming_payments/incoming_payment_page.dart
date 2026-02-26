@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'payment_incoming_mean_page.dart'; 
+import 'payment_incoming_mean_page.dart';
 
 class IncomingPaymentPage extends StatefulWidget {
   const IncomingPaymentPage({super.key});
@@ -28,26 +28,25 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, bool> _checkStates = {};
 
- 
-  final double _inputHeight = 40.0; 
-  final BorderRadius _inputRadius = BorderRadius.circular(10); 
+  final double _inputHeight = 40.0;
+  final BorderRadius _inputRadius = BorderRadius.circular(10);
 
   List<BoxShadow> get _softShadow => [
-    BoxShadow(
-      color: const Color(0xFF4F46E5).withOpacity(0.08),
-      offset: const Offset(0, 4),
-      blurRadius: 12,
-      spreadRadius: -2,
-    ),
-    BoxShadow(
-      color: Colors.black.withOpacity(0.03),
-      offset: const Offset(0, 2),
-      blurRadius: 4,
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+          offset: const Offset(0, 4),
+          blurRadius: 12,
+          spreadRadius: -2,
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          offset: const Offset(0, 2),
+          blurRadius: 4,
+        ),
+      ];
 
-  Border get _thinBorder =>
-      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  Border get _thinBorder => Border.all(
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1);
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
@@ -87,8 +86,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             return;
           }
 
-          bool isNumericField =
-              key.contains("qty") ||
+          bool isNumericField = key.contains("qty") ||
               key.contains("stock") ||
               key.contains("price") ||
               key.contains("total") ||
@@ -233,89 +231,92 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   }
 
   Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildModernFieldRow("Code", "p_code"),
-              const SizedBox(height: 8),
-              _buildModernFieldRow("Name", "h_name"),
-              const SizedBox(height: 12),
-              _buildModernNoFieldRow(
-                "Bill to",
-                "p_no_series",
-                [""],
-                "p_no_val",
-                initialNo: "",
-                isAddress: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 6,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModernFieldRow("Code", "p_code"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Name", "h_name"),
+                  const SizedBox(height: 12),
+                  _buildModernNoFieldRow(
+                    "Bill to",
+                    "p_no_series",
+                    [""],
+                    "p_no_val",
+                    initialNo: "",
+                    isAddress: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Contact Person", "h_contact"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("blanket agreement", "p_blanket"),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 148), // 120 (label) + 28
+                    child: Row(
+                      children: [
+                        _buildCategoryRadio("Customer"),
+                        const SizedBox(width: 16),
+                        _buildCategoryRadio("Vendor"),
+                        const SizedBox(width: 16),
+                        _buildCategoryRadio("Account"),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Contact Person", "h_contact"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("blanket agreement", "p_blanket"),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(left: 148), // 120 (label) + 28
-                child: Row(
-                  children: [
-                    _buildCategoryRadio("Customer"),
-                    const SizedBox(width: 16),
-                    _buildCategoryRadio("Vendor"),
-                    const SizedBox(width: 16),
-                    _buildCategoryRadio("Account"),
-                  ],
-                ),
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              flex: 4,
+              child: Column(
+                children: [
+                  _buildModernFieldRow("No", "h_no", initial: ""),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("Posting Date", "h_post_date", ""),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("Delivery Date", "h_deliv", ""),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("Document Date", "h_doc", ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Refrence", "ref", initial: ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Transaction No", "Trans_No",
+                      initial: ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Wtax Code", "Wtax_code", initial: ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Wtax Base Sum", "Wtax_sum",
+                      initial: ""),
+                ],
               ),
-              const SizedBox(height: 8),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernFieldRow("No", "h_no", initial: ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Posting Date", "h_post_date", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              const SizedBox(height: 12),
-              _buildHeaderDate("Document Date", "h_doc", ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Refrence", "ref", initial: ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Transaction No", "Trans_No", initial: ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Wtax Code", "Wtax_code", initial: ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Wtax Base Sum", "Wtax_sum", initial: ""),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildTabSection() {
     return Container(
@@ -327,7 +328,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -440,14 +441,14 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
+                    headingRowColor: WidgetStatePropertyAll(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -597,8 +598,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   }) {
     final controller = _getCtrl(key, initial: initial);
 
-    bool isNumeric =
-        key.contains("qty") ||
+    bool isNumeric = key.contains("qty") ||
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
@@ -692,8 +692,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   void _syncTotalBeforeDiscount() {
     double totalAllRows = 0;
     for (int i = 0; i < _rowCount; i++) {
-      String val =
-          _controllers["total_val_$i"]?.text ??
+      String val = _controllers["total_val_$i"]?.text ??
           _fieldValues["total_val_$i"] ??
           "0";
 
@@ -740,7 +739,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -773,8 +772,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                                 width: 24,
                                 height: 24,
                                 child: Checkbox(
-                                  value:
-                                      _checkStates["created_by_wizard"] ??
+                                  value: _checkStates["created_by_wizard"] ??
                                       false,
                                   activeColor: primaryIndigo,
                                   side: const BorderSide(
@@ -806,7 +804,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                 ),
               ),
               const SizedBox(width: 60),
-              
+
               // --- Bagian Kanan (Total & Button Payment Means) ---
               SizedBox(
                 width: 450,
@@ -825,17 +823,16 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                       isBold: true,
                       isReadOnly: true,
                     ),
-                    
-                   
                     const SizedBox(height: 20),
                     Align(
-                      alignment: Alignment.centerRight, 
+                      alignment: Alignment.centerRight,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const PaymentIncomingMeanPage(),
+                              builder: (context) =>
+                                  const PaymentIncomingMeanPage(),
                             ),
                           );
                         },
@@ -845,21 +842,18 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange.shade700, 
+                          backgroundColor: Colors.orange.shade700,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 24, 
-                            vertical: 16
-                          ),
+                              horizontal: 24, vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           elevation: 3,
-                          shadowColor: Colors.orange.withOpacity(0.4),
+                          shadowColor: Colors.orange.withValues(alpha: 0.4),
                         ),
                       ),
                     ),
-                   
                   ],
                 ),
               ),
@@ -925,7 +919,8 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                     child: Icon(
                       Icons.calendar_month_rounded,
                       size: 14,
-                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                      color:
+                          primaryIndigo.withValues(alpha: 0.6), // Icon Indigo
                     ),
                   ),
                 ],
@@ -938,15 +933,15 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   }
 
   Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Cancel", isDanger: true),
-      ],
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _buildSAPActionButton("Add", isPrimary: true),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Cancel", isDanger: true),
+          ],
+        ),
+      );
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
@@ -1079,85 +1074,86 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     String textKey, {
     String initialNo = "",
     bool isAddress = false,
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: secondarySlate,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Container(
-          width: 110,
-          height: _inputHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: _inputRadius,
-            border: _thinBorder, // Border Ungu
-            boxShadow: _softShadow, // Shadow
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dropdownValues[dropdownKey] ?? seriesOptions.first,
-              isDense: true,
-              icon: Icon(
-                Icons.arrow_drop_down,
-                size: 20,
-                color: primaryIndigo.withOpacity(0.6), // Icon Indigo
-              ),
-              style: const TextStyle(fontSize: 11, color: Colors.black),
-              onChanged: (v) =>
-                  setState(() => _dropdownValues[dropdownKey] = v!),
-              items: seriesOptions
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Container(
-            constraints: BoxConstraints(
-              minHeight: isAddress ? 80 : _inputHeight,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: _inputRadius,
-              border: _thinBorder, // Border Ungu
-              boxShadow: _softShadow, // Shadow
-            ),
-            child: TextField(
-              controller: _getCtrl(textKey, initial: initialNo),
-              maxLines: isAddress ? 4 : 1,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: secondarySlate,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              onChanged: (val) => _fieldValues[textKey] = val,
             ),
-          ),
+            const SizedBox(width: 28),
+            Container(
+              width: 110,
+              height: _inputHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: _inputRadius,
+                border: _thinBorder, // Border Ungu
+                boxShadow: _softShadow, // Shadow
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _dropdownValues[dropdownKey] ?? seriesOptions.first,
+                  isDense: true,
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    size: 20,
+                    color: primaryIndigo.withValues(alpha: 0.6), // Icon Indigo
+                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.black),
+                  onChanged: (v) =>
+                      setState(() => _dropdownValues[dropdownKey] = v!),
+                  items: seriesOptions
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                constraints: BoxConstraints(
+                  minHeight: isAddress ? 80 : _inputHeight,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: _inputRadius,
+                  border: _thinBorder, // Border Ungu
+                  boxShadow: _softShadow, // Shadow
+                ),
+                child: TextField(
+                  controller: _getCtrl(textKey, initial: initialNo),
+                  maxLines: isAddress ? 4 : 1,
+                  style: const TextStyle(fontSize: 12),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                  ),
+                  onChanged: (val) => _fieldValues[textKey] = val,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
@@ -1188,96 +1184,99 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
     String label,
     String key,
     List<String> items,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+  ) =>
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 28),
+            Expanded(child: _buildSmallDropdown(key, items)),
+          ],
         ),
-        const SizedBox(width: 28),
-        Expanded(child: _buildSmallDropdown(key, items)),
-      ],
-    ),
-  );
+      );
 
   Widget _buildChooseFromListField(
     String label,
     String key,
     List<String> data,
-  ) => Padding(
-    padding: EdgeInsets.zero,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () => _showSearchDialog(label, key, data),
-            child: Container(
-              height: _inputHeight,
-              decoration: BoxDecoration(
-                color: bgSlate,
-                borderRadius: _inputRadius,
-                border: _thinBorder, // Border Ungu
-                boxShadow: _softShadow, // Shadow
+  ) =>
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _getCtrl(key).text.isEmpty
-                              ? (data.isNotEmpty ? data.first : "")
-                              : _getCtrl(key).text,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () => _showSearchDialog(label, key, data),
+                child: Container(
+                  height: _inputHeight,
+                  decoration: BoxDecoration(
+                    color: bgSlate,
+                    borderRadius: _inputRadius,
+                    border: _thinBorder, // Border Ungu
+                    boxShadow: _softShadow, // Shadow
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _getCtrl(key).text.isEmpty
+                                  ? (data.isNotEmpty ? data.first : "")
+                                  : _getCtrl(key).text,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(
+                          Icons.search,
+                          size: 16,
+                          color: primaryIndigo.withValues(
+                              alpha: 0.6), // Icon Indigo
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Icon(
-                      Icons.search,
-                      size: 16,
-                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
@@ -1349,78 +1348,79 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
   }
 
   Widget _buildFloatingSidePanel() => Container(
-    width: 380,
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
-      ],
-    ),
-    child: Column(
-      children: [
-        AppBar(
-          backgroundColor: primaryIndigo,
-          title: const Text(
-            "Sales Order",
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => setState(() => showSidePanel = false),
-              icon: const Icon(Icons.close),
-              color: Colors.white,
+        width: 380,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+          ],
+        ),
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: primaryIndigo,
+              title: const Text(
+                "Sales Order",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => setState(() => showSidePanel = false),
+                  icon: const Icon(Icons.close),
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("FP No.", "cfg_fp_no"),
+                  const SizedBox(height: 12),
+                  _buildHeaderDate("FP Date", "cfg_fp_date", ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Total Amount",
+                    "cfg_total_amt",
+                    isDecimal: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "No kas bon",
+                    "cfg_nokasbon",
+                    isDecimal: true,
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => showSidePanel = false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "APPLY",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ],
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("FP No.", "cfg_fp_no"),
-              const SizedBox(height: 12),
-              _buildHeaderDate("FP Date", "cfg_fp_date", ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Total Amount",
-                "cfg_total_amt",
-                isDecimal: true,
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "No kas bon",
-                "cfg_nokasbon",
-                isDecimal: true,
-              ),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => setState(() => showSidePanel = false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "APPLY",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildCategoryRadio(String title) {
     return InkWell(

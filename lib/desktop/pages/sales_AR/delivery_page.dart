@@ -66,8 +66,7 @@ class _DeliveryPageState extends State<DeliveryPage>
             return;
           }
 
-          bool isNumericField =
-              key.contains("qty") ||
+          bool isNumericField = key.contains("qty") ||
               key.contains("stock") ||
               key.contains("price") ||
               key.contains("total") ||
@@ -144,10 +143,8 @@ class _DeliveryPageState extends State<DeliveryPage>
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
 
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String cleanVal =
+          val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
 
       return double.tryParse(cleanVal) ?? 0.0;
     }
@@ -209,63 +206,63 @@ class _DeliveryPageState extends State<DeliveryPage>
   }
 
   Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-              _buildModernFieldRow("Name", "h_name"),
-              _buildModernFieldRow("Contact Person", "h_cont"),
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-              _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                "IDR",
-                "USD",
-                "EUR",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["2025-COM", "2024-REG"],
-                "h_no_val",
-                initialNo: "256100727",
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 6,
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Customer", "h_cust"),
+                  _buildModernFieldRow("Name", "h_name"),
+                  _buildModernFieldRow("Contact Person", "h_cont"),
+                  _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+                  _buildSmallDropdownRowModern("Local Currency", "h_curr", [
+                    "IDR",
+                    "USD",
+                    "EUR",
+                  ]),
+                ],
               ),
-              _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-              _buildHeaderDate("Posting Date", "h_post_date", ""),
-              _buildHeaderDate("Delivery Date", "h_deliv", ""),
-              _buildHeaderDate("Document Date", "h_doc", ""),
-            ],
-          ),
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              flex: 4,
+              child: Column(
+                children: [
+                  _buildModernNoFieldRow(
+                    "No.",
+                    "h_no_series",
+                    ["2025-COM", "2024-REG"],
+                    "h_no_val",
+                    initialNo: "256100727",
+                  ),
+                  _buildModernFieldRow("Status", "h_stat", initial: "Open"),
+                  _buildHeaderDate("Posting Date", "h_post_date", ""),
+                  _buildHeaderDate("Delivery Date", "h_deliv", ""),
+                  _buildHeaderDate("Document Date", "h_doc", ""),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildTabSection() {
     return Container(
@@ -277,7 +274,7 @@ class _DeliveryPageState extends State<DeliveryPage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -404,11 +401,11 @@ class _DeliveryPageState extends State<DeliveryPage>
                     headingRowColor: MaterialStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -486,8 +483,7 @@ class _DeliveryPageState extends State<DeliveryPage>
   }) {
     final controller = _getCtrl(key, initial: initial);
 
-    bool isNumeric =
-        key.contains("qty") ||
+    bool isNumeric = key.contains("qty") ||
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
@@ -601,7 +597,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                 Icon(
                   Icons.search,
                   size: 14,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -628,101 +624,107 @@ class _DeliveryPageState extends State<DeliveryPage>
   // --- LOGISTIK & ACCOUNTING TAB (Updated with new Field styles) ---
 
   Widget _buildLogisticsTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-              _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-              _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
-                "",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildModernCheckbox("Print Picking Sheet", "cb_print"),
-              _buildModernCheckbox(
-                "Proc. Doc. For Non Drop-Ship",
-                "cb_non_drop",
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Ship To", "log_ship_to",
+                      isTextArea: true),
+                  _buildModernFieldRow("Bill To", "log_bill_to",
+                      isTextArea: true),
+                  _buildSmallDropdownRowModern(
+                      "Shipping Type", "log_ship_type", [
+                    "",
+                  ]),
+                ],
               ),
-              _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
-              _buildModernCheckbox("Approved", "cb_approved"),
-              _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
-              const SizedBox(height: 20),
-              _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-              _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-              _buildSmallDropdownRowModern(
-                "BP Channel Contact",
-                "log_bp_cont",
-                [""],
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModernCheckbox("Print Picking Sheet", "cb_print"),
+                  _buildModernCheckbox(
+                    "Proc. Doc. For Non Drop-Ship",
+                    "cb_non_drop",
+                  ),
+                  _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
+                  _buildModernCheckbox("Approved", "cb_approved"),
+                  _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
+                  const SizedBox(height: 20),
+                  _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
+                  _buildModernFieldRow("BP Channel Name", "log_bp_name"),
+                  _buildSmallDropdownRowModern(
+                    "BP Channel Contact",
+                    "log_bp_cont",
+                    [""],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildAccountingTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Journal Remark", "acc_journal"),
-              _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
-                "",
-              ]),
-              _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
-                "",
-              ]),
-              _buildSmallDropdownRowModern(
-                "Central Bank Ind.",
-                "acc_central_bank",
-                [""],
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Journal Remark", "acc_journal"),
+                  _buildSmallDropdownRowModern(
+                      "Payment Terms", "acc_pay_terms", [
+                    "",
+                  ]),
+                  _buildSmallDropdownRowModern(
+                      "Payment Method", "acc_pay_method", [
+                    "",
+                  ]),
+                  _buildSmallDropdownRowModern(
+                    "Central Bank Ind.",
+                    "acc_central_bank",
+                    [""],
+                  ),
+                  _buildModernFieldRow(
+                    "Manually\nRecalculate Due Date",
+                    "acc_manual_due",
+                  ),
+                  _buildModernFieldRow(
+                    "Cash Discount\nDate Offset",
+                    "acc_cash_disc",
+                  ),
+                  _buildModernCheckbox(
+                    "Use Shipped Goods Account",
+                    "cb_shipped_acc",
+                  ),
+                ],
               ),
-              _buildModernFieldRow(
-                "Manually\nRecalculate Due Date",
-                "acc_manual_due",
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("BP Project", "acc_bp_proj"),
+                  _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
+                  _buildModernFieldRow("Required Date", "acc_req_date"),
+                  _buildSmallDropdownRowModern(
+                      "Indicator", "acc_indicator", [""]),
+                  _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
+                  _buildModernFieldRow("Order Number", "acc_order_no"),
+                  _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
+                ],
               ),
-              _buildModernFieldRow(
-                "Cash Discount\nDate Offset",
-                "acc_cash_disc",
-              ),
-              _buildModernCheckbox(
-                "Use Shipped Goods Account",
-                "cb_shipped_acc",
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("BP Project", "acc_bp_proj"),
-              _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-              _buildModernFieldRow("Required Date", "acc_req_date"),
-              _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-              _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-              _buildModernFieldRow("Order Number", "acc_order_no"),
-              _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   // --- FOOTER (Updated Styles) ---
 
@@ -749,7 +751,7 @@ class _DeliveryPageState extends State<DeliveryPage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -817,102 +819,103 @@ class _DeliveryPageState extends State<DeliveryPage>
   // --- STYLING WIDGETS (SHADOW + FLOATING) ---
 
   Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      children: [
-        const SizedBox(
-          width: 120,
-          child: Text(
-            "Discount",
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF64748B),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: Container(
-            height: 35,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: -2,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 120,
+              child: Text(
+                "Discount",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
                 ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-              border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
-                width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 50,
-                  child: TextField(
-                    controller: _getCtrl("f_disc_pct", initial: "0"),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+            const SizedBox(width: 28),
+            Expanded(
+              child: Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
                     ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 9),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
                     ),
-                    onChanged: (val) =>
-                        setState(() => _fieldValues["f_disc_pct"] = val),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    width: 1,
                   ),
                 ),
-                Text(
-                  "%",
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                Container(
-                  width: 1,
-                  height: 20,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  color: Colors.grey.withOpacity(0.3),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _getCtrl("f_disc_val", initial: "0.00"),
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 9,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 50,
+                      child: TextField(
+                        controller: _getCtrl("f_disc_pct", initial: "0"),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 9),
+                        ),
+                        onChanged: (val) =>
+                            setState(() => _fieldValues["f_disc_pct"] = val),
                       ),
                     ),
-                    onChanged: (val) =>
-                        setState(() => _fieldValues["f_disc_val"] = val),
-                  ),
+                    Text(
+                      "%",
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 20,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _getCtrl("f_disc_val", initial: "0.00"),
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
+                        ),
+                        onChanged: (val) =>
+                            setState(() => _fieldValues["f_disc_val"] = val),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Padding(
@@ -942,19 +945,19 @@ class _DeliveryPageState extends State<DeliveryPage>
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4F46E5).withOpacity(0.08),
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                       offset: const Offset(0, 4),
                       blurRadius: 12,
                       spreadRadius: -2,
                     ),
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       offset: const Offset(0, 2),
                       blurRadius: 4,
                     ),
                   ],
                   border: Border.all(
-                    color: const Color(0xFF4F46E5).withOpacity(0.15),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                     width: 1,
                   ),
                 ),
@@ -984,7 +987,7 @@ class _DeliveryPageState extends State<DeliveryPage>
                       child: Icon(
                         Icons.calendar_month_rounded,
                         size: 16,
-                        color: primaryIndigo.withOpacity(0.6),
+                        color: primaryIndigo.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -998,126 +1001,128 @@ class _DeliveryPageState extends State<DeliveryPage>
   }
 
   Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                bool val = _checkStates["cb_rounding"] ?? false;
-                _checkStates["cb_rounding"] = !val;
-              });
-            },
-            borderRadius: BorderRadius.circular(4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Transform.translate(
-                  offset: const Offset(-5, 0),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Checkbox(
-                      value: _checkStates["cb_rounding"] ?? false,
-                      onChanged: (v) =>
-                          setState(() => _checkStates["cb_rounding"] = v!),
-                      activeColor: primaryIndigo,
-                      visualDensity: const VisualDensity(
-                        horizontal: -4,
-                        vertical: -4,
-                      ),
-                      side: BorderSide(color: borderGrey, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    bool val = _checkStates["cb_rounding"] ?? false;
+                    _checkStates["cb_rounding"] = !val;
+                  });
+                },
+                borderRadius: BorderRadius.circular(4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(-5, 0),
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Checkbox(
+                          value: _checkStates["cb_rounding"] ?? false,
+                          onChanged: (v) =>
+                              setState(() => _checkStates["cb_rounding"] = v!),
+                          activeColor: primaryIndigo,
+                          visualDensity: const VisualDensity(
+                            horizontal: -4,
+                            vertical: -4,
+                          ),
+                          side: BorderSide(color: borderGrey, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
                       ),
                     ),
+                    Transform.translate(
+                      offset: const Offset(-1, 0),
+                      child: Text(
+                        "Rounding",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: secondarySlate,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    width: 1,
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(-1, 0),
-                  child: Text(
-                    "Rounding",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: secondarySlate,
-                      fontWeight: FontWeight.w500,
+                child: TextField(
+                  controller: _getCtrl("f_rounding", initial: "0.00"),
+                  readOnly: !(_checkStates["cb_rounding"] ?? false),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: (_checkStates["cb_rounding"] ?? false)
+                        ? Colors.black87
+                        : Colors.grey,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 9,
                     ),
                   ),
+                  onChanged: (val) =>
+                      setState(() => _fieldValues["f_rounding"] = val),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: Container(
-            height: 35,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: -2,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-              border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
-                width: 1,
-              ),
-            ),
-            child: TextField(
-              controller: _getCtrl("f_rounding", initial: "0.00"),
-              readOnly: !(_checkStates["cb_rounding"] ?? false),
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: (_checkStates["cb_rounding"] ?? false)
-                    ? Colors.black87
-                    : Colors.grey,
-              ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 9,
-                ),
-              ),
-              onChanged: (val) =>
-                  setState(() => _fieldValues["f_rounding"] = val),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Delete", isDanger: true),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
-      ],
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _buildSAPActionButton("Add", isPrimary: true),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Delete", isDanger: true),
+            const Spacer(),
+            _buildSAPActionButton("Copy From",
+                customColor: Colors.blue.shade700),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Copy To",
+                customColor: Colors.orange.shade600),
+          ],
+        ),
+      );
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
@@ -1154,19 +1159,19 @@ class _DeliveryPageState extends State<DeliveryPage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1212,9 +1217,8 @@ class _DeliveryPageState extends State<DeliveryPage>
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: isTextArea
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            isTextArea ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 120,
@@ -1237,19 +1241,19 @@ class _DeliveryPageState extends State<DeliveryPage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1284,151 +1288,156 @@ class _DeliveryPageState extends State<DeliveryPage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: Container(
-            height: 35,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: -2,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
                 ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-              border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
-                width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 110,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value:
-                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                      isDense: true,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: primaryIndigo,
-                      ),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropdownKey] = v!),
-                      items: seriesOptions
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
+            const SizedBox(width: 28),
+            Expanded(
+              child: Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
                     ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    width: 1,
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 20,
-                  color: Colors.grey.withOpacity(0.3),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _getCtrl(textKey, initial: initialNo),
-                    style: const TextStyle(fontSize: 12, color: Colors.black87),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 9,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 110,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _dropdownValues[dropdownKey] ??
+                              seriesOptions.first,
+                          isDense: true,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 18,
+                            color: primaryIndigo,
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _dropdownValues[dropdownKey] = v!),
+                          items: seriesOptions
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
-                    onChanged: (val) {
-                      _fieldValues[textKey] = val;
-                    },
-                  ),
+                    Container(
+                      width: 1,
+                      height: 20,
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _getCtrl(textKey, initial: initialNo),
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.black87),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 9,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          _fieldValues[textKey] = val;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildModernCheckbox(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: InkWell(
-      onTap: () {
-        setState(() {
-          bool val = _checkStates[key] ?? false;
-          _checkStates[key] = !val;
-        });
-      },
-      borderRadius: BorderRadius.circular(4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Transform.translate(
-            offset: const Offset(-10, 0),
-            child: SizedBox(
-              width: 30,
-              height: 30,
-              child: Checkbox(
-                value: _checkStates[key] ?? false,
-                activeColor: primaryIndigo,
-                onChanged: (val) => setState(() => _checkStates[key] = val!),
-                visualDensity: const VisualDensity(
-                  horizontal: -4,
-                  vertical: -4,
-                ),
-                side: BorderSide(color: borderGrey, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.only(bottom: 8),
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              bool val = _checkStates[key] ?? false;
+              _checkStates[key] = !val;
+            });
+          },
+          borderRadius: BorderRadius.circular(4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Transform.translate(
+                offset: const Offset(-10, 0),
+                child: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: Checkbox(
+                    value: _checkStates[key] ?? false,
+                    activeColor: primaryIndigo,
+                    onChanged: (val) =>
+                        setState(() => _checkStates[key] = val!),
+                    visualDensity: const VisualDensity(
+                      horizontal: -4,
+                      vertical: -4,
+                    ),
+                    side: BorderSide(color: borderGrey, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              Transform.translate(
+                offset: const Offset(-8, 0),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
           ),
-          Transform.translate(
-            offset: const Offset(-8, 0),
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
@@ -1440,19 +1449,19 @@ class _DeliveryPageState extends State<DeliveryPage>
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
             offset: const Offset(0, 4),
             blurRadius: 12,
             spreadRadius: -2,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             offset: const Offset(0, 2),
             blurRadius: 4,
           ),
         ],
         border: Border.all(
-          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -1484,121 +1493,120 @@ class _DeliveryPageState extends State<DeliveryPage>
     String label,
     String key,
     List<String> items,
-  ) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
+  ) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 28),
+            Expanded(child: _buildSmallDropdown(key, items)),
+          ],
         ),
-        const SizedBox(width: 28),
-        Expanded(child: _buildSmallDropdown(key, items)),
-      ],
-    ),
-  );
+      );
 
   Widget _buildChooseFromListField(
     String label,
     String key,
     List<String> data,
-  ) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-
-              shadows: [
-                Shadow(
-                  offset: const Offset(0.5, 0.5),
-                  blurRadius: 1.0,
-                  color: Colors.grey.withOpacity(0.5),
+  ) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0.5, 0.5),
+                      blurRadius: 1.0,
+                      color: Colors.grey.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-
-        Expanded(
-          child: InkWell(
-            onTap: () => _showSearchDialog(label, key, data),
-            child: Container(
-              height: 35,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                // Border ungu tipis
-                border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                    spreadRadius: -2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _getCtrl(key).text.isEmpty
-                              ? (data.isNotEmpty ? data.first : "")
-                              : _getCtrl(key).text,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () => _showSearchDialog(label, key, data),
+                child: Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    // Border ungu tipis
+                    border: Border.all(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        spreadRadius: -2,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _getCtrl(key).text.isEmpty
+                                  ? (data.isNotEmpty ? data.first : "")
+                                  : _getCtrl(key).text,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(
+                          Icons.search,
+                          size: 16,
+                          color: primaryIndigo.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
-
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Icon(
-                      Icons.search,
-                      size: 16,
-                      color: primaryIndigo.withOpacity(0.6),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
     showDialog(
@@ -1646,87 +1654,87 @@ class _DeliveryPageState extends State<DeliveryPage>
   }
 
   Widget _buildFileUploadRow(String label, String key) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-        Expanded(
-          child: InkWell(
-            onTap: () async {
-              FilePickerResult? res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                setState(() => _formValues[key] = res.files.first.name);
-              }
-            },
-            child: Container(
-              height: 35,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                    spreadRadius: -2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-                border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
-                  width: 1,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _formValues[key] ?? "No file selected",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black87,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () async {
+                  FilePickerResult? res = await FilePicker.platform.pickFiles();
+                  if (res != null) {
+                    setState(() => _formValues[key] = res.files.first.name);
+                  }
+                },
+                child: Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        spreadRadius: -2,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                    border: Border.all(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _formValues[key] ?? "No file selected",
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black87,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child: Icon(
+                          Icons.upload_file,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Icon(
-                      Icons.upload_file,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildSAPActionButton(
     String label, {
@@ -1752,69 +1760,70 @@ class _DeliveryPageState extends State<DeliveryPage>
   }
 
   Widget _buildFloatingSidePanel() => Container(
-    width: 380,
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
-      ],
-    ),
-    child: Column(
-      children: [
-        AppBar(
-          backgroundColor: primaryIndigo,
-          title: const Text(
-            "Sales Order",
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => setState(() => showSidePanel = false),
-              icon: const Icon(Icons.close),
-              color: Colors.white,
+        width: 380,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+          ],
+        ),
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: primaryIndigo,
+              title: const Text(
+                "Sales Order",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => setState(() => showSidePanel = false),
+                  icon: const Icon(Icons.close),
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
+                  const SizedBox(height: 8),
+                  _buildFileUploadRow("File 1", "cfg_f1"),
+                  _buildFileUploadRow("File 2", "cfg_f2"),
+                  _buildFileUploadRow("File 3", "cfg_f3"),
+                  _buildFileUploadRow("File 4", "cfg_f4"),
+                  _buildModernFieldRow("Create By", "cfg_by"),
+                  _buildModernFieldRow("Delivery To", "cfg_up"),
+                  _buildChooseFromListField("Series Draft", "cfg_series", [""]),
+                  _buildChooseFromListField("No Do ", "cfg_no_do", [""]),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => showSidePanel = false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "APPLY",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ],
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildChooseFromListField("Business Unit", "cfg_bu", [""]),
-               const SizedBox (height: 8),
-              _buildFileUploadRow("File 1", "cfg_f1"),
-              _buildFileUploadRow("File 2", "cfg_f2"),
-              _buildFileUploadRow("File 3", "cfg_f3"),
-              _buildFileUploadRow("File 4", "cfg_f4"),
-              _buildModernFieldRow("Create By", "cfg_by"),
-              _buildModernFieldRow("Delivery To", "cfg_up"),
-              _buildChooseFromListField("Series Draft", "cfg_series", [""]),
-              _buildChooseFromListField("No Do ", "cfg_no_do", [""]),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => setState(() => showSidePanel = false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "APPLY",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }

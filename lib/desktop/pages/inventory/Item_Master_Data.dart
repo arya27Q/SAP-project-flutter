@@ -21,7 +21,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
   // ignore: unused_field
   final Map<String, FocusNode> _focusNodes = {};
 
-  int _inventoryRowCount = 10; 
+  int _inventoryRowCount = 10;
   int _currentTabIndex = 0;
 
   final Color primaryIndigo = const Color(0xFF4F46E5);
@@ -77,12 +77,10 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
               child: _buildHeaderSection(),
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: _buildTabSection(),
             ),
-
             Padding(
               padding: const EdgeInsets.all(24),
               child: _buildActionArea(),
@@ -103,7 +101,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
         border: Border.all(color: Colors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -205,7 +203,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
         border: Border.all(color: Colors.white, width: 3),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -220,7 +218,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
               isScrollable: true,
               dividerColor: Colors.transparent,
               labelColor: primaryIndigo,
-              unselectedLabelColor: Colors.white.withOpacity(0.9),
+              unselectedLabelColor: Colors.white.withValues(alpha: 0.9),
               indicatorSize: TabBarIndicatorSize.tab,
               indicator: BoxDecoration(
                 color: Colors.white,
@@ -249,7 +247,6 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
             ),
           ),
           Container(height: 3, color: primaryIndigo),
-
           _buildCurrentTabContent(),
         ],
       ),
@@ -430,8 +427,8 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
             return Container(
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 246, 246, 246),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 246, 246, 246),
                 border: Border(
                   bottom: BorderSide(color: Colors.white, width: 1.0),
                   left: BorderSide(color: Colors.white, width: 1.0),
@@ -448,7 +445,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minWidth: constraints.maxWidth),
                     child: DataTable(
-                      headingRowColor: MaterialStateProperty.all(primaryIndigo),
+                      headingRowColor: WidgetStatePropertyAll(primaryIndigo),
                       headingRowHeight: 40,
                       dataRowMinHeight: 40,
                       dataRowMaxHeight: 40,
@@ -609,7 +606,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 // 🔥 SHADOW SAMA PERSIS KAYAK FORM ATAS 🔥
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                     spreadRadius: -1,
@@ -618,7 +615,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Border Ungu Tipis
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -662,7 +659,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 borderRadius: BorderRadius.circular(6),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                     spreadRadius: -1,
@@ -671,7 +668,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Style Border Seragam
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -805,9 +802,13 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   labelWidth: 140,
                 ),
                 const SizedBox(height: 24),
-                _buildTaxRow("Customs Group", "purch_customs", [
-                  "Customs Exempt",
-                ], labelWidth: 140),
+                _buildTaxRow(
+                    "Customs Group",
+                    "purch_customs",
+                    [
+                      "Customs Exempt",
+                    ],
+                    labelWidth: 140),
                 _buildTaxRow(
                   "Tax Group",
                   "purch_tax",
@@ -831,9 +832,14 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 ),
                 _buildModernFieldRow("Width", "purch_width", labelWidth: 90),
                 _buildModernFieldRow("Height", "purch_height", labelWidth: 90),
-                _buildVolumeRow("Volume", "purch_vol", "purch_vol_uom", [
-                  "cm",
-                ], labelWidth: 90),
+                _buildVolumeRow(
+                    "Volume",
+                    "purch_vol",
+                    "purch_vol_uom",
+                    [
+                      "cm",
+                    ],
+                    labelWidth: 90),
                 _buildModernFieldRow("Weight", "purch_weight", labelWidth: 90),
                 const SizedBox(height: 80),
                 _buildModernFieldRow(
@@ -924,9 +930,14 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 ),
                 _buildModernFieldRow("Width", "sales_width", labelWidth: 90),
                 _buildModernFieldRow("Height", "sales_height", labelWidth: 90),
-                _buildVolumeRow("Volume", "sales_vol", "sales_vol_uom", [
-                  "cm",
-                ], labelWidth: 90),
+                _buildVolumeRow(
+                    "Volume",
+                    "sales_vol",
+                    "sales_vol_uom",
+                    [
+                      "cm",
+                    ],
+                    labelWidth: 90),
                 _buildModernFieldRow("Weight", "sales_weight", labelWidth: 90),
                 const SizedBox(height: 80),
                 _buildModernFieldRow(
@@ -1002,13 +1013,13 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 // Shadow Ungu Tipis (Seragam)
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
@@ -1016,7 +1027,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Border Ungu Tipis
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1045,19 +1056,19 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   Container(
                     width: 1,
                     height: 35,
-                    color: borderGrey.withOpacity(0.5),
+                    color: borderGrey.withValues(alpha: 0.5),
                   ),
 
                   // BAGIAN 3: BUTTON (Menyatu di kanan)
                   Container(
                     width: 40, // Lebar tombol
                     height: 35,
-                    decoration: BoxDecoration(
-                      color: const Color(
+                    decoration: const BoxDecoration(
+                      color: Color(
                         0xFFFDE68A,
                       ), // Warna Kuning asli (dipertahankan)
                       // Rounded cuma di kanan biar nyatu
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         topRight: Radius.circular(9),
                         bottomRight: Radius.circular(9),
                       ),
@@ -1072,7 +1083,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                         ),
                         onTap: () {
                           // Tambahin logic tombol disini kalau butuh
-                          print("Button $key clicked");
+                          debugPrint("Button $key clicked");
                         },
                         child: Center(
                           child: buttonIcon != null
@@ -1143,13 +1154,13 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 // Shadow Seragam
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
@@ -1157,7 +1168,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Border Ungu Tipis
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1188,7 +1199,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   Container(
                     width: 1,
                     height: 20,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                   ),
 
                   // BAGIAN 3: DROPDOWN UNIT (Kanan)
@@ -1266,19 +1277,19 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1319,7 +1330,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   Container(
                     width: 1,
                     height: 20,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                   ),
 
                   // BAGIAN 3: INPUT + PERSEN (Disatukan di tengah)
@@ -1385,9 +1396,8 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: isTextArea
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            isTextArea ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           // --- BAGIAN LABEL ---
           SizedBox(
@@ -1413,19 +1423,19 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1490,13 +1500,13 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 // Shadow Halus
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
@@ -1504,7 +1514,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Border Tipis (Ungu/Abu)
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1572,13 +1582,13 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                 // Shadow sama persis
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
@@ -1586,7 +1596,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
 
                 // Border sama persis
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1624,7 +1634,8 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
                   Container(
                     width: 1,
                     height: 20, // Tinggi garis
-                    color: Colors.grey.withOpacity(0.3), // Warna garis pemisah
+                    color: Colors.grey
+                        .withValues(alpha: 0.3), // Warna garis pemisah
                   ),
 
                   // BAGIAN 3: TEXTFIELD (Nomor)
@@ -1696,7 +1707,7 @@ class _ItemMasterDataPageState extends State<ItemMasterDataPage>
               ),
             ),
             Transform.translate(
-              offset: const Offset(-0.1,0),
+              offset: const Offset(-0.1, 0),
               child: Text(
                 label,
                 style: TextStyle(

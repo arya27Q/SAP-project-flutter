@@ -1,5 +1,5 @@
-import 'dart:async'; 
-import 'dart:math'; 
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -58,7 +58,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
     // 1. Tampilkan Loading Dialog dulu
     showDialog(
       context: context,
-      barrierDismissible: false, 
+      barrierDismissible: false,
       builder: (context) {
         return const Center(
           child: CircularProgressIndicator(color: Colors.white),
@@ -66,10 +66,9 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
       },
     );
 
-   
     Timer(const Duration(seconds: 2), () {
       Navigator.pop(context);
-      bool isSuccess = Random().nextBool(); 
+      bool isSuccess = Random().nextBool();
       _showResultDialog(isSuccess);
     });
   }
@@ -87,15 +86,14 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
-              mainAxisSize: MainAxisSize.min, 
+              mainAxisSize: MainAxisSize.min,
               children: [
-               
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSuccess 
-                        ? Colors.green.withOpacity(0.1) 
-                        : Colors.red.withOpacity(0.1),
+                    color: isSuccess
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.red.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -105,7 +103,6 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                   ),
                 ),
                 const SizedBox(height: 24),
-                
                 Text(
                   isSuccess ? "Payment Successful!" : "Payment Failed!",
                   style: TextStyle(
@@ -115,25 +112,23 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                   ),
                 ),
                 const SizedBox(height: 12),
-                
                 Text(
-                  isSuccess 
-                    ? "Your transaction has been processed successfully."
-                    : "Something went wrong. Please try again later.",
+                  isSuccess
+                      ? "Your transaction has been processed successfully."
+                      : "Something went wrong. Please try again later.",
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
-
                 SizedBox(
                   width: double.infinity,
                   height: 45,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); 
-                      
+                      Navigator.pop(context);
+
                       if (isSuccess) {
-                        Navigator.pop(context); 
+                        Navigator.pop(context);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -144,10 +139,9 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      "OK", 
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
-                    ),
+                    child: const Text("OK",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ),
               ],
@@ -166,7 +160,6 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
       body: SafeArea(
         child: Column(
           children: [
-          
             _buildFloatingHeader(),
             _buildFloatingTabBar(),
             const SizedBox(height: 16),
@@ -179,7 +172,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -188,16 +181,14 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildCheckTab(),        
-                    _buildBankTransferTab(), 
-                    _buildCreditCardTab(),   
-                    _buildCashTab(),        
+                    _buildCheckTab(),
+                    _buildBankTransferTab(),
+                    _buildCreditCardTab(),
+                    _buildCashTab(),
                   ],
                 ),
               ),
             ),
-
-           
             const SizedBox(height: 16),
             _buildFooterSummary(),
             const SizedBox(height: 16),
@@ -218,7 +209,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -232,7 +223,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryIndigo.withOpacity(0.1),
+                  color: primaryIndigo.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.payment_rounded, color: primaryIndigo),
@@ -266,7 +257,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -283,7 +274,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: primaryIndigo.withOpacity(0.3),
+              color: primaryIndigo.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -362,7 +353,9 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
           const Text(
             "* Ensure the transfer date matches the bank statement date.",
             style: TextStyle(
-                fontSize: 11, color: Colors.orange, fontStyle: FontStyle.italic),
+                fontSize: 11,
+                color: Colors.orange,
+                fontStyle: FontStyle.italic),
           )
         ],
       ),
@@ -419,9 +412,9 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.05),
+              color: Colors.green.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.green.withOpacity(0.2)),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
             ),
             child: Column(
               children: [
@@ -448,12 +441,12 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16), 
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4), 
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -490,7 +483,7 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 4,
-              shadowColor: primaryIndigo.withOpacity(0.4),
+              shadowColor: primaryIndigo.withValues(alpha: 0.4),
             ),
             child: const Text("Confirm Payment",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -539,7 +532,9 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                 ? Align(
                     alignment: Alignment.centerLeft,
                     child: Checkbox(
-                        value: true, onChanged: (v) {}, activeColor: primaryIndigo),
+                        value: true,
+                        onChanged: (v) {},
+                        activeColor: primaryIndigo),
                   )
                 : Container(
                     height: 38,
@@ -550,7 +545,8 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                       border: Border.all(color: const Color(0xFFE0E7FF)),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF4F46E5).withOpacity(0.05),
+                          color:
+                              const Color(0xFF4F46E5).withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -559,7 +555,8 @@ class _PaymentOutgoingMeanPageState extends State<PaymentOutgoingMeanPage>
                     child: TextField(
                       controller: _getCtrl(key),
                       textAlign: isCurrency ? TextAlign.right : TextAlign.left,
-                      style: const TextStyle(fontSize: 13, color: Colors.black87),
+                      style:
+                          const TextStyle(fontSize: 13, color: Colors.black87),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         isDense: true,

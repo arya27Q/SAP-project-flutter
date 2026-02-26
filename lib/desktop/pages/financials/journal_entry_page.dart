@@ -35,21 +35,21 @@ class _JournalEntryPageState extends State<JournalEntryPage>
   // Shadow Ungu Halus
   List<BoxShadow> get _softShadow => [
         BoxShadow(
-          color: const Color(0xFF4F46E5).withOpacity(0.08),
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
           offset: const Offset(0, 4),
           blurRadius: 12,
           spreadRadius: -2,
         ),
         BoxShadow(
-          color: Colors.black.withOpacity(0.03),
+          color: Colors.black.withValues(alpha: 0.03),
           offset: const Offset(0, 2),
           blurRadius: 4,
         ),
       ];
 
   // Border Tipis Indigo
-  Border get _thinBorder =>
-      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  Border get _thinBorder => Border.all(
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1);
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
@@ -241,7 +241,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           border: Border.all(color: Colors.white, width: 3.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
+              color: Colors.black.withValues(alpha: 0.12),
               blurRadius: 18,
               spreadRadius: 2,
               offset: const Offset(0, 8),
@@ -515,7 +515,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           border: Border.all(color: Colors.white, width: 3.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
+              color: Colors.black.withValues(alpha: 0.12),
               blurRadius: 18,
               spreadRadius: 2,
               offset: const Offset(0, 8),
@@ -675,7 +675,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -794,11 +794,11 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.2),
+                        color: primaryIndigo.withValues(alpha: 0.2),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.2),
+                        color: primaryIndigo.withValues(alpha: 0.2),
                         width: 0.5,
                       ),
                     ),
@@ -984,7 +984,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                 Icon(
                   Icons.search,
                   size: 14,
-                  color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                  color: primaryIndigo.withValues(alpha: 0.6), // Icon Indigo
                 ),
               ],
             ),
@@ -1160,7 +1160,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -1301,7 +1301,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                     child: Icon(
                       Icons.calendar_month_rounded,
                       size: 14,
-                      color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                      color:
+                          primaryIndigo.withValues(alpha: 0.6), // Icon Indigo
                     ),
                   ),
                 ],
@@ -1681,8 +1682,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                           icon: Icon(
                             Icons.keyboard_arrow_down_rounded,
                             size: 18,
-                            color:
-                                primaryIndigo.withOpacity(0.6), // Icon Indigo
+                            color: primaryIndigo.withValues(
+                                alpha: 0.6), // Icon Indigo
                           ),
                           onChanged: (v) =>
                               setState(() => _dropdownValues[dropdownKey] = v!),
@@ -1766,7 +1767,7 @@ class _JournalEntryPageState extends State<JournalEntryPage>
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             size: 18,
-            color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+            color: primaryIndigo.withValues(alpha: 0.6), // Icon Indigo
           ),
           onChanged: (val) => setState(() => _dropdownValues[key] = val!),
           items: items
@@ -1862,7 +1863,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                         child: Icon(
                           Icons.search,
                           size: 16,
-                          color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                          color: primaryIndigo.withValues(
+                              alpha: 0.6), // Icon Indigo
                         ),
                       ),
                     ],
@@ -1975,7 +1977,8 @@ class _JournalEntryPageState extends State<JournalEntryPage>
                         child: Icon(
                           Icons.upload_file,
                           size: 16,
-                          color: primaryIndigo.withOpacity(0.6), // Icon Indigo
+                          color: primaryIndigo.withValues(
+                              alpha: 0.6), // Icon Indigo
                         ),
                       ),
                     ],

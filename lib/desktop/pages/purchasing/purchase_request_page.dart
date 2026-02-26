@@ -30,22 +30,22 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
 
   // Shadow Ungu Halus (Reusable)
   List<BoxShadow> get _softShadow => [
-    BoxShadow(
-      color: const Color(0xFF4F46E5).withOpacity(0.08),
-      offset: const Offset(0, 4),
-      blurRadius: 12,
-      spreadRadius: -2,
-    ),
-    BoxShadow(
-      color: Colors.black.withOpacity(0.03),
-      offset: const Offset(0, 2),
-      blurRadius: 4,
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+          offset: const Offset(0, 4),
+          blurRadius: 12,
+          spreadRadius: -2,
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          offset: const Offset(0, 2),
+          blurRadius: 4,
+        ),
+      ];
 
   // Border Ungu Tipis (Reusable)
-  Border get _thinBorder =>
-      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  Border get _thinBorder => Border.all(
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1);
   // -------------------------------------------
 
   String formatPrice(String value) {
@@ -87,9 +87,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             controller.text = defaultValue;
             return;
           }
-          String cleanText = controller.text
-              .replaceAll('.', '')
-              .replaceAll(',', '');
+          String cleanText =
+              controller.text.replaceAll('.', '').replaceAll(',', '');
           double? parsed = double.tryParse(cleanText);
 
           if (mounted) {
@@ -143,10 +142,8 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     for (int i = 0; i < _rowCount; i++) {
       String val =
           _fieldValues["total_$i"] ?? _controllers["total_$i"]?.text ?? "0";
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String cleanVal =
+          val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
       totalAllRows += double.tryParse(cleanVal) ?? 0.0;
     }
 
@@ -232,7 +229,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -264,7 +261,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                               Shadow(
                                 offset: const Offset(0.5, 0.5),
                                 blurRadius: 1.0,
-                                color: Colors.grey.withOpacity(0.5),
+                                color: Colors.grey.withValues(alpha: 0.5),
                               ),
                             ],
                           ),
@@ -289,7 +286,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                             icon: Icon(
                               Icons.keyboard_arrow_down,
                               size: 18,
-                              color: primaryIndigo.withOpacity(0.6),
+                              color: primaryIndigo.withValues(alpha: 0.6),
                             ),
                             style: const TextStyle(
                               fontSize: 12,
@@ -368,7 +365,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                             Shadow(
                               offset: const Offset(0.5, 0.5),
                               blurRadius: 1.0,
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                             ),
                           ],
                         ),
@@ -409,7 +406,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                             Shadow(
                               offset: const Offset(0.5, 0.5),
                               blurRadius: 1.0,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withValues(alpha: 0.5),
                             ),
                           ],
                         ),
@@ -511,7 +508,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   Shadow(
                     offset: const Offset(0.5, 0.5),
                     blurRadius: 1.0,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                 ],
               ),
@@ -559,7 +556,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                       child: Icon(
                         Icons.search,
                         size: 16,
-                        color: primaryIndigo.withOpacity(0.6),
+                        color: primaryIndigo.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -592,7 +589,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 Shadow(
                   offset: const Offset(0.5, 0.5),
                   blurRadius: 1.0,
-                  color: Colors.grey.withOpacity(0.5),
+                  color: Colors.grey.withValues(alpha: 0.5),
                 ),
               ],
             ),
@@ -642,7 +639,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 Shadow(
                   offset: const Offset(0.5, 0.5),
                   blurRadius: 1.0,
-                  color: Colors.grey.withOpacity(0.5),
+                  color: Colors.grey.withValues(alpha: 0.5),
                 ),
               ],
             ),
@@ -674,7 +671,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     suffixIcon: Icon(
                       Icons.calendar_month_rounded,
                       size: 14,
-                      color: primaryIndigo.withOpacity(0.6),
+                      color: primaryIndigo.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -696,7 +693,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -767,18 +764,17 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
-
-          border: Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15)),
-
+          border: Border.all(
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.15)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF4F46E5).withOpacity(0.08),
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
               offset: const Offset(0, 4),
               blurRadius: 12,
               spreadRadius: -2,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               offset: const Offset(0, 2),
               blurRadius: 4,
             ),
@@ -792,7 +788,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             icon: Icon(
               Icons.arrow_drop_down,
               size: 20,
-              color: primaryIndigo.withOpacity(0.6),
+              color: primaryIndigo.withValues(alpha: 0.6),
             ),
             onChanged: (val) => setState(() => _dropdownValues[key] = val!),
             items: items
@@ -870,11 +866,11 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -971,8 +967,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
     bool isPercent = false,
   }) {
     final controller = _getCtrl(key, initial: initial);
-    bool isNumeric =
-        key.contains("qty") ||
+    bool isNumeric = key.contains("qty") ||
         key.contains("price") ||
         key.contains("total") ||
         key.contains("disc") ||
@@ -1045,7 +1040,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 Icon(
                   Icons.search,
                   size: 14,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -1073,7 +1068,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                 icon: Icon(
                   Icons.arrow_drop_down,
                   size: 18,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
                 onChanged: (newValue) =>
                     setState(() => _dropdownValues[key] = newValue!),
@@ -1114,7 +1109,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -1165,7 +1160,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                                     Shadow(
                                       offset: const Offset(0.5, 0.5),
                                       blurRadius: 1.0,
-                                      color: Colors.grey.withOpacity(0.5),
+                                      color: Colors.grey.withValues(alpha: 0.5),
                                     ),
                                   ],
                                 ),
@@ -1263,7 +1258,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   Shadow(
                     offset: const Offset(0.5, 0.5),
                     blurRadius: 1.0,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                 ],
               ),
@@ -1373,7 +1368,7 @@ class _PurchaseRequestPageState extends State<PurchaseRequestPage>
                   Shadow(
                     offset: const Offset(0.5, 0.5),
                     blurRadius: 1.0,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                 ],
               ),

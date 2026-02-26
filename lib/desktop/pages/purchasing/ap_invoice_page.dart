@@ -92,8 +92,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             return;
           }
 
-          bool isNumericField =
-              key.contains("qty") ||
+          bool isNumericField = key.contains("qty") ||
               key.contains("stock") ||
               key.contains("price") ||
               key.contains("total") ||
@@ -151,10 +150,8 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   double _getGrandTotal() {
     double parseValue(String key) {
       String val = _controllers[key]?.text ?? _fieldValues[key] ?? "0";
-      String cleanVal = val
-          .replaceAll('.', '')
-          .replaceAll(',', '.')
-          .replaceAll('%', '');
+      String cleanVal =
+          val.replaceAll('.', '').replaceAll(',', '.').replaceAll('%', '');
 
       return double.tryParse(cleanVal) ?? 0.0;
     }
@@ -236,67 +233,59 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }
 
   Widget _buildModernHeader() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    padding: const EdgeInsets.all(24),
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.white, width: 3.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 18,
-          spreadRadius: 2,
-          offset: const Offset(0, 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: Column(
-            children: [
-              _buildModernFieldRow("Customer", "h_cust"),
-
-              _buildModernFieldRow("Name", "h_name"),
-
-              _buildModernFieldRow("Contact Person", "h_cont"),
-
-              _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-
-              _buildBpCurrencyRow(),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              _buildModernNoFieldRow(
-                "No.",
-                "h_no_series",
-                ["Primary", "Manual"],
-                "h_no_val",
-                initialNo: "",
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 6,
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Customer", "h_cust"),
+                  _buildModernFieldRow("Name", "h_name"),
+                  _buildModernFieldRow("Contact Person", "h_cont"),
+                  _buildModernFieldRow("Customer Ref. No.", "h_ref"),
+                  _buildBpCurrencyRow(),
+                ],
               ),
-
-              _buildModernFieldRow("Status", "h_stat", initial: ""),
-
-              _buildHeaderDate("Posting Date", "h_post", ""),
-
-              _buildHeaderDate("Delivery Date", "h_deliv", ""),
-
-              _buildHeaderDate("Document Date", "h_doc", ""),
-            ],
-          ),
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              flex: 4,
+              child: Column(
+                children: [
+                  _buildModernNoFieldRow(
+                    "No.",
+                    "h_no_series",
+                    ["Primary", "Manual"],
+                    "h_no_val",
+                    initialNo: "",
+                  ),
+                  _buildModernFieldRow("Status", "h_stat", initial: ""),
+                  _buildHeaderDate("Posting Date", "h_post", ""),
+                  _buildHeaderDate("Delivery Date", "h_deliv", ""),
+                  _buildHeaderDate("Document Date", "h_doc", ""),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildTabSection() {
     return Container(
@@ -308,7 +297,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -433,11 +422,11 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -513,8 +502,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }) {
     final controller = _getCtrl(key, initial: initial);
 
-    bool isNumeric =
-        key.contains("qty") ||
+    bool isNumeric = key.contains("qty") ||
         key.contains("stock") ||
         key.contains("price") ||
         key.contains("total") ||
@@ -628,7 +616,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                 Icon(
                   Icons.search,
                   size: 14,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -653,117 +641,123 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }
 
   Widget _buildLogisticsTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Ship To", "log_ship_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Bill To", "log_bill_to", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Shipping Type", "log_ship_type", [
-                "",
-              ]),
-            ],
-          ),
-        ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildModernCheckbox("Print Picking Sheet", "cb_print"),
-              _buildModernCheckbox(
-                "Proc. Doc. For Non Drop-Ship",
-                "cb_non_drop",
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Ship To", "log_ship_to",
+                      isTextArea: true),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Bill To", "log_bill_to",
+                      isTextArea: true),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Shipping Type", "log_ship_type", [
+                    "",
+                  ]),
+                ],
               ),
-              _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
-              _buildModernCheckbox("Approved", "cb_approved"),
-              _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
-              const SizedBox(height: 20),
-              _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("BP Channel Name", "log_bp_name"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "BP Channel Contact",
-                "log_bp_cont",
-                [""],
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModernCheckbox("Print Picking Sheet", "cb_print"),
+                  _buildModernCheckbox(
+                    "Proc. Doc. For Non Drop-Ship",
+                    "cb_non_drop",
+                  ),
+                  _buildModernCheckbox("Proc. Doc. For Drop-Ship", "cb_drop"),
+                  _buildModernCheckbox("Approved", "cb_approved"),
+                  _buildModernCheckbox("Allow Partial Delivery", "cb_partial"),
+                  const SizedBox(height: 20),
+                  _buildModernFieldRow("Pick and Pack Remarks", "log_pick_rem"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("BP Channel Name", "log_bp_name"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "BP Channel Contact",
+                    "log_bp_cont",
+                    [""],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildAccountingTab() => SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("Journal Remark", "acc_journal"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Terms", "acc_pay_terms", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Payment Method", "acc_pay_method", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "Central Bank Ind.",
-                "acc_central_bank",
-                [""],
+        padding: const EdgeInsets.all(24),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("Journal Remark", "acc_journal"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Payment Terms", "acc_pay_terms", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Payment Method", "acc_pay_method", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "Central Bank Ind.",
+                    "acc_central_bank",
+                    [""],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Manually\nRecalculate Due Date",
+                    "acc_manual_due",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Cash Discount\nDate Offset",
+                    "acc_cash_disc",
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernCheckbox(
+                    "Use Shipped Goods Account",
+                    "cb_shipped_acc",
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Manually\nRecalculate Due Date",
-                "acc_manual_due",
+            ),
+            const SizedBox(width: 60),
+            Expanded(
+              child: Column(
+                children: [
+                  _buildModernFieldRow("BP Project", "acc_bp_proj"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Required Date", "acc_req_date"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Indicator", "acc_indicator", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Order Number", "acc_order_no"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
+                ],
               ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Cash Discount\nDate Offset",
-                "acc_cash_disc",
-              ),
-              const SizedBox(height: 12),
-              _buildModernCheckbox(
-                "Use Shipped Goods Account",
-                "cb_shipped_acc",
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 60),
-        Expanded(
-          child: Column(
-            children: [
-              _buildModernFieldRow("BP Project", "acc_bp_proj"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Cancellation Date", "acc_cancel_date"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Required Date", "acc_req_date"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Indicator", "acc_indicator", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Federal Tax ID", "acc_tax_id"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Order Number", "acc_order_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Referenced Document", "acc_ref_doc"),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildModernFooter() {
     double grandTotal = _getGrandTotal();
@@ -786,7 +780,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -867,30 +861,30 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }
 
   Widget _buildDiscountRow() => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        const SizedBox(
-          width: 140,
-          child: Text("DPM", style: TextStyle(fontSize: 12)),
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 140,
+              child: Text("DPM", style: TextStyle(fontSize: 12)),
+            ),
+            const SizedBox(width: 58),
+            SizedBox(
+              width: 40,
+              child: _buildSummaryBox(
+                "f_disc_pct",
+                isPercent: true,
+                defaultValue: "0",
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4),
+              child: Text("%", style: TextStyle(fontSize: 12)),
+            ),
+            Expanded(child: _buildSummaryBox("f_disc_val")),
+          ],
         ),
-        const SizedBox(width: 58),
-        SizedBox(
-          width: 40,
-          child: _buildSummaryBox(
-            "f_disc_pct",
-            isPercent: true,
-            defaultValue: "0",
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text("%", style: TextStyle(fontSize: 12)),
-        ),
-        Expanded(child: _buildSummaryBox("f_disc_val")),
-      ],
-    ),
-  );
+      );
 
   Widget _buildHeaderDate(String label, String key, String initial) {
     return Padding(
@@ -920,13 +914,13 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryIndigo.withOpacity(0.08),
+                      color: primaryIndigo.withValues(alpha: 0.08),
                       offset: const Offset(0, 4),
                       blurRadius: 12,
                     ),
                   ],
                   border: Border.all(
-                    color: primaryIndigo.withOpacity(0.15),
+                    color: primaryIndigo.withValues(alpha: 0.15),
                     width: 1,
                   ),
                 ),
@@ -955,7 +949,7 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                       child: Icon(
                         Icons.calendar_month_rounded,
                         size: 14, // Sesuai permintaanmu
-                        color: primaryIndigo.withOpacity(0.6),
+                        color: primaryIndigo.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -1029,65 +1023,67 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }
 
   Widget _buildRoundingRow() => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _checkStates["cb_rounding"] ?? false,
-                  onChanged: (v) =>
-                      setState(() => _checkStates["cb_rounding"] = v!),
-                  activeColor: primaryIndigo,
-                  side: BorderSide(color: borderGrey, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 140,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _checkStates["cb_rounding"] ?? false,
+                      onChanged: (v) =>
+                          setState(() => _checkStates["cb_rounding"] = v!),
+                      activeColor: primaryIndigo,
+                      side: BorderSide(color: borderGrey, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Rounding",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Text(
-                "Rounding",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
-                ),
+            ),
+            const SizedBox(width: 58),
+            Expanded(
+              child: _buildSummaryBox(
+                "f_rounding",
+                isReadOnly: !(_checkStates["cb_rounding"] ?? false),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(width: 58),
-        Expanded(
-          child: _buildSummaryBox(
-            "f_rounding",
-            isReadOnly: !(_checkStates["cb_rounding"] ?? false),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildActionButtons() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        _buildSAPActionButton("Add", isPrimary: true),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Delete", isDanger: true),
-        const Spacer(),
-        _buildSAPActionButton("Copy From", customColor: Colors.blue.shade700),
-        const SizedBox(width: 8),
-        _buildSAPActionButton("Copy To", customColor: Colors.orange.shade600),
-      ],
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            _buildSAPActionButton("Add", isPrimary: true),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Delete", isDanger: true),
+            const Spacer(),
+            _buildSAPActionButton("Copy From",
+                customColor: Colors.blue.shade700),
+            const SizedBox(width: 8),
+            _buildSAPActionButton("Copy To",
+                customColor: Colors.orange.shade600),
+          ],
+        ),
+      );
 
   Widget _buildSummaryRowWithAutoValue(
     String label,
@@ -1124,19 +1120,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1185,19 +1181,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
             offset: const Offset(0, 4),
             blurRadius: 12,
             spreadRadius: -2,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             offset: const Offset(0, 2),
             blurRadius: 4,
           ),
         ],
         border: Border.all(
-          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -1221,15 +1217,14 @@ class _ApInvoicePageState extends State<ApInvoicePage>
               _fieldValues[key] = val;
               if (key == "f_disc_pct") {
                 double pct = double.tryParse(val) ?? 0;
-                double before =
-                    double.tryParse(
+                double before = double.tryParse(
                       _getCtrl(
                         "f_before_disc",
                       ).text.replaceAll(RegExp(r'[^0-9.]'), ''),
                     ) ??
                     0;
-                _getCtrl("f_disc_val").text = (before * pct / 100)
-                    .toStringAsFixed(2);
+                _getCtrl("f_disc_val").text =
+                    (before * pct / 100).toStringAsFixed(2);
                 _fieldValues["f_disc_val"] = _getCtrl("f_disc_val").text;
               }
             });
@@ -1279,19 +1274,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -1326,122 +1321,125 @@ class _ApInvoicePageState extends State<ApInvoicePage>
     List<String> seriesOptions,
     String textKey, {
     String initialNo = "",
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120, // KUNCI LURUS: 120
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
-        Expanded(
-          child: Container(
-            height: 35,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                  spreadRadius: -2,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120, // KUNCI LURUS: 120
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
                 ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-              border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
-                width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 110,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value:
-                          _dropdownValues[dropdownKey] ?? seriesOptions.first,
-                      isDense: true,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: primaryIndigo,
-                      ),
-                      onChanged: (v) =>
-                          setState(() => _dropdownValues[dropdownKey] = v!),
-                      items: seriesOptions
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
+            const SizedBox(width: 28), // KUNCI LURUS: 28
+            Expanded(
+              child: Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
                     ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    width: 1,
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 20,
-                  color: Colors.grey.withOpacity(0.3),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _getCtrl(textKey, initial: initialNo),
-                    style: const TextStyle(fontSize: 12, color: Colors.black87),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 9,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 110,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _dropdownValues[dropdownKey] ??
+                              seriesOptions.first,
+                          isDense: true,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 18,
+                            color: primaryIndigo,
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _dropdownValues[dropdownKey] = v!),
+                          items: seriesOptions
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
-                    onChanged: (val) {
-                      _fieldValues[textKey] = val;
-                    },
-                  ),
+                    Container(
+                      width: 1,
+                      height: 20,
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _getCtrl(textKey, initial: initialNo),
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.black87),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 9,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          _fieldValues[textKey] = val;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildModernCheckbox(String label, String key) => Row(
-    children: [
-      SizedBox(
-        width: 24,
-        height: 32,
-        child: Checkbox(
-          value: _checkStates[key] ?? false,
-          activeColor: primaryIndigo,
-          onChanged: (val) => setState(() => _checkStates[key] = val!),
-        ),
-      ),
-      const SizedBox(width: 8),
-      Text(label, style: const TextStyle(fontSize: 12)),
-    ],
-  );
+        children: [
+          SizedBox(
+            width: 24,
+            height: 32,
+            child: Checkbox(
+              value: _checkStates[key] ?? false,
+              activeColor: primaryIndigo,
+              onChanged: (val) => setState(() => _checkStates[key] = val!),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      );
 
   // 1. Tambahkan parameter {double? customWidth}
   Widget _buildSmallDropdown(String key, List<String> items) {
@@ -1455,19 +1453,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.08),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
             offset: const Offset(0, 4),
             blurRadius: 12,
             spreadRadius: -2,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             offset: const Offset(0, 2),
             blurRadius: 4,
           ),
         ],
         border: Border.all(
-          color: const Color(0xFF4F46E5).withOpacity(0.15),
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -1499,129 +1497,129 @@ class _ApInvoicePageState extends State<ApInvoicePage>
     String label,
     String key,
     List<String> items,
-  ) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120, // KUNCI LURUS: 120
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-              // Tetap dikasih shadow di text labelnya biar konsisten sama request sebelumnya
-              shadows: [
-                Shadow(
-                  offset: const Offset(0.5, 0.5),
-                  blurRadius: 1.0,
-                  color: Colors.grey.withOpacity(0.5),
+  ) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120, // KUNCI LURUS: 120
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                  // Tetap dikasih shadow di text labelnya biar konsisten sama request sebelumnya
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0.5, 0.5),
+                      blurRadius: 1.0,
+                      color: Colors.grey.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 28), // KUNCI LURUS: 28
+            Expanded(child: _buildSmallDropdown(key, items)),
+          ],
         ),
-        const SizedBox(width: 28), // KUNCI LURUS: 28
-        Expanded(child: _buildSmallDropdown(key, items)),
-      ],
-    ),
-  );
+      );
 
   Widget _buildChooseFromListField(
     String label,
     String key,
     List<String> data,
-  ) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-
-              shadows: [
-                Shadow(
-                  offset: const Offset(0.5, 0.5),
-                  blurRadius: 1.0,
-                  color: Colors.grey.withOpacity(0.5),
+  ) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0.5, 0.5),
+                      blurRadius: 1.0,
+                      color: Colors.grey.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 28),
-
-        Expanded(
-          child: InkWell(
-            onTap: () => _showSearchDialog(label, key, data),
-            child: Container(
-              height: 35,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                // Border ungu tipis
-                border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                    spreadRadius: -2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _getCtrl(key).text.isEmpty
-                              ? (data.isNotEmpty ? data.first : "")
-                              : _getCtrl(key).text,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
+            ),
+            const SizedBox(width: 28),
+            Expanded(
+              child: InkWell(
+                onTap: () => _showSearchDialog(label, key, data),
+                child: Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    // Border ungu tipis
+                    border: Border.all(
+                      color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        spreadRadius: -2,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _getCtrl(key).text.isEmpty
+                                  ? (data.isNotEmpty ? data.first : "")
+                                  : _getCtrl(key).text,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
+                      // Icon Search (Warna Indigo Soft)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(
+                          Icons.search,
+                          size: 16,
+                          color: primaryIndigo.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
-                  // Icon Search (Warna Indigo Soft)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Icon(
-                      Icons.search,
-                      size: 16,
-                      color: primaryIndigo.withOpacity(0.6),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   void _showSearchDialog(String label, String key, List<String> data) {
     List<String> filteredList = List.from(data);
@@ -1693,196 +1691,200 @@ class _ApInvoicePageState extends State<ApInvoicePage>
   }
 
   Widget _buildFloatingSidePanel() => Container(
-    width: 380,
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
-      ],
-    ),
-    child: Column(
-      children: [
-        AppBar(
-          backgroundColor: primaryIndigo,
-          title: const Text(
-            "Sales Order",
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => setState(() => showSidePanel = false),
-              icon: const Icon(Icons.close),
-              color: Colors.white,
+        width: 380,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+          ],
+        ),
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: primaryIndigo,
+              title: const Text(
+                "Sales Order",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => setState(() => showSidePanel = false),
+                  icon: const Icon(Icons.close),
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildChooseFromListField("Return Date", "cfg_bu", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("No Kendaraan", "No_ken"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Departemen", "Departemen"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Request By", "Request_by"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Driver", "Driver"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Create By", "cfg_by", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Send To Subcont",
+                    "sendtoSub",
+                    isTextArea: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Punching", "cfg_punch", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Bending", "cfg_bend", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Assy", "cfg_assy", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
+                    "No",
+                    "Yes",
+                    "N/A",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Internal Memo",
+                    "cfg_memo",
+                    isTextArea: true,
+                  ),
+                  const Divider(height: 45, thickness: 3),
+                  _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "Internal Memo",
+                    "Internal_memo",
+                    isTextArea: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Delivered To", "Delivered_to", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("AP FP Number", "AP_FP_num"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                    "AP FP tax Amount",
+                    "f_tax_amount",
+                    isDecimal: true,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("E faktur AP Date", "E_faktur"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "E faktur AP Date Creditable",
+                    "ap_date_credit",
+                    [""],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("DO reject Number", "do_reject_numb"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("ETD Delivery", "etd_del"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("AR FP Number", "AR FP Number", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRowPrecision("Tax Rate", "tax_rate"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("PPBJNO", "ppbjno", isTextArea: true),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("PO number", "po_numb"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Request Due Date", "req_due_date"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Upload Status", "upload_status", [
+                    "",
+                    "Yes",
+                    "No",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("SO No", "so_no"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("DO No", "do_no"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("PDO No", "pdo_no"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Kode Faktur Pajak", "code_tax"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("Area", "area", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow(
+                      "Credit Note Number", "Credit_note_numb"),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("AR FP Number E Faktur", "ar_fp_numb"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                    "Number Series Faktur",
+                    "numb_s_faktur",
+                    [""],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern(
+                      "Business Unit ", "business_unit", [
+                    "",
+                  ]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("DO Receipt Date", "receipt_date"),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("GI Type", "gi_type", [""]),
+                  const SizedBox(height: 12),
+                  _buildSmallDropdownRowModern("GR Type", "gr_type", [""]),
+                  const SizedBox(height: 12),
+                  _buildModernFieldRow("Customer Code", "cust_cod"),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => showSidePanel = false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "APPLY",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ],
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildChooseFromListField("Return Date", "cfg_bu", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("No Kendaraan", "No_ken"),
-              const SizedBox(height: 8),
-              _buildModernFieldRow("Departemen", "Departemen"),
-              const SizedBox(height: 8),
-              _buildModernFieldRow("Request By", "Request_by"),
-              const SizedBox(height: 8),
-              _buildModernFieldRow("Driver", "Driver"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Create By", "cfg_by", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Send To Subcont",
-                "sendtoSub",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Cutting Laser", "cfg_laser", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Punching", "cfg_punch", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Bending", "cfg_bend", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Assy", "cfg_assy", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("SubCont", "cfg_sub", [
-                "No",
-                "Yes",
-                "N/A",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Internal Memo",
-                "cfg_memo",
-                isTextArea: true,
-              ),
-              const Divider(height: 45, thickness: 3),
-              _buildHeaderDate("Production\nDue date", "cfg_prod_date", ""),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "Internal Memo",
-                "Internal_memo",
-                isTextArea: true,
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Delivered To", "Delivered_to", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("AP FP Number", "AP_FP_num"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow(
-                "AP FP tax Amount",
-                "f_tax_amount",
-                isDecimal: true,
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("E faktur AP Date", "E_faktur"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "E faktur AP Date Creditable",
-                "ap_date_credit",
-                [""],
-              ),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("DO reject Number", "do_reject_numb"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("ETD Delivery", "etd_del"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("AR FP Number", "AR FP Number", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRowPrecision("Tax Rate", "tax_rate"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("PPBJNO", "ppbjno", isTextArea: true),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("PO number", "po_numb"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Request Due Date", "req_due_date"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Upload Status", "upload_status", [
-                "",
-                "Yes",
-                "No",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("SO No", "so_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("DO No", "do_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("PDO No", "pdo_no"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Kode Faktur Pajak", "code_tax"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Area", "area", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Credit Note Number", "Credit_note_numb"),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("AR FP Number E Faktur", "ar_fp_numb"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern(
-                "Number Series Faktur",
-                "numb_s_faktur",
-                [""],
-              ),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("Business Unit ", "business_unit", [
-                "",
-              ]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("DO Receipt Date", "receipt_date"),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("GI Type", "gi_type", [""]),
-              const SizedBox(height: 12),
-              _buildSmallDropdownRowModern("GR Type", "gr_type", [""]),
-              const SizedBox(height: 12),
-              _buildModernFieldRow("Customer Code", "cust_cod"),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => setState(() => showSidePanel = false),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "APPLY",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildBpCurrencyRow() {
     return Padding(
@@ -1898,19 +1900,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                   offset: const Offset(0, 4),
                   blurRadius: 12,
                   spreadRadius: -2,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   offset: const Offset(0, 2),
                   blurRadius: 4,
                 ),
               ],
               border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -1942,19 +1944,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.08),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                   offset: const Offset(0, 4),
                   blurRadius: 12,
                   spreadRadius: -2,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   offset: const Offset(0, 2),
                   blurRadius: 4,
                 ),
               ],
               border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.15),
+                color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -1976,19 +1978,19 @@ class _ApInvoicePageState extends State<ApInvoicePage>
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),

@@ -104,7 +104,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -116,7 +116,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: Colors.white, size: 48),
@@ -285,7 +285,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryIndigo.withOpacity(0.4),
+                    color: AppColors.primaryIndigo.withValues(alpha: 0.4),
                     blurRadius: 200,
                     spreadRadius: 50,
                   ),
@@ -303,7 +303,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.darkIndigo.withOpacity(0.3),
+                    color: AppColors.darkIndigo.withValues(alpha: 0.3),
                     blurRadius: 200,
                     spreadRadius: 50,
                   ),
@@ -330,7 +330,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
   }
 
   Widget _buildStatusOverlay() => Container(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withValues(alpha: 0.5),
         child: const Center(
           child: CircularProgressIndicator(color: AppColors.primaryIndigo),
         ),
@@ -344,7 +344,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 4),
             spreadRadius: -2,
@@ -462,14 +462,14 @@ class _SapAuthPageState extends State<SapAuthPage> {
                 filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     border: Border(
                       left: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         width: 1,
                       ),
                       top: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         width: 1,
                       ),
                     ),
@@ -517,10 +517,11 @@ class _SapAuthPageState extends State<SapAuthPage> {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 450),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 15),
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1), blurRadius: 15),
             ],
           ),
           child: Stack(
@@ -688,9 +689,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
           child: GestureDetector(
             onTap: () => _switchAuthMode(AuthMode.signup),
             child: RichText(
-              text: TextSpan(
+              text: const TextSpan(
                 text: "Don't have an account? ",
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(color: Colors.white70),
                 children: [
                   TextSpan(
                     text: "Sign Up Now",
@@ -911,7 +912,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.white, fontSize: 14),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.white.withValues(alpha: 0.1),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         border: OutlineInputBorder(
@@ -932,9 +933,9 @@ class _SapAuthPageState extends State<SapAuthPage> {
   Widget _buildWarningBox(String message) => Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.amber.withOpacity(0.1),
+          color: Colors.amber.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [

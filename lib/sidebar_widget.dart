@@ -405,7 +405,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
             EdgeInsets.symmetric(horizontal: isExpanded ? 10 : 8, vertical: 2),
         child: InkWell(
           onTap: onTap ?? () => widget.onViewChanged(title),
-          hoverColor: Colors.white.withOpacity(0.1),
+          hoverColor: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             constraints: const BoxConstraints(minHeight: 50),
@@ -413,7 +413,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                 vertical: 8, horizontal: isExpanded ? 0 : 8),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.white.withOpacity(0.15)
+                  ? Colors.white.withValues(alpha: 0.15)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
@@ -432,7 +432,8 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                       message: !isExpanded ? title : '',
                       child: Icon(
                         icon,
-                        color: Colors.white.withOpacity(isActive ? 1.0 : 0.7),
+                        color: Colors.white
+                            .withValues(alpha: isActive ? 1.0 : 0.7),
                         size: 22,
                       ),
                     ),
@@ -495,8 +496,8 @@ class _SidebarWidgetState extends State<SidebarWidget> {
             leading: SizedBox(
               width: 24,
               child: Center(
-                child:
-                    Icon(icon, color: Colors.white.withOpacity(0.8), size: 22),
+                child: Icon(icon,
+                    color: Colors.white.withValues(alpha: 0.8), size: 22),
               ),
             ),
             title: Text(
@@ -548,14 +549,14 @@ class _SidebarWidgetState extends State<SidebarWidget> {
       margin: const EdgeInsets.only(left: 20, right: 16, bottom: 2),
       child: InkWell(
         onTap: () => widget.onViewChanged(title),
-        hoverColor: Colors.white.withOpacity(0.05),
+        hoverColor: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
         child: Container(
           constraints: const BoxConstraints(minHeight: 40),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isSubActive
-                ? Colors.white.withOpacity(0.1)
+                ? Colors.white.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(

@@ -34,21 +34,21 @@ class _GoodIssuePageState extends State<GoodIssuePage>
   // Shadow Ungu Halus (Reusable)
   List<BoxShadow> get _softShadow => [
         BoxShadow(
-          color: const Color(0xFF4F46E5).withOpacity(0.08),
+          color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
           offset: const Offset(0, 4),
           blurRadius: 12,
           spreadRadius: -2,
         ),
         BoxShadow(
-          color: Colors.black.withOpacity(0.03),
+          color: Colors.black.withValues(alpha: 0.03),
           offset: const Offset(0, 2),
           blurRadius: 4,
         ),
       ];
 
   // Border Ungu Tipis (Reusable)
-  Border get _thinBorder =>
-      Border.all(color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1);
+  Border get _thinBorder => Border.all(
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1);
   // -------------------------------------------
 
   String formatPrice(String value) {
@@ -243,7 +243,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -313,7 +313,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                             icon: Icon(
                               Icons.keyboard_arrow_down,
                               size: 18,
-                              color: primaryIndigo.withOpacity(0.6),
+                              color: primaryIndigo.withValues(alpha: 0.6),
                             ),
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.black),
@@ -397,7 +397,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                   icon: Icon(
                     Icons.keyboard_arrow_down,
                     size: 18,
-                    color: primaryIndigo.withOpacity(0.6),
+                    color: primaryIndigo.withValues(alpha: 0.6),
                   ),
                   style: const TextStyle(fontSize: 12, color: Colors.black),
                   onChanged: (v) => setState(() => _dropdownValues[key] = v!),
@@ -473,7 +473,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                     suffixIcon: Icon(
                       Icons.calendar_month_rounded,
                       size: 14,
-                      color: primaryIndigo.withOpacity(0.6),
+                      color: primaryIndigo.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -498,7 +498,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
         border: Border.all(color: Colors.white, width: 3.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -607,11 +607,11 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                     headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                       horizontalInside: BorderSide(
-                        color: primaryIndigo.withOpacity(0.5),
+                        color: primaryIndigo.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -896,7 +896,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                 Icon(
                   Icons.search,
                   size: 14,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -925,7 +925,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                 icon: Icon(
                   Icons.arrow_drop_down,
                   size: 18,
-                  color: primaryIndigo.withOpacity(0.6),
+                  color: primaryIndigo.withValues(alpha: 0.6),
                 ),
                 onChanged: (newValue) =>
                     setState(() => _dropdownValues[key] = newValue!),
@@ -966,7 +966,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
             border: Border.all(color: Colors.white, width: 3.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -1240,7 +1240,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                   Shadow(
                     offset: const Offset(0.5, 0.5),
                     blurRadius: 1.0,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                 ],
               ),
@@ -1260,19 +1260,19 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                 // Style Shadow & Border tetep dipertahankan
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
                     offset: const Offset(0, 4),
                     blurRadius: 12,
                     spreadRadius: -2,
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     offset: const Offset(0, 2),
                     blurRadius: 4,
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),

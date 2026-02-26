@@ -32,7 +32,6 @@ import 'desktop/pages/inventory/good_issue_page.dart';
 
 import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
 
-
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -322,7 +321,7 @@ class _MainLayoutState extends State<MainLayout> {
                           bottom: BorderSide(color: Colors.grey.shade300)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
+                          color: Colors.black.withValues(alpha: 0.02),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         )
@@ -350,7 +349,10 @@ class _MainLayoutState extends State<MainLayout> {
                                   fontSize: 12)),
                           Switch(
                             value: isFloatingMode,
-                            activeColor: const Color(0xFF4F46E5),
+                            activeTrackColor: const Color(
+                                0xFF4F46E5), // Warna background saat nyala
+                            activeThumbColor:
+                                Colors.white, // Warna buletan saat nyala
                             inactiveThumbColor: Colors.grey.shade400,
                             inactiveTrackColor: Colors.grey.shade200,
                             onChanged: (val) {
@@ -532,7 +534,7 @@ class _MainLayoutState extends State<MainLayout> {
         return const ReturnPage();
 
       case "Cancel Write Off":
-        return const CancelWritteOffPage(); 
+        return const CancelWritteOffPage();
 
       case "Business Partner Master Data":
         return const BpMasterDataPage();

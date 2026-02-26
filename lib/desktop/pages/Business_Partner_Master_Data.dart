@@ -22,6 +22,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   final Color secondarySlate = const Color(0xFF64748B);
   final Color borderGrey = const Color.fromARGB(255, 208, 213, 220);
 
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 9, vsync: this);
@@ -126,13 +127,27 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           // Consolidating BP
           _buildSearchField("Consolidating BP", "acc_con_bp", []),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              const SizedBox(width: 145),
-              _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
-              const SizedBox(width: 20),
-              _buildStatusRadioSmall("Delivery Consolidation", "acc_con_type"),
-            ],
+
+          // 🔥 BUNGKUS ROW PAKAI RADIOGROUP DI SINI
+          RadioGroup<String>(
+            // Ambil data pakai key "acc_con_type", kasih default value kalau kosong
+            groupValue: _dropdownValues["acc_con_type"]?.toString() ??
+                "Payment Consolidation",
+            onChanged: (v) {
+              if (v != null) {
+                setState(() => _dropdownValues["acc_con_type"] = v);
+              }
+            },
+            // Ini Row anak-anaknya
+            child: Row(
+              children: [
+                const SizedBox(width: 145),
+                _buildStatusRadioSmall("Payment Consolidation", "acc_con_type"),
+                const SizedBox(width: 20),
+                _buildStatusRadioSmall(
+                    "Delivery Consolidation", "acc_con_type"),
+              ],
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -270,8 +285,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               horizontal: VisualDensity.minimumDensity,
               vertical: VisualDensity.minimumDensity,
             ),
-            groupValue: _dropdownValues[groupKey] ?? "Accrual",
-            onChanged: (v) => setState(() => _dropdownValues[groupKey] = v!),
+            // ❌ groupValue dan onChanged DIHAPUS dari sini
+            // Karena sudah ditangani oleh RadioGroup di fungsi pemanggilnya
           ),
         ),
         Text(label, style: const TextStyle(fontSize: 11)),
@@ -315,13 +330,24 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                         ),
                         _buildSmallIconButton(Icons.more_horiz),
                         const SizedBox(width: 12),
-                        // Opsi Accrual & Cash disusun vertikal di samping tombol
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildStatusRadioSmall("Accrual", "wtax_type"),
-                            _buildStatusRadioSmall("Cash", "wtax_type"),
-                          ],
+
+                        // 🔥 BUNGKUS COLUMN PAKAI RADIOGROUP DI SINI
+                        RadioGroup<String>(
+                          groupValue:
+                              _dropdownValues["wtax_type"]?.toString() ??
+                                  "Accrual",
+                          onChanged: (v) {
+                            if (v != null) {
+                              setState(() => _dropdownValues["wtax_type"] = v);
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatusRadioSmall("Accrual", "wtax_type"),
+                              _buildStatusRadioSmall("Cash", "wtax_type"),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -366,7 +392,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     _buildSmallDropdownRowModern(
                       "Type for WTax Rpt",
                       "tax_rpt_type",
-                      ["Company", "Individual"],
+                      const ["Company", "Individual"], // Tambah const di sini
                     ),
                   ],
                 ),
@@ -425,13 +451,13 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryIndigo.withOpacity(0.08),
+                      color: primaryIndigo.withValues(alpha: 0.08),
                       offset: const Offset(0, 4),
                       blurRadius: 12,
                     ),
                   ],
                   border: Border.all(
-                    color: primaryIndigo.withOpacity(0.15),
+                    color: primaryIndigo.withValues(alpha: 0.15),
                     width: 1,
                   ),
                 ),
@@ -460,7 +486,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       child: Icon(
                         Icons.calendar_month_rounded,
                         size: 14, // Sesuai permintaanmu
-                        color: primaryIndigo.withOpacity(0.6),
+                        color: primaryIndigo.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -605,19 +631,19 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
   }
 
   Widget _buildExpandableAddressItem(String label, {bool isSelected = false}) {
-    bool _isExpanded = isSelected;
+    bool isExpanded = isSelected;
 
     return StatefulBuilder(
       builder: (context, setTileState) {
         return Column(
           children: [
             InkWell(
-              onTap: () => setTileState(() => _isExpanded = !_isExpanded),
+              onTap: () => setTileState(() => isExpanded = !isExpanded),
               child: Container(
                 height: 32,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: _isExpanded
+                  color: isExpanded
                       ? const Color(0xFFFFF9C4)
                       : Colors.transparent, // Warna SAP
                   border: Border(
@@ -627,7 +653,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 child: Row(
                   children: [
                     AnimatedRotation(
-                      turns: _isExpanded ? 0 : -0.25, // Animasi panah halus
+                      turns: isExpanded ? 0 : -0.25, // Animasi panah halus
                       duration: const Duration(milliseconds: 200),
                       child: const Icon(
                         Icons.arrow_drop_down,
@@ -651,7 +677,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               child: Container(
-                constraints: _isExpanded
+                constraints: isExpanded
                     ? const BoxConstraints()
                     : const BoxConstraints(maxHeight: 0),
                 child: Column(
@@ -948,7 +974,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 8), // Bayangan jatuh ke bawah
@@ -1018,7 +1044,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         border: Border.all(color: Colors.white, width: 3),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -1038,7 +1064,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 255,
                 255,
                 255,
-              ).withOpacity(0.9),
+              ).withValues(alpha: 0.9),
               indicatorSize: TabBarIndicatorSize.tab,
               indicator: BoxDecoration(
                 color: const Color.fromARGB(255, 255, 255, 255),
@@ -1130,7 +1156,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               border: Border.all(color: borderPurple),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.05),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -1201,7 +1227,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               border: Border.all(color: borderPurple),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.05),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -1250,8 +1276,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                const Color(0xFF4F46E5).withOpacity(0.05), // Shadow ungu halus
+            color: const Color(0xFF4F46E5)
+                .withValues(alpha: 0.05), // Shadow ungu halus
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1312,7 +1338,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF4F46E5)
-                        .withOpacity(0.05), // Shadow halus
+                        .withValues(alpha: 0.05), // Shadow halus
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -1355,7 +1381,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     String key, {
     String value = "0.00",
   }) {
-    final TextEditingController _controller = _getCtrl(
+    final TextEditingController controller = _getCtrl(
       key,
       initial: _fieldValues[key] ?? value,
     );
@@ -1364,20 +1390,20 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
       _focusNodes[key] = FocusNode();
       _focusNodes[key]!.addListener(() {
         if (!_focusNodes[key]!.hasFocus) {
-          String text = _controller.text;
+          String text = controller.text;
           double? parsedValue = double.tryParse(text.replaceAll(',', ''));
           if (parsedValue != null) {
-            _controller.text = parsedValue.toStringAsFixed(2);
+            controller.text = parsedValue.toStringAsFixed(2);
           } else if (text.isEmpty) {
-            _controller.text = "0.00";
+            controller.text = "0.00";
           }
-          _fieldValues[key] = _controller.text;
+          _fieldValues[key] = controller.text;
 
           if (mounted) setState(() {});
         }
       });
     }
-    final FocusNode _focusNode = _focusNodes[key]!;
+    final FocusNode focusNode = _focusNodes[key]!;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12), // Jarak antar row agak lega
@@ -1409,16 +1435,16 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
               ),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      const Color(0xFF4F46E5).withOpacity(0.05), // Shadow halus
+                  color: const Color(0xFF4F46E5)
+                      .withValues(alpha: 0.05), // Shadow halus
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
+              controller: controller,
+              focusNode: focusNode,
               textAlign: TextAlign.right, // Angka rata kanan
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -1487,8 +1513,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4F46E5)
-                        .withOpacity(0.05), // Shadow Ungu sangat transparan
+                    color: const Color(0xFF4F46E5).withValues(
+                        alpha: 0.05), // Shadow Ungu sangat transparan
                     blurRadius: 10, // Blur luas biar glowing
                     offset: const Offset(0, 4), // Bayangan sedikit ke bawah
                     spreadRadius: 0,
@@ -1654,7 +1680,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFF4F46E5)
-                          .withOpacity(0.05), // Shadow halus
+                          .withValues(alpha: 0.05), // Shadow halus
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -1711,14 +1737,12 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                       ],
                     ),
                     _buildModernFieldRow("Interest on Arreas %", "Interest"),
-                   
                     _buildSmallDropdownRowModern("Price List", "PriceList", [
                       "",
                     ]),
                     _buildModernFieldRow("Total Discount %", "total disc"),
                     _buildSimpleFieldRow("Credit Limit", "Credit Limit"),
                     _buildSimpleFieldRow("Commitmen Limit", "commitmen Limit"),
-                   
                     _buildSmallDropdownRowModern(
                       "Effective Discount Group",
                       "Effective Discount Group",
@@ -1784,7 +1808,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     _buildModernFieldRow("Credit Card No", "Credit Card No"),
                     _buildHeaderDate("Expiration Date", "Expiration Date", ""),
                     _buildModernFieldRow("ID number", "Id number"),
-                    _buildHeaderDate("Expiration Date", "Expiration Date 2",""),
+                    _buildHeaderDate(
+                        "Expiration Date", "Expiration Date 2", ""),
                     _buildModernFieldRow("Average Delay", "Average Delay"),
                     _buildSmallDropdownRowModern("Priority", "priority", [""]),
                     _buildModernFieldRow("Default IBAN", " Default IBAN"),
@@ -1836,7 +1861,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                             backgroundColor: Colors.redAccent.shade400,
                             foregroundColor: Colors.white,
                             elevation: 4,
-                            shadowColor: Colors.redAccent.withOpacity(0.4),
+                            shadowColor:
+                                Colors.redAccent.withValues(alpha: 0.4),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 15,
@@ -1879,7 +1905,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 25,
                       offset: const Offset(0, 10),
                     ),
@@ -2100,7 +2126,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   elevation: 4,
-                                  shadowColor: primaryIndigo.withOpacity(0.4),
+                                  shadowColor:
+                                      primaryIndigo.withValues(alpha: 0.4),
                                 ),
                                 child: const Text(
                                   "SAVE CHANGES",
@@ -2130,21 +2157,21 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
     String key, {
     String value = "0.00",
   }) {
-    final TextEditingController _controller = TextEditingController(
+    final TextEditingController controller = TextEditingController(
       text: _fieldValues[key] ?? value,
     );
-    final FocusNode _focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
 
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) {
-        String text = _controller.text;
+    focusNode.addListener(() {
+      if (!focusNode.hasFocus) {
+        String text = controller.text;
         double? parsedValue = double.tryParse(text.replaceAll(',', ''));
         if (parsedValue != null) {
-          _controller.text = parsedValue.toStringAsFixed(2);
+          controller.text = parsedValue.toStringAsFixed(2);
         } else if (text.isEmpty) {
-          _controller.text = "0.00";
+          controller.text = "0.00";
         }
-        _fieldValues[key] = _controller.text;
+        _fieldValues[key] = controller.text;
       }
     });
 
@@ -2176,15 +2203,15 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF4F46E5)
-                        .withOpacity(0.05), // Shadow halus
+                        .withValues(alpha: 0.05), // Shadow halus
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
+                controller: controller,
+                focusNode: focusNode,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -2276,29 +2303,39 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         children: [
           Expanded(
             flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _buildStatusRadio("Active"),
-                    const SizedBox(width: 20),
-                    const Text("From", style: TextStyle(fontSize: 11)),
-                    const SizedBox(width: 8),
-                    _buildSmallBox("act_from", width: 80),
-                    const SizedBox(width: 8),
-                    const Text("To", style: TextStyle(fontSize: 11)),
-                    const SizedBox(width: 8),
-                    _buildSmallBox("act_to", width: 80),
-                    const SizedBox(width: 8),
-                    const Text("Remarks", style: TextStyle(fontSize: 11)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildSmallBox("act_rem")),
-                  ],
-                ),
-                _buildStatusRadio("Inactive"),
-                _buildStatusRadio("Advanced"),
-              ],
+            child: RadioGroup<String>(
+              // 🔥 Pasang Bapaknya di sini buat bungkus Column
+              groupValue:
+                  _dropdownValues["status_main"]?.toString() ?? "Active",
+              onChanged: (v) {
+                if (v != null) {
+                  setState(() => _dropdownValues["status_main"] = v);
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _buildStatusRadio("Active"),
+                      const SizedBox(width: 20),
+                      const Text("From", style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 8),
+                      _buildSmallBox("act_from", width: 80),
+                      const SizedBox(width: 8),
+                      const Text("To", style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 8),
+                      _buildSmallBox("act_to", width: 80),
+                      const SizedBox(width: 8),
+                      const Text("Remarks", style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildSmallBox("act_rem")),
+                    ],
+                  ),
+                  _buildStatusRadio("Inactive"),
+                  _buildStatusRadio("Advanced"),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 40),
@@ -2338,9 +2375,7 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
           child: Radio<String>(
             value: label,
             activeColor: primaryIndigo,
-            groupValue: _dropdownValues["status_main"] ?? "Active",
-            onChanged: (v) =>
-                setState(() => _dropdownValues["status_main"] = v.toString()),
+            // ❌ groupValue dan onChanged HAPUS dari sini
           ),
         ),
         Text(label, style: const TextStyle(fontSize: 12)),
@@ -2360,7 +2395,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.05), // Shadow halus
+            color:
+                const Color(0xFF4F46E5).withValues(alpha: 0.05), // Shadow halus
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -2538,7 +2574,8 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                           side: const BorderSide(
                             color: Color.fromARGB(255, 95, 37, 255),
                           ),
-                          backgroundColor: Color.fromARGB(255, 95, 37, 255),
+                          backgroundColor:
+                              const Color.fromARGB(255, 95, 37, 255),
                           foregroundColor: const Color.fromARGB(
                             255,
                             255,
@@ -2561,8 +2598,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                           style: TextStyle(fontSize: 14),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.red.withOpacity(0.5)),
-                          backgroundColor: Color.fromARGB(255, 255, 0, 0),
+                          side: BorderSide(
+                              color: Colors.red.withValues(alpha: 0.5)),
+                          backgroundColor: const Color.fromARGB(255, 255, 0, 0),
                           foregroundColor: const Color.fromARGB(
                             255,
                             255,
@@ -2643,13 +2681,25 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildStatusRadio("Active"),
-              _buildStatusRadio("Inactive"),
-            ],
+          // 🔥 1. BUNGKUS COLUMN PAKAI RADIOGROUP DI SINI
+          RadioGroup<String>(
+            groupValue: _dropdownValues["status_main"]?.toString() ?? "Active",
+            onChanged: (v) {
+              if (v != null) {
+                setState(() => _dropdownValues["status_main"] = v);
+              }
+            },
+            // Ini Column anak-anaknya
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatusRadio("Active"),
+                _buildStatusRadio("Inactive"),
+              ],
+            ),
           ),
+
+          // --- BAGIAN KANAN (TIDAK BERUBAH) ---
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -2697,7 +2747,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
       width: double.infinity,
       height: 30,
       decoration: BoxDecoration(
-        color: isSelected ? primaryIndigo.withOpacity(0.1) : Colors.transparent,
+        color: isSelected
+            ? primaryIndigo.withValues(alpha: 0.1)
+            : Colors.transparent,
         border: Border(bottom: BorderSide(color: borderGrey, width: 0.5)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4),

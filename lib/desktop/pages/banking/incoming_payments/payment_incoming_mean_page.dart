@@ -92,8 +92,8 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSuccess
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.red.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -171,7 +171,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -208,7 +208,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -222,7 +222,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryIndigo.withOpacity(0.1),
+                  color: primaryIndigo.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.payment_rounded, color: primaryIndigo),
@@ -256,7 +256,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -273,7 +273,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: primaryIndigo.withOpacity(0.3),
+              color: primaryIndigo.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -411,9 +411,9 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.05),
+              color: Colors.green.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.green.withOpacity(0.2)),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
             ),
             child: Column(
               children: [
@@ -443,7 +443,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -482,7 +482,7 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 4,
-              shadowColor: primaryIndigo.withOpacity(0.4),
+              shadowColor: primaryIndigo.withValues(alpha: 0.4),
             ),
             child: const Text("Confirm Payment",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -544,7 +544,8 @@ class _PaymentIncomingMeanPageState extends State<PaymentIncomingMeanPage>
                       border: Border.all(color: const Color(0xFFE0E7FF)),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF4F46E5).withOpacity(0.05),
+                          color:
+                              const Color(0xFF4F46E5).withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

@@ -179,7 +179,7 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
     border: Border.all(color: Colors.white, width: 3.5),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.12),
+        color: Colors.black.withValues(alpha: 0.12),
         blurRadius: 18,
         spreadRadius: 2,
         offset: const Offset(0, 8),
@@ -335,39 +335,46 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
         const SizedBox(height: 8),
 
         // 3. Radio Buttons (Title / Active Account)
-        Row(
-          children: [
-            Expanded(
-              child: RadioListTile<String>(
-                title: Text('Title',
+        RadioGroup<String>(
+          groupValue: accountTypeRadio,
+          onChanged: (val) => setState(() => accountTypeRadio = val!),
+          child: Row(
+            children: [
+              Expanded(
+                child: RadioListTile<String>(
+                  title: Text(
+                    'Title',
                     style: TextStyle(
-                        fontSize: 12,
-                        color: secondarySlate,
-                        fontWeight: FontWeight.w500)),
-                value: 'Title',
-                groupValue: accountTypeRadio,
-                onChanged: (val) => setState(() => accountTypeRadio = val!),
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                activeColor: primaryIndigo,
+                      fontSize: 12,
+                      color: secondarySlate,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  value: 'Title',
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: primaryIndigo,
+                ),
               ),
-            ),
-            Expanded(
-              child: RadioListTile<String>(
-                title: Text('Active Account',
+              Expanded(
+                child: RadioListTile<String>(
+                  title: Text(
+                    'Active Account',
                     style: TextStyle(
-                        fontSize: 12,
-                        color: secondarySlate,
-                        fontWeight: FontWeight.w500)),
-                value: 'Active',
-                groupValue: accountTypeRadio,
-                onChanged: (val) => setState(() => accountTypeRadio = val!),
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                activeColor: primaryIndigo,
+                      fontSize: 12,
+                      color: secondarySlate,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  value: 'Active',
+                  // ❌ groupValue dan onChanged dihapus dari sini
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: primaryIndigo,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         const SizedBox(height: 8),
@@ -584,17 +591,17 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF4F46E5).withOpacity(0.08),
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
               offset: const Offset(0, 4),
               blurRadius: 12,
               spreadRadius: -2),
           BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               offset: const Offset(0, 2),
               blurRadius: 4),
         ],
         border: Border.all(
-            color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1),
       ),
       child: TextField(
         controller: controller,
@@ -656,17 +663,17 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF4F46E5).withOpacity(0.08),
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
               offset: const Offset(0, 4),
               blurRadius: 12,
               spreadRadius: -2),
           BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               offset: const Offset(0, 2),
               blurRadius: 4),
         ],
         border: Border.all(
-            color: const Color(0xFF4F46E5).withOpacity(0.15), width: 1),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.15), width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -753,11 +760,13 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
     var filteredData = coaData
         .where((node) => node['id'].toString().startsWith(activeCategory))
         .toList();
-    if (filteredData.isEmpty)
+    if (filteredData.isEmpty) {
       return [
         const Padding(
             padding: EdgeInsets.all(16), child: Text('No data found.'))
       ];
+    }
+
     return filteredData.map((node) => _buildTreeNode(node)).toList();
   }
 
@@ -841,7 +850,7 @@ class _ChartOfAccountsPageState extends State<ChartOfAccountsPage> {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2))
                 ]
