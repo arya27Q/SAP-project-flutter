@@ -774,7 +774,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                                   ),
                                 ),
                                 // Isi Halaman Journal Entry
-                                Expanded(
+                                const Expanded(
                                   // Pastikan kamu meng-import JournalEntryPage dengan benar di atas
                                   child: JournalEntryPage(),
                                 ),
@@ -991,55 +991,10 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                 ),
               ),
               const SizedBox(width: 60),
-              SizedBox(
+              const SizedBox(
                 width: 350,
                 child: Column(
-                  children: [
-                    _buildSummaryRowWithAutoValue(
-                      "Total Before Discount",
-                      "f_before_disc",
-                      isReadOnly: true,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 140,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Freight",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF64748B),
-                                ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 14,
-                                color: Colors.orange,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 58),
-                        Expanded(child: _buildSummaryBox("f_freight")),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildSummaryRowWithAutoValue("Tax", "f_tax"),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(height: 1, thickness: 1),
-                    ),
-                    _buildSummaryRowWithAutoValue(
-                      "Total Payment Due",
-                      "f_total_final",
-                      isBold: true,
-                      isReadOnly: true,
-                    ),
-                  ],
+                  children: [],
                 ),
               ),
             ],
@@ -1049,7 +1004,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
-              _buildFooterButton("Add", primaryIndigo),
+              _buildFooterButton("Add", const Color(0xFF4F46E5)),
               const SizedBox(width: 8),
               _buildFooterButton("Cancel", Colors.red),
               const Spacer(),
@@ -1076,108 +1031,6 @@ class _GoodIssuePageState extends State<GoodIssuePage>
       child: Text(
         label,
         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildSummaryRowWithAutoValue(
-    String label,
-    String key, {
-    String defaultValue = "0.00",
-    bool isBold = false,
-    bool isReadOnly = false,
-  }) {
-    final controller = _getCtrl(key, initial: defaultValue);
-    final focusNode = _getFn(
-      key,
-      isReadOnly: isReadOnly,
-      defaultValue: defaultValue,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: secondarySlate,
-              ),
-            ),
-          ),
-          const SizedBox(width: 58),
-          Expanded(
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: isReadOnly ? Colors.white : Colors.white,
-                borderRadius: _inputRadius,
-                border: _thinBorder,
-                boxShadow: _softShadow,
-              ),
-              child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                readOnly: isReadOnly,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryBox(
-    String key, {
-    String defaultValue = "0.00",
-    bool isReadOnly = false,
-    bool isPercent = false,
-  }) {
-    final controller = _getCtrl(key, initial: defaultValue);
-    final focusNode = _getFn(
-      key,
-      isReadOnly: isReadOnly,
-      defaultValue: defaultValue,
-      isPercent: isPercent,
-    );
-    return Container(
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: _inputRadius,
-        border: _thinBorder,
-        boxShadow: _softShadow,
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        readOnly: isReadOnly,
-        textAlign: TextAlign.right,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          isDense: true,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        ),
       ),
     );
   }
@@ -1324,18 +1177,15 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                 padding: const EdgeInsets.all(20),
                 children: [
                   // Sesuai gambar ketiga
-                  _buildModernFieldRow("Customer Code", "sp_cust_code"),
+                  _buildModernFieldRow("Customer Code", "cust_code2"),
                   const SizedBox(height: 8),
-                  _buildModernFieldRow("SO No.", "sp_so_no"),
+                  _buildModernFieldRow("SO No.", "sp_so_no2"),
                   const SizedBox(height: 8),
-                  _buildModernFieldRow("GI Reason Code", "sp_gi_reason"),
-                  const SizedBox(height: 8),
+                  _buildModernDropdownRow("GR Reason Code", "_gi_reason", [""]),
+                  const SizedBox(height: 16),
                   _buildModernFieldRow("Item Group", "sp_item_group"),
                   const SizedBox(height: 8),
                   _buildModernFieldRow("Create by", "sp_create_by"),
-                  const SizedBox(height: 8),
-                  _buildModernFieldRow("No Resi", "sp_no_resi"),
-
                   const SizedBox(height: 30),
                   SizedBox(
                     width: double.infinity,
@@ -1364,4 +1214,101 @@ class _GoodIssuePageState extends State<GoodIssuePage>
           ],
         ),
       );
+
+  Widget _buildModernDropdownRow(String label, String key, List<String> items) {
+    // 1. Logic Set Default Value (Pindah ke sini)
+    if (!_dropdownValues.containsKey(key)) {
+      _dropdownValues[key] = items.isNotEmpty ? items.first : "";
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 2. BAGIAN LABEL (KIRI)
+          SizedBox(
+            width: 102, // KUNCI LURUS: 120
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    secondarySlate, // Pastikan variabel ini ada atau ganti Colors.grey
+                fontWeight: FontWeight.w500,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0.5, 0.5),
+                    blurRadius: 1.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 28), // KUNCI LURUS: 28
+
+          // 3. BAGIAN DROPDOWN (KANAN - Expanded)
+          Expanded(
+            child: Container(
+              height: 37,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                // Style Shadow & Border tetep dipertahankan
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF4F46E5).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _dropdownValues[key],
+                  isDense: true,
+                  isExpanded:
+                      true, // Aku nyalain true biar menuhin Expanded dgn rapi
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: primaryIndigo, // Pastikan variabel ini ada
+                  ),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _dropdownValues[key] = val!;
+                    });
+                  },
+                  items: items.map((val) {
+                    return DropdownMenuItem(
+                      value: val,
+                      child: Text(val),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
