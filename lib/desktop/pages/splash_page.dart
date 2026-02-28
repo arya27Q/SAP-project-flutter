@@ -4,7 +4,6 @@ import 'package:lottie/lottie.dart';
 
 // 🔥 IMPORT 🔥
 import '../../main_layout.dart'; // Dashboard Desktop
-import '../../tablet/login_page.dart'; // Login Tablet
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -45,31 +44,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // 🔥 LOGIC NAVIGASI (SUDAH DINORMALKAN KEMBALI) 🔥
+  //  LOGIC NAVIGASI (LANGSUNG TEMBAK KE DESKTOP / MAIN LAYOUT)
   void _navigateToDashboard() {
     if (mounted) {
-      // 1. Cek Lebar Layar
-      double screenWidth = MediaQuery.of(context).size.width;
-
-      bool isTablet = screenWidth < 900;
-
-      // 2. Tentukan Tujuan Halaman
-      Widget destinationPage;
-
-      if (isTablet) {
-        // Layar Sempit -> Masuk QC System
-        destinationPage = const TabletLoginPage();
-      } else {
-        // Layar Lebar (Laptop) -> Masuk ERP System
-        destinationPage = const MainLayout();
-      }
-
-      // 3. Pindah Halaman
+      // Langsung pindah ke MainLayout tanpa ngecek ukuran layar lagi
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              destinationPage,
+              const MainLayout(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -114,14 +97,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             -150,
             -150,
             450,
-            primaryIndigo.withOpacity(0.12),
+            primaryIndigo.withValues(alpha: 0.12),
             delayMs: 0,
           ),
           _buildAnimatedPremiumCircle(
             null,
             null,
             300,
-            Colors.indigoAccent.withOpacity(0.08),
+            Colors.indigoAccent.withValues(alpha: 0.08),
             bottom: -100,
             left: -100,
             delayMs: 200,
@@ -176,7 +159,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 6.5,
-                color: darkSlate.withOpacity(0.7),
+                color: darkSlate.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -192,14 +175,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryIndigo.withOpacity(0.4),
+                    color: primaryIndigo.withValues(alpha: 0.4),
                     blurRadius: 25,
                     spreadRadius: 2,
                     offset: const Offset(0, 12),
                   ),
                 ],
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   width: 1.5,
                 ),
               ),
@@ -232,11 +215,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       opacity: _showContent ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 2500),
       child: Text(
-        "POWERED BY DLM GROUP TECHNOLOGY",
+        "POWERED BY ENTERPRISE TECHNOLOGY",
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: darkSlate.withOpacity(0.5),
+          color: darkSlate.withValues(alpha: 0.5),
           letterSpacing: 2.2,
         ),
         textAlign: TextAlign.center,
@@ -287,15 +270,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               width: size,
               height: size,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: primaryIndigo.withOpacity(0.4),
+                  color: primaryIndigo.withValues(alpha: 0.4),
                   width: 3.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryIndigo.withOpacity(0.15),
+                    color: primaryIndigo.withValues(alpha: 0.15),
                     blurRadius: 25,
                     offset: const Offset(0, 15),
                   ),
@@ -336,7 +319,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: primaryIndigo.withOpacity(0.2),
+                  color: primaryIndigo.withValues(alpha: 0.2),
                 ),
               ),
             ),
@@ -367,7 +350,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: accentYellow.withOpacity(0.15),
+                      color: accentYellow.withValues(alpha: 0.15),
                       blurRadius: 100,
                       spreadRadius: 40 * value,
                     ),
@@ -415,7 +398,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: color,
-                border: Border.all(color: color.withOpacity(0.15), width: 25),
+                border:
+                    Border.all(color: color.withValues(alpha: 0.15), width: 25),
               ),
             ),
           ),
@@ -427,14 +411,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
         child: _isLoading
             ? CircularProgressIndicator(
                 strokeWidth: 4,
-                color: primaryIndigo.withOpacity(0.6),
+                color: primaryIndigo.withValues(alpha: 0.6),
               )
             : Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryIndigo.withOpacity(0.3),
+                      color: primaryIndigo.withValues(alpha: 0.3),
                       blurRadius: 40,
                       offset: const Offset(0, 15),
                     ),
@@ -480,7 +464,7 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = gridColor.withOpacity(0.8)
+      ..color = gridColor.withValues(alpha: 0.8)
       ..strokeWidth = 0.8;
     for (double i = 0; i <= size.width; i += 50) {
       canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);

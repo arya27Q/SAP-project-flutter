@@ -267,7 +267,7 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                   _buildModernNoFieldRow(
                     "Bill to",
                     "p_no_series",
-                    [""],
+                    const [""],
                     "p_no_val",
                     initialNo:
                         "Desa Wonokoyo, Beji, Beji, Kab. Pasuruan, Jawa Timur, 67154",
@@ -280,14 +280,22 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 148),
-                    child: Row(
-                      children: [
-                        _buildCategoryRadio("Customer"),
-                        const SizedBox(width: 16),
-                        _buildCategoryRadio("Vendor"),
-                        const SizedBox(width: 16),
-                        _buildCategoryRadio("Account"),
-                      ],
+                    child: RadioGroup<String>(
+                      groupValue: _selectedCategory,
+                      onChanged: (v) {
+                        if (v != null) {
+                          setState(() => _selectedCategory = v);
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          _buildCategoryRadio("Customer"),
+                          const SizedBox(width: 16),
+                          _buildCategoryRadio("Vendor"),
+                          const SizedBox(width: 16),
+                          _buildCategoryRadio("Account"),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -446,7 +454,7 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
                     columnSpacing: 45,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
                         color: primaryIndigo.withValues(alpha: 0.5),
@@ -1430,32 +1438,28 @@ class _OutgoingPaymentPageState extends State<OutgoingPaymentPage>
       );
 
   Widget _buildCategoryRadio(String title) {
-    return InkWell(
-      onTap: () => setState(() => _selectedCategory = title),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Radio<String>(
-              value: title,
-              groupValue: _selectedCategory,
-              activeColor: primaryIndigo,
-              onChanged: (v) => setState(() => _selectedCategory = v!),
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Radio<String>(
+            value: title,
+            activeColor: primaryIndigo,
+            //  groupValue dan onChanged SUDAH DIHAPUS DARI SINI
           ),
-          const SizedBox(width: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            color: secondarySlate, // Pastikan variabel warna lu aman ya
+            fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -561,7 +561,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSubActive
-                  ? Colors.white.withOpacity(0.5)
+                  ? Colors.white.withValues(alpha: 0.5)
                   : Colors.transparent,
               width: 1.5,
             ),

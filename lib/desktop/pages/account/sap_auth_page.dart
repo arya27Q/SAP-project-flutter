@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:ui';
 import '../../../constants.dart';
 import '../splash_page.dart';
 import '../../../services/api_services.dart';
-import 'package:flutter/foundation.dart'; // Untuk debugPrint
 
 enum AuthMode { login, signup, forgotPassword }
 
@@ -316,8 +314,10 @@ class _SapAuthPageState extends State<SapAuthPage> {
               padding: const EdgeInsets.all(20),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth > 950)
+                  if (constraints.maxWidth > 950) {
                     return _buildDesktopCardLayout();
+                  }
+
                   return _buildMobileLayout();
                 },
               ),
@@ -415,38 +415,37 @@ class _SapAuthPageState extends State<SapAuthPage> {
                     ),
                   ),
                   const SizedBox(height: 50),
-                  ...features
-                      .map(
-                        (f) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white24,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Text(
-                                f['title'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                  // 🔥 Titik tiganya mulai di sini, dan .toList() di bawah sudah dihapus
+                  ...features.map(
+                    (f) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.white24,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                          const SizedBox(width: 16),
+                          Text(
+                            f['title'],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ), // <--- .toList() yang tadi di sini udah minggat!
                 ],
               ),
             ),
@@ -877,7 +876,7 @@ class _SapAuthPageState extends State<SapAuthPage> {
 
   // 🔥 UPDATE: Dropdown Menggunakan Map (Name vs Value)
   Widget _buildCompanyDropdown(bool isDark) => DropdownButtonFormField<String>(
-        value: selectedCompanyValue,
+        initialValue: selectedCompanyValue,
         isExpanded: true,
         dropdownColor: const Color(0xFF2E2E48),
         style: const TextStyle(color: Colors.white),

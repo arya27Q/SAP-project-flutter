@@ -14,7 +14,7 @@ import 'desktop/pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'desktop/pages/sales_AR/ar_invoice_page.dart';
 import 'desktop/pages/sales_AR/ar_credit_memo_page.dart';
 import 'desktop/pages/sales_AR/return_page.dart';
-import 'desktop/pages/Business_Partner_Master_Data.dart';
+import 'desktop/pages/business_partner_master_data.dart.dart';
 import 'desktop/pages/purchasing/purchase_request_page.dart';
 import 'desktop/pages/purchasing/purchase_quotation_page.dart';
 import 'desktop/pages/purchasing/purchase_order_page.dart';

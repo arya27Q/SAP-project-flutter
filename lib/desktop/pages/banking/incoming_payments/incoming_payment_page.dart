@@ -262,7 +262,7 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                   _buildModernNoFieldRow(
                     "Bill to",
                     "p_no_series",
-                    [""],
+                    const [""], // Tambah const biar clean
                     "p_no_val",
                     initialNo: "",
                     isAddress: true,
@@ -275,14 +275,24 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
                   Padding(
                     padding:
                         const EdgeInsets.only(left: 148), // 120 (label) + 28
-                    child: Row(
-                      children: [
-                        _buildCategoryRadio("Customer"),
-                        const SizedBox(width: 16),
-                        _buildCategoryRadio("Vendor"),
-                        const SizedBox(width: 16),
-                        _buildCategoryRadio("Account"),
-                      ],
+                    // 🔥 BUNGKUS ROW PAKAI RADIOGROUP DI SINI
+                    child: RadioGroup<String>(
+                      groupValue:
+                          _selectedCategory, // <-- Variabel lu sekarang kepakai!
+                      onChanged: (v) {
+                        if (v != null) {
+                          setState(() => _selectedCategory = v);
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          _buildCategoryRadio("Customer"),
+                          const SizedBox(width: 16),
+                          _buildCategoryRadio("Vendor"),
+                          const SizedBox(width: 16),
+                          _buildCategoryRadio("Account"),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1423,32 +1433,29 @@ class _IncomingPaymentPageState extends State<IncomingPaymentPage>
       );
 
   Widget _buildCategoryRadio(String title) {
-    return InkWell(
-      onTap: () => setState(() => _selectedCategory = title),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Radio<String>(
-              value: title,
-              groupValue: _selectedCategory,
-              activeColor: primaryIndigo,
-              onChanged: (v) => setState(() => _selectedCategory = v!),
-            ),
+    // ❌ InkWell dan onTap dihapus, langsung return Row aja
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Radio<String>(
+            value: title,
+            activeColor: primaryIndigo,
+            // ❌ groupValue dan onChanged DIHAPUS dari sini
           ),
-          const SizedBox(width: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: secondarySlate,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            color: secondarySlate,
+            fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
