@@ -347,9 +347,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.inventory_2_rounded,
                     "Inventory",
                     [
-                      _buildSubExpansionMenu(
-                          context,
-                          "Inventory Counting Transactions",
+                      _buildSubExpansionMenu(context, "Inventory Transactions",
                           Icons.folder_open_outlined, [
                         _buildSubMenu(
                           "Inventory Counting",

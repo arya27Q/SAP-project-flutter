@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
-import 'floating_window_widget.dart'; // 🔥 IMPORT BARU: File Floating Widget kamu
+import 'floating_window_widget.dart'; //  IMPORT BARU: File Floating Widget kamu
 
 // --- IMPORTS HALAMAN (TIDAK BERUBAH) ---
 import 'desktop/pages/account/sap_auth_page.dart';
@@ -30,7 +30,8 @@ import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
 import 'desktop/pages/inventory/good_issue_page.dart';
 import 'desktop/pages/inventory/inventory_transfer_page.dart';
-
+import 'desktop/pages/inventory/inventory_transaction/inventory_counting_page.dart';
+import 'desktop/pages/inventory/inventory_transaction/inventory_posting_page.dart';
 import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
 
 class MainLayout extends StatefulWidget {
@@ -577,6 +578,12 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Inventory Transfer":
         return const InventoryTransferPage();
+
+      case "Inventory Counting":
+        return const InventoryCountingPage();
+
+      case "Inventory Posting":
+        return const InventoryPostingPage();
 
       default:
         return Center(
