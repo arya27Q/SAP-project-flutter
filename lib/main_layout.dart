@@ -29,6 +29,7 @@ import 'desktop/pages/financials/journal_entry_page.dart';
 import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
 import 'desktop/pages/inventory/good_issue_page.dart';
+import 'desktop/pages/inventory/inventory_transfer_page.dart';
 
 import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
 
@@ -69,7 +70,7 @@ class _MainLayoutState extends State<MainLayout> {
     focusedWindowKey = "Dashboard";
   }
 
-  // 🔥 FUNGSI BARU: Bawa Jendela ke Paling Depan (MDI)
+  // FUNGSI BARU: Bawa Jendela ke Paling Depan (MDI)
   void _bringToFront(String key) {
     int index = _openPageKeys.indexOf(key);
     if (index != -1 && index != _openPageKeys.length - 1) {
@@ -573,6 +574,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Chart of Accounts":
         return const ChartOfAccountsPage();
+
+      case "Inventory Transfer":
+        return const InventoryTransferPage();
 
       default:
         return Center(
