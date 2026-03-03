@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
-import 'desktop/pages/splash_page.dart'; 
-import 'tablet/tablet_splash_page.dart';
+import 'desktop/pages/splash_page.dart';
 
 void main() {
   runApp(const SAPModernApp());
@@ -14,23 +13,13 @@ class SAPModernApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'QC System',
+      title: 'ERP system samudra II',
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Segoe UI',
         colorSchemeSeed: AppColors.primaryIndigo,
       ),
-      
-      home: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 1000) {
-            return const SplashPage(); 
-          } 
-          else {
-            return const TabletSplashPage(); 
-          }
-        },
-      ),
+      home: const SplashPage(),
     );
   }
 }

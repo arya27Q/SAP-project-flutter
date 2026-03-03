@@ -10,7 +10,7 @@ class CancelWritteOffPage extends StatefulWidget {
 }
 
 class _CancelWritteOffPageState extends State<CancelWritteOffPage> {
-   @override
+  @override
   Widget build(BuildContext context) {
     const seed = Colors.indigo;
     return MaterialApp(
@@ -36,17 +36,17 @@ class _CancelWritteOffPageState extends State<CancelWritteOffPage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: seed, width: 1.6),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         ),
-       cardTheme: const CardThemeData(
-  color: Colors.white,
-  elevation: 0,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(16)),
-    side: BorderSide(color: Color(0xFFE6ECF7)),
-  ),
-),
-
+        cardTheme: const CardThemeData(
+          color: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+            side: BorderSide(color: Color(0xFFE6ECF7)),
+          ),
+        ),
       ),
       home: const CancelWriteOffScreen(),
     );
@@ -301,9 +301,6 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-  
-
-
                       FilledButton.icon(
                         onPressed: _searchByNoSo,
                         icon: const Icon(Icons.search),
@@ -311,8 +308,10 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
                         style: FilledButton.styleFrom(
                           backgroundColor: cs.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ],
@@ -347,8 +346,10 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
                           style: FilledButton.styleFrom(
                             backgroundColor: cs.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -360,66 +361,62 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
     );
   }
 
- Widget _buildDetailsCard(bool isWide) {
-  final fields = [
-    _roField('Customer Name', _customerNameCtrl),
-    _roField('Total SO', _totalSoCtrl, prefix: const Icon(Icons.payments_outlined)),
-    _roField('Total Omzet', _totalOmzetCtrl, prefix: const Icon(Icons.stacked_line_chart)),
-    _roField('Material Cost', _materialCostCtrl),
-    _roField('Supporting Cost', _supportingCostCtrl),
-    _roField('Subcont Cost', _subcontCostCtrl),
-  ];
+  Widget _buildDetailsCard(bool isWide) {
+    final fields = [
+      _roField('Customer Name', _customerNameCtrl),
+      _roField('Total SO', _totalSoCtrl,
+          prefix: const Icon(Icons.payments_outlined)),
+      _roField('Total Omzet', _totalOmzetCtrl,
+          prefix: const Icon(Icons.stacked_line_chart)),
+      _roField('Material Cost', _materialCostCtrl),
+      _roField('Supporting Cost', _supportingCostCtrl),
+      _roField('Subcont Cost', _subcontCostCtrl),
+    ];
 
-  return Column(
-    children: [
-
-      // ================= DETAIL CARD =================
-      Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionTitle('Detail SO (auto dari hasil search)'),
-              const SizedBox(height: 12),
-              
-              
-              isWide
-                  ? Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: fields
-                          .map((w) => SizedBox(width: 260, child: w))
-                          .toList(),
-                    )
-                  : Column(
-                      children: [
-                        for (final f in fields) ...[
-                          f,
-                          const SizedBox(height: 12),
-                        ]
-                      ],
-                    ),
-            ],
+    return Column(
+      children: [
+        // ================= DETAIL CARD =================
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionTitle('Detail SO (auto dari hasil search)'),
+                const SizedBox(height: 12),
+                isWide
+                    ? Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: fields
+                            .map((w) => SizedBox(width: 260, child: w))
+                            .toList(),
+                      )
+                    : Column(
+                        children: [
+                          for (final f in fields) ...[
+                            f,
+                            const SizedBox(height: 12),
+                          ]
+                        ],
+                      ),
+              ],
+            ),
           ),
         ),
-      ),
-
-      
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildActionCard(bool isWide, ColorScheme cs) {
-    final actionItems = const ['Cancel', 'Write Off'];
-    final statusItems = const ['In Progress', 'Done'];
+    final actionItems = ['Cancel', 'Write Off'];
+    final statusItems = ['In Progress', 'Done'];
 
     final left = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<String>(
-          value: _actionType,
+          initialValue: _actionType,
           items: actionItems
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
@@ -466,7 +463,7 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<String>(
-          value: _status,
+          initialValue: _status,
           items: statusItems
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
@@ -485,7 +482,8 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFFF2F6FF),
             borderRadius: BorderRadius.circular(14),
-            border: const Border.fromBorderSide(BorderSide(color: Color(0xFFE0E9FF))),
+            border: const Border.fromBorderSide(
+                BorderSide(color: Color(0xFFE0E9FF))),
           ),
           child: Row(
             children: [
@@ -605,7 +603,8 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
             label: const Text('Reset'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               side: const BorderSide(color: Color(0xFFD7E0F2)),
               foregroundColor: const Color(0xFF0B1220),
               backgroundColor: Colors.white,
@@ -618,7 +617,8 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
             onPressed: () {
               // FRONTEND ONLY: nanti ganti jadi call API save.
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Simulasi: data disimpan (frontend-only).')),
+                const SnackBar(
+                    content: Text('Simulasi: data disimpan (frontend-only).')),
               );
             },
             icon: const Icon(Icons.save_outlined),
@@ -627,7 +627,8 @@ class _CancelWriteOffScreenState extends State<CancelWriteOffScreen> {
               backgroundColor: cs.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),

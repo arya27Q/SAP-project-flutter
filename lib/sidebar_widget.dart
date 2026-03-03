@@ -347,6 +347,15 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.inventory_2_rounded,
                     "Inventory",
                     [
+                      _buildSubExpansionMenu(context, "Inventory Transactions",
+                          Icons.folder_open_outlined, [
+                        _buildSubMenu(
+                          "Inventory Counting",
+                          Icons.calculate_outlined,
+                        ),
+                        _buildSubMenu(
+                            "Inventory Posting", Icons.post_add_rounded),
+                      ]),
                       _buildSubMenu("Item Master Data", Icons.category_rounded),
                       _buildSubMenu("Goods Receipt", Icons.add_box_outlined),
                       _buildSubMenu(
@@ -357,12 +366,6 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                         "Inventory Transfer",
                         Icons.swap_horiz_rounded,
                       ),
-                      _buildSubMenu(
-                        "Inventory Counting",
-                        Icons.calculate_outlined,
-                      ),
-                      _buildSubMenu(
-                          "Inventory Posting", Icons.post_add_rounded),
                       _buildSubMenu(
                           "Inventory Report", Icons.bar_chart_rounded),
                     ],
@@ -533,6 +536,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
         title: Text(
           title,
           style: const TextStyle(color: Colors.white60, fontSize: 13),
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         iconColor: Colors.white,
@@ -561,7 +565,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSubActive
-                  ? Colors.white.withOpacity(0.5)
+                  ? Colors.white.withValues(alpha: 0.5)
                   : Colors.transparent,
               width: 1.5,
             ),

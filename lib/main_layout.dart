@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
-import 'floating_window_widget.dart'; // 🔥 IMPORT BARU: File Floating Widget kamu
+import 'floating_window_widget.dart'; //  IMPORT BARU: File Floating Widget kamu
 
 // --- IMPORTS HALAMAN (TIDAK BERUBAH) ---
 import 'desktop/pages/account/sap_auth_page.dart';
@@ -14,7 +14,7 @@ import 'desktop/pages/sales_AR/ar_down_payment_invoice_page.dart';
 import 'desktop/pages/sales_AR/ar_invoice_page.dart';
 import 'desktop/pages/sales_AR/ar_credit_memo_page.dart';
 import 'desktop/pages/sales_AR/return_page.dart';
-import 'desktop/pages/Business_Partner_Master_Data.dart';
+import 'desktop/pages/business_partner_master_data.dart.dart';
 import 'desktop/pages/purchasing/purchase_request_page.dart';
 import 'desktop/pages/purchasing/purchase_quotation_page.dart';
 import 'desktop/pages/purchasing/purchase_order_page.dart';
@@ -29,7 +29,9 @@ import 'desktop/pages/financials/journal_entry_page.dart';
 import 'desktop/pages/financials/chart_of_accounts_page.dart';
 import 'desktop/pages/inventory/item_master_data.dart';
 import 'desktop/pages/inventory/good_issue_page.dart';
-
+import 'desktop/pages/inventory/inventory_transfer_page.dart';
+import 'desktop/pages/inventory/inventory_transaction/inventory_counting_page.dart';
+import 'desktop/pages/inventory/inventory_transaction/inventory_posting_page.dart';
 import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
 
 class MainLayout extends StatefulWidget {
@@ -69,7 +71,7 @@ class _MainLayoutState extends State<MainLayout> {
     focusedWindowKey = "Dashboard";
   }
 
-  // 🔥 FUNGSI BARU: Bawa Jendela ke Paling Depan (MDI)
+  // FUNGSI BARU: Bawa Jendela ke Paling Depan (MDI)
   void _bringToFront(String key) {
     int index = _openPageKeys.indexOf(key);
     if (index != -1 && index != _openPageKeys.length - 1) {
@@ -573,6 +575,15 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Chart of Accounts":
         return const ChartOfAccountsPage();
+
+      case "Inventory Transfer":
+        return const InventoryTransferPage();
+
+      case "Inventory Counting":
+        return const InventoryCountingPage();
+
+      case "Inventory Posting":
+        return const InventoryPostingPage();
 
       default:
         return Center(

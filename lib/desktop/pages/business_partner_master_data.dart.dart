@@ -2589,8 +2589,9 @@ class _BpMasterDataPageState extends State<BpMasterDataPage>
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          if (_contactRowCount > 1)
+                          if (_contactRowCount > 1) {
                             setState(() => _contactRowCount--);
+                          }
                         },
                         icon: const Icon(Icons.remove, size: 14),
                         label: const Text(
