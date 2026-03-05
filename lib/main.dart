@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'constants.dart';
-import 'desktop/pages/splash_page.dart';
+import 'pages/splash_page.dart';
 
 void main() {
   runApp(const SAPModernApp());
