@@ -141,6 +141,43 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.admin_panel_settings_rounded,
                     "Administration",
                     [
+                      _buildSubExpansionMenu(
+                        context,
+                        "Setup",
+                        Icons.settings_outlined,
+                        [
+                          _buildSubExpansionMenu(
+                            context,
+                            "Inventory",
+                            Icons.inventory_2_outlined,
+                            [
+                              _buildSubMenu(
+                                "Item Groups",
+                                Icons.category_outlined,
+                              ),
+                              _buildSubMenu(
+                                "Unit Of Measure",
+                                Icons.balance_outlined,
+                              ),
+                              _buildSubMenu(
+                                "Warehouse",
+                                Icons.warehouse_sharp,
+                              ),
+                            ],
+                          ),
+                          _buildSubExpansionMenu(
+                            context,
+                            "Financials",
+                            Icons.money_outlined,
+                            [
+                              _buildSubMenu(
+                                "Item Groups",
+                                Icons.category_outlined,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                       _buildSubMenu("Choose Company", Icons.business_rounded),
                       _buildSubMenu(
                         "Exchange Rates",
@@ -357,7 +394,7 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                             "Inventory Posting", Icons.post_add_rounded),
                       ]),
                       _buildSubMenu("Item Master Data", Icons.category_rounded),
-                      _buildSubMenu("Goods Receipt", Icons.add_box_outlined),
+                      _buildSubMenu("Good Receipt", Icons.add_box_outlined),
                       _buildSubMenu(
                         "Good Issue",
                         Icons.indeterminate_check_box_outlined,

@@ -33,6 +33,9 @@ import 'desktop/pages/inventory/inventory_transfer_page.dart';
 import 'desktop/pages/inventory/inventory_transaction/inventory_counting_page.dart';
 import 'desktop/pages/inventory/inventory_transaction/inventory_posting_page.dart';
 import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
+import 'desktop/pages/inventory/good_receipt_page.dart';
+import 'desktop/pages/administration/setup/inventory/item_group.dart';
+import 'desktop/pages/administration/setup/inventory/warehouse.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -520,6 +523,9 @@ class _MainLayoutState extends State<MainLayout> {
           onLogout: () => setState(() => isLoggedIn = false),
         );
 
+      case "Warehouse":
+        return const WarehouseSetupPage();
+
       case "Sales Quotation":
         return const SalesQuotationPage();
       case "Sales Order":
@@ -584,6 +590,18 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Inventory Posting":
         return const InventoryPostingPage();
+
+      case "Good Receipt":
+        return const GoodReceiptPage();
+
+      case "Item Group":
+        return const ItemGroupPage();
+
+      case "Item Location":
+        return const WarehouseSetupPage();
+
+      case "Item Groups":
+        return const ItemGroupPage();
 
       default:
         return Center(

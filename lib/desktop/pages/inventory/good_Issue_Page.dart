@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// Hapus import ini kalau nanti masih merah, lalu pakai cara Ctrl + Titik (Auto Import)
-import '../financials/journal_entry_page.dart';
+// Import Item Master Data yang bener (karena satu folder, tinggal panggil namanya)
+import 'item_master_data.dart';
 
 class GoodIssuePage extends StatefulWidget {
   const GoodIssuePage({super.key});
@@ -631,7 +631,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
   }
 
   // ==========================================
-  // UPDATED TABLE COLUMNS
+  // UPDATED TABLE COLUMNS (Sesuai Gambar)
   // ==========================================
   List<DataColumn> _buildStaticColumns() {
     const headerStyle = TextStyle(
@@ -647,22 +647,21 @@ class _GoodIssuePageState extends State<GoodIssuePage>
       );
     }
 
-    // Sesuai gambar yang diminta
+    // Persis urutan di gambar Goods Receipt
     return [
       centeredColumn("#"),
       centeredColumn("Item No."),
       centeredColumn("Item Description"),
       centeredColumn("Quantity"),
       centeredColumn("UoM Name"),
-      centeredColumn("Item Cost"),
-      centeredColumn("In Stock"),
-      centeredColumn("Inventory Offset - Decrease Account"),
-      centeredColumn("Total"),
       centeredColumn("Whse"),
-      centeredColumn("Dimension 1"),
-      centeredColumn("Dem_nottf"),
-      centeredColumn("Sales BoM"),
-      centeredColumn("No. Permintaan"),
+      centeredColumn("Unit Price"),
+      centeredColumn("Total"),
+      centeredColumn("Inventory Offset - Increase Account"),
+      centeredColumn("Item Cost"),
+      centeredColumn("Material"),
+      centeredColumn("Material From"),
+      centeredColumn("Project"),
     ];
   }
 
@@ -674,20 +673,18 @@ class _GoodIssuePageState extends State<GoodIssuePage>
             child: Text("${index + 1}", style: const TextStyle(fontSize: 12)),
           ),
         ),
-        _buildItemNoCell("item_no_$index"), // Tanda panah kuning ada di sini
+        _buildItemNoCell("item_no_$index"), // Panah kuning SAP ada di sini
         _buildSearchableCell("desc_$index"),
         _buildModernTableCell("qty_$index", initial: "0"),
         _buildSearchableCell("uom_$index"),
-        _buildModernTableCell("cost_$index", initial: "0,00"),
-        _buildModernTableCell("stock_$index", initial: "0"),
-        _buildSearchableCell("offset_$index"),
-        _buildModernTableCell("total_$index", initial: "0,00"),
         _buildSearchableCell("whse_$index"),
-        _buildSearchableCell("dim1_$index"),
-        _buildSearchableCell("dem_$index"),
-        // Dropdown khusus kolom Sales BoM
-        _buildDropdownCell("sales_bom_$index", ["Header", "Component", "None"]),
-        _buildSearchableCell("no_perm_$index"),
+        _buildModernTableCell("price_$index", initial: "0,00"),
+        _buildModernTableCell("total_$index", initial: "0,00"),
+        _buildSearchableCell("offset_$index"),
+        _buildModernTableCell("cost_$index", initial: "0,00"),
+        _buildSearchableCell("mat_$index"),
+        _buildSearchableCell("mat_from_$index"),
+        _buildSearchableCell("proj_$index"),
       ],
     );
   }
@@ -731,7 +728,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
               children: [
                 InkWell(
                   onTap: () {
-                    // MUNCULKAN SEBAGAI POP-UP DIALOG (MODAL) BIAR GAMPANG DITUTUP
+                    // MUNCULKAN POP-UP ITEM MASTER DATA
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -739,13 +736,12 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          // Atur ukuran Pop-up Journal Entry nya (Bisa dibesarkan/dikecilkan)
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width * 0.85,
                             height: MediaQuery.of(context).size.height * 0.85,
                             child: Column(
                               children: [
-                                // Header Pop-up dengan tombol Close
+                                // Header Pop-up Ungu
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 8),
@@ -759,7 +755,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       const Text(
-                                        "Journal Entry Details",
+                                        "Item Master Data", // Judul Pop Up
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold),
@@ -767,16 +763,16 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                                       IconButton(
                                         icon: const Icon(Icons.close,
                                             color: Colors.white),
-                                        onPressed: () => Navigator.of(context)
-                                            .pop(), // Tombol Kembali
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
                                       ),
                                     ],
                                   ),
                                 ),
-                                // Isi Halaman Journal Entry
+                                // Isi Halaman Item Master Data
                                 const Expanded(
-                                  // Pastikan kamu meng-import JournalEntryPage dengan benar di atas
-                                  child: JournalEntryPage(),
+                                  // DI SINI KITA PANGGIL HALAMAN ITEM MASTER DATA NYA!
+                                  child: ItemMasterDataPage(),
                                 ),
                               ],
                             ),
@@ -788,7 +784,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                   child: const Icon(
                     Icons.play_arrow, // Golden arrow khas SAP
                     size: 16,
-                    color: Colors.orange,
+                    color: Color(0xFFFFB300), // Warna kuning persis SAP
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -899,45 +895,6 @@ class _GoodIssuePageState extends State<GoodIssuePage>
                   color: primaryIndigo.withValues(alpha: 0.6),
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDropdownCell(String key, List<String> items) {
-    if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
-
-    return DataCell(
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: IntrinsicWidth(
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 120),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValues[key],
-                hint: const Text("", style: TextStyle(fontSize: 12)),
-                isDense: true,
-                isExpanded: false,
-                style: const TextStyle(fontSize: 12, color: Colors.black),
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  size: 18,
-                  color: primaryIndigo.withValues(alpha: 0.6),
-                ),
-                onChanged: (newValue) =>
-                    setState(() => _dropdownValues[key] = newValue!),
-                items: items
-                    .map(
-                      (String value) => DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      ),
-                    )
-                    .toList(),
-              ),
             ),
           ),
         ),
@@ -1144,7 +1101,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
   }
 
   // ==========================================
-  // UPDATED SIDE PANEL
+  // UPDATED SIDE PANEL (Persis Gambar Kanan)
   // ==========================================
   Widget _buildFloatingSidePanel() => Container(
         width: 380,
@@ -1160,7 +1117,7 @@ class _GoodIssuePageState extends State<GoodIssuePage>
             AppBar(
               backgroundColor: primaryIndigo,
               title: const Text(
-                "Sales Order",
+                "Document Details",
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
               actions: [
@@ -1176,16 +1133,32 @@ class _GoodIssuePageState extends State<GoodIssuePage>
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
-                  // Sesuai gambar ketiga
-                  _buildModernFieldRow("Customer Code", "cust_code2"),
+                  _buildModernFieldRow("GR Type", "sp_gr_type",
+                      initial: "Stock Adjustment"),
                   const SizedBox(height: 8),
-                  _buildModernFieldRow("SO No.", "sp_so_no2"),
+                  _buildModernFieldRow("Driver", "sp_driver", initial: ""),
                   const SizedBox(height: 8),
-                  _buildModernDropdownRow("GR Reason Code", "_gi_reason", [""]),
-                  const SizedBox(height: 16),
-                  _buildModernFieldRow("Item Group", "sp_item_group"),
+                  _buildModernFieldRow("Create By", "sp_create_by",
+                      initial: "KARMO"),
                   const SizedBox(height: 8),
-                  _buildModernFieldRow("Create by", "sp_create_by"),
+                  _buildModernFieldRow("SO No", "sp_so_no",
+                      initial: "3266200407"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("PDO No", "sp_pdo_no", initial: ""),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("DO Receipt Date", "sp_do_date",
+                      initial: ""),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Customer Code", "sp_cust_code",
+                      initial: "CJS-00076"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Customer Name", "sp_cust_name",
+                      initial: "Schneider Indonesia, PT"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Status TTF", "sp_status_ttf",
+                      initial: "Unapproved"),
+                  const SizedBox(height: 8),
+                  _buildModernFieldRow("Approved By", "sp_app_by", initial: ""),
                   const SizedBox(height: 30),
                   SizedBox(
                     width: double.infinity,
@@ -1214,101 +1187,4 @@ class _GoodIssuePageState extends State<GoodIssuePage>
           ],
         ),
       );
-
-  Widget _buildModernDropdownRow(String label, String key, List<String> items) {
-    // 1. Logic Set Default Value (Pindah ke sini)
-    if (!_dropdownValues.containsKey(key)) {
-      _dropdownValues[key] = items.isNotEmpty ? items.first : "";
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 2. BAGIAN LABEL (KIRI)
-          SizedBox(
-            width: 102, // KUNCI LURUS: 120
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color:
-                    secondarySlate, // Pastikan variabel ini ada atau ganti Colors.grey
-                fontWeight: FontWeight.w500,
-                shadows: [
-                  Shadow(
-                    offset: const Offset(0.5, 0.5),
-                    blurRadius: 1.0,
-                    color: Colors.grey.withValues(alpha: 0.5),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 28), // KUNCI LURUS: 28
-
-          // 3. BAGIAN DROPDOWN (KANAN - Expanded)
-          Expanded(
-            child: Container(
-              height: 37,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                // Style Shadow & Border tetep dipertahankan
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                    spreadRadius: -2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-                border: Border.all(
-                  color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _dropdownValues[key],
-                  isDense: true,
-                  isExpanded:
-                      true, // Aku nyalain true biar menuhin Expanded dgn rapi
-                  icon: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 18,
-                    color: primaryIndigo, // Pastikan variabel ini ada
-                  ),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  onChanged: (val) {
-                    setState(() {
-                      _dropdownValues[key] = val!;
-                    });
-                  },
-                  items: items.map((val) {
-                    return DropdownMenuItem(
-                      value: val,
-                      child: Text(val),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -11,7 +11,7 @@ class InventoryPostingPage extends StatefulWidget {
 
 class _InventoryPostingPageState extends State<InventoryPostingPage>
     with SingleTickerProviderStateMixin {
-  // 🔥 STATE BUAT SIDE PANEL UDF
+  // STATE BUAT SIDE PANEL UDF
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;

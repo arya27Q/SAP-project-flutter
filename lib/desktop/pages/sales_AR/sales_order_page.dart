@@ -397,7 +397,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                     columnSpacing: 30,
                     horizontalMargin: 15,
                     headingRowHeight: 40,
-                    headingRowColor: MaterialStateProperty.all(primaryIndigo),
+                    headingRowColor: WidgetStateProperty.all(primaryIndigo),
                     border: TableBorder(
                       verticalInside: BorderSide(
                         color: primaryIndigo.withValues(alpha: 0.5),
