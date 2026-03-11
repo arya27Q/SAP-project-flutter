@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project_sap/pages/administration/setup/business_partner/countries.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'constants.dart';
 import 'sidebar_widget.dart';
 import 'floating_window_widget.dart'; //  IMPORT BARU: File Floating Widget kamu
 
 // --- IMPORTS HALAMAN (TIDAK BERUBAH) ---
+<<<<<<< HEAD
 import 'desktop/pages/account/sap_auth_page.dart';
 import 'desktop/pages/dashboard.dart';
 import 'desktop/pages/sales_AR/sales_order_page.dart';
@@ -37,6 +39,39 @@ import 'desktop/pages/inventory/good_receipt_page.dart';
 import 'desktop/pages/administration/setup/inventory/item_group.dart';
 import 'desktop/pages/administration/setup/inventory/warehouse.dart';
 import 'desktop/pages/Pajak_Coretax/Satuan.dart';
+=======
+import 'pages/account/sap_auth_page.dart';
+import 'pages/dashboard.dart';
+import 'pages/sales_AR/sales_order_page.dart';
+import 'pages/sales_AR/sales_quotation_page.dart';
+import 'pages/sales_AR/delivery_page.dart';
+import 'pages/sales_AR/ar_down_payment_invoice_page.dart';
+import 'pages/sales_AR/ar_invoice_page.dart';
+import 'pages/sales_AR/ar_credit_memo_page.dart';
+import 'pages/sales_AR/return_page.dart';
+import 'pages/business_partner_master_data.dart';
+import 'pages/purchasing/purchase_request_page.dart';
+import 'pages/purchasing/purchase_quotation_page.dart';
+import 'pages/purchasing/purchase_order_page.dart';
+import 'pages/purchasing/good_return_page.dart';
+import 'pages/purchasing/good_receipt_po_page.dart';
+import 'pages/purchasing/ap_down_payment_page.dart';
+import 'pages/purchasing/ap_invoice_page.dart';
+import 'pages/purchasing/ap_credit_memo_page.dart';
+import 'pages/banking/incoming_payments/incoming_payment_page.dart';
+import 'pages/banking/outgoing_payments/outgoing_payment_page.dart';
+import 'pages/financials/journal_entry_page.dart';
+import 'pages/financials/chart_of_accounts_page.dart';
+import 'pages/inventory/item_master_data.dart';
+import 'pages/inventory/good_issue_page.dart';
+import 'pages/inventory/inventory_transfer_page.dart';
+import 'pages/inventory/inventory_transaction/inventory_counting_page.dart';
+import 'pages/inventory/inventory_transaction/inventory_posting_page.dart';
+import 'pages/sales_AR/cancel_write_off_page.dart';
+import 'pages/inventory/good_receipt_page.dart';
+import 'pages/administration/setup/inventory/item_group.dart';
+import 'pages/administration/setup/inventory/warehouse.dart';
+>>>>>>> 212a60b71595f04930bd28699c6dbe2f863dfb38
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -604,8 +639,13 @@ class _MainLayoutState extends State<MainLayout> {
       case "Item Groups":
         return const ItemGroupPage();
 
+<<<<<<< HEAD
       case "Item Groups":
         return const p();
+=======
+      case "Countries":
+        return const CountriesSetupPage();
+>>>>>>> 212a60b71595f04930bd28699c6dbe2f863dfb38
 
       default:
         return Center(

@@ -169,10 +169,16 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                             context,
                             "Financials",
                             Icons.money_outlined,
+                            [],
+                          ),
+                          _buildSubExpansionMenu(
+                            context,
+                            "Business Partner",
+                            Icons.money_outlined,
                             [
                               _buildSubMenu(
-                                "Item Groups",
-                                Icons.category_outlined,
+                                "Countries",
+                                Icons.flag_outlined,
                               ),
                             ],
                           ),
