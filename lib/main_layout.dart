@@ -639,13 +639,8 @@ class _MainLayoutState extends State<MainLayout> {
       case "Item Groups":
         return const ItemGroupPage();
 
-<<<<<<< HEAD
       case "Item Groups":
         return const p();
-=======
-      case "Countries":
-        return const CountriesSetupPage();
->>>>>>> 212a60b71595f04930bd28699c6dbe2f863dfb38
 
       default:
         return Center(
