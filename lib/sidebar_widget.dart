@@ -180,6 +180,10 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                                 "Countries",
                                 Icons.flag_outlined,
                               ),
+                              _buildSubMenu(
+                                "Address Format",
+                                Icons.contact_mail_outlined,
+                              ),
                             ],
                           ),
                         ],

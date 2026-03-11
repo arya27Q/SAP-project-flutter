@@ -37,6 +37,7 @@ import 'pages/sales_AR/cancel_write_off_page.dart';
 import 'pages/inventory/good_receipt_page.dart';
 import 'pages/administration/setup/inventory/item_group.dart';
 import 'pages/administration/setup/inventory/warehouse.dart';
+import 'pages/administration/setup/business_partner/address_format.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -317,7 +318,7 @@ class _MainLayoutState extends State<MainLayout> {
                     ),
                   ),
 
-                // 🔥 TOP BAR: TOMBOL SAKLAR MODE WORKSPACE
+                //  TOP BAR: TOMBOL SAKLAR MODE WORKSPACE
                 Container(
                   height: 48,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -419,7 +420,7 @@ class _MainLayoutState extends State<MainLayout> {
                               );
                             }).toList(),
                           )
-                        // 🔥 MODE 2: MULTI SPLIT VIEW (DEFAULT)
+                        //  MODE 2: MULTI SPLIT VIEW (DEFAULT)
                         : MultiSplitViewTheme(
                             data: MultiSplitViewThemeData(
                               dividerPainter: DividerPainters.grooved1(
@@ -606,6 +607,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Countries":
         return const CountriesSetupPage();
+
+      case "Address Format":
+        return const AddressFormatPage();
 
       default:
         return Center(
