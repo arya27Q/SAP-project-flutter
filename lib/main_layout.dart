@@ -36,6 +36,7 @@ import 'desktop/pages/sales_AR/cancel_write_off_page.dart';
 import 'desktop/pages/inventory/good_receipt_page.dart';
 import 'desktop/pages/administration/setup/inventory/item_group.dart';
 import 'desktop/pages/administration/setup/inventory/warehouse.dart';
+import 'desktop/pages/Pajak_Coretax/Satuan.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -602,6 +603,9 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Item Groups":
         return const ItemGroupPage();
+
+      case "Item Groups":
+        return const p();
 
       default:
         return Center(
