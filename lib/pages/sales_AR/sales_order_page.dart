@@ -28,6 +28,62 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String?> _formValues = {};
 
+  // --- DATA DUMMY DROPDOWN (Sesuai Rekaman Bunda) ---
+  final List<String> listCompany = ['PT DLM', 'PT Senzo', 'PT Dempo', 'PT ADE'];
+  final List<String> listDocType = [
+    'SO Resmi (1)',
+    'SO Intern/Protolan (2)',
+    'Project Master (9)'
+  ];
+  final List<String> listCustomer = [
+    'PT Indofood Makmur',
+    'PT Unilever',
+    'RS Siloam',
+    'Walk-in'
+  ];
+  final List<String> listProject = [
+    '2619-0001 - Project Merah Putih',
+    '2619-0002 - Gudang Baru',
+    '2619-0005 - Repair Mesin'
+  ];
+
+  // ========================================================
+  // LOGIKA "RAHASIA" BUNDA: AUTO GENERATE SO NUMBER
+  // ========================================================
+  void _generateAutoSONumber() {
+    // 1. Ambil pilihan user saat ini (Default ke yang pertama kalau kosong)
+    String company = _dropdownValues["h_company"] ?? listCompany.first;
+    String docType = _dropdownValues["h_doc_type"] ?? listDocType.first;
+
+    // 2. Format Tahun (Contoh: "26" buat 2026)
+    String year = DateFormat('yy').format(DateTime.now());
+
+    // 3. Digit ke-3: Kode PT (DLM=1, Senzo=2, Dempo=3, ADE=4)
+    String compCode = "1";
+    if (company.contains("Senzo"))
+      compCode = "2";
+    else if (company.contains("Dempo"))
+      compCode = "3";
+    else if (company.contains("ADE")) compCode = "4";
+
+    // 4. Digit ke-4: Kode Jenis Dokumen (Resmi=1, Intern=2, Project=9)
+    String docCode = "1";
+    if (docType.contains("Intern") || docType.contains("(2)"))
+      docCode = "2";
+    else if (docType.contains("Project") || docType.contains("(9)"))
+      docCode = "9";
+
+    // 5. Gabungin kodenya jadi satu + nomor urut fiktif
+    String generatedCode = "$year$compCode$docCode";
+    String finalSONumber =
+        "$generatedCode-0001"; // Nanti 0001 ini dari backend Laravel
+
+    // 6. Tembak langsung ke textfield SO No.
+    _getCtrl("h_no_val").text = finalSONumber;
+    _fieldValues["h_no_val"] = finalSONumber;
+  }
+  // ========================================================
+
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return "0,00";
@@ -162,6 +218,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+
+    // Memicu logika auto-generate pertama kali saat layar dibuka
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateAutoSONumber();
+    });
   }
 
   @override
@@ -205,6 +266,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
+  // --- HEADER TETAP SAMA, CUMA NOMORNYA SEKARANG HIDUP ---
   Widget _buildModernHeader() => Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         padding: const EdgeInsets.all(24),
@@ -212,10 +274,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: Colors.white, width: 3.5),
+          border: Border.all(
+              color: primaryIndigo.withValues(alpha: 0.4), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 18,
               spreadRadius: 2,
               offset: const Offset(0, 8),
@@ -229,15 +292,16 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               flex: 6,
               child: Column(
                 children: [
-                  _buildModernFieldRow("Customer", "h_cust"),
-                  _buildModernFieldRow("Name", "h_name"),
-                  _buildModernFieldRow("Contact Person", "h_cont"),
-                  _buildModernFieldRow("Customer Ref. No.", "h_ref"),
-                  _buildSmallDropdownRowModern("Local Currency", "h_curr", [
-                    "IDR",
-                    "USD",
-                    "EUR",
-                  ]),
+                  _buildSmallDropdownRowModern(
+                      "Company (PT)", "h_company", listCompany),
+                  _buildSmallDropdownRowModern(
+                      "SO Type", "h_doc_type", listDocType),
+                  _buildSmallDropdownRowModern(
+                      "Customer", "h_customer", listCustomer),
+                  _buildSmallDropdownRowModern(
+                      "Project Ref", "h_project", listProject),
+                  _buildSmallDropdownRowModern(
+                      "Local Currency", "h_curr", ["IDR", "USD", "EUR"]),
                 ],
               ),
             ),
@@ -247,11 +311,12 @@ class _SalesOrderPageState extends State<SalesOrderPage>
               child: Column(
                 children: [
                   _buildModernNoFieldRow(
-                    "No.",
+                    "SO No.",
                     "h_no_series",
-                    ["2025-COM", "2024-REG"],
+                    ["2026-SO", "2025-SO"],
                     "h_no_val",
-                    initialNo: "256100727",
+                    initialNo:
+                        "2611-0001", // Nanti dioverride otomatis sama logika
                   ),
                   _buildModernFieldRow("Status", "h_stat", initial: "Open"),
                   _buildHeaderDate("Posting Date", "h_post_date", ""),
@@ -271,10 +336,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white, width: 3.5),
+        border:
+            Border.all(color: primaryIndigo.withValues(alpha: 0.4), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 18,
             spreadRadius: 2,
             offset: const Offset(0, 10),
@@ -337,7 +403,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  // --- LOGIKA TABLE TIDAK DIUBAH (Sesuai Request) ---
   Widget _buildContentsTab() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -475,7 +540,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  // --- CELL BUILDER (LOGIKA LAMA) ---
   DataCell _buildModernTableCell(
     String key, {
     String initial = "",
@@ -752,10 +816,11 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.white, width: 3.5),
+            border: Border.all(
+                color: primaryIndigo.withValues(alpha: 0.4), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 18,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -819,8 +884,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       ],
     );
   }
-
-  // --- STYLING BARU: SHADOW & FLOATING ---
 
   Widget _buildDiscountRow() => Padding(
         padding: const EdgeInsets.only(bottom: 12),
@@ -1436,6 +1499,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
         ),
       );
 
+  // LOGIKA DROPDOWN DIUPDATE DI SINI BIAR NOMOR SO IKUT BERUBAH
   Widget _buildSmallDropdown(String key, List<String> items) {
     if (!_dropdownValues.containsKey(key)) _dropdownValues[key] = items.first;
     return Container(
@@ -1477,7 +1541,16 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
-          onChanged: (val) => setState(() => _dropdownValues[key] = val!),
+          onChanged: (val) {
+            setState(() {
+              _dropdownValues[key] = val!;
+
+              // KALO YANG DIPILIH ITU DROPDOWN COMPANY ATAU SO TYPE, GENERATE ULANG NOMORNYA!
+              if (key == "h_company" || key == "h_doc_type") {
+                _generateAutoSONumber();
+              }
+            });
+          },
           items: items
               .map((val) => DropdownMenuItem(value: val, child: Text(val)))
               .toList(),
@@ -1758,6 +1831,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
+  // --- BAGIAN SIDE PANEL SAMA SEKALI GAK DIUBAH (Sesuai Request Lu!) ---
   Widget _buildFloatingSidePanel() => Container(
         width: 380,
         decoration: const BoxDecoration(

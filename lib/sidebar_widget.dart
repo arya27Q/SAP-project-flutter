@@ -422,10 +422,28 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.people_alt_rounded,
                     "Business Partner Master Data",
                   ),
+                  
                   _buildSimpleMenu(
                     Icons.admin_panel_settings_outlined,
                     "Data Admin",
                   ),
+
+                  _buildExpansionMenu(
+                    context,
+                    Icons.shopping_bag_rounded,
+                    "Pajak Coretax",
+                    [
+                      _buildSubMenu(
+                        "Satuan",
+                        Icons.description_outlined,
+                      ),
+                     
+                    ],
+                  ),                
+
+
+
+                  
                   const SizedBox(height: 20),
                   Divider(
                       color: Colors.white24,
