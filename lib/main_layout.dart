@@ -38,6 +38,9 @@ import 'pages/inventory/good_receipt_page.dart';
 import 'pages/administration/setup/inventory/item_group.dart';
 import 'pages/administration/setup/inventory/warehouse.dart';
 import 'pages/administration/setup/business_partner/address_format.dart';
+import 'pages/administration/setup/financials/currencies.dart';
+
+import 'pages/Pajak_Coretax/Satuan.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -610,6 +613,12 @@ class _MainLayoutState extends State<MainLayout> {
 
       case "Address Format":
         return const AddressFormatPage();
+
+      case "Satuan":
+        return const SatuanPage();
+
+      case "Currencies":
+        return const CurrenciesPage();
 
       default:
         return Center(

@@ -169,7 +169,16 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                             context,
                             "Financials",
                             Icons.money_outlined,
-                            [],
+                            [
+                              _buildSubMenu(
+                                "Edit Chart Of Accounts",
+                                Icons.flag_outlined,
+                              ),
+                              _buildSubMenu(
+                                "Currencies",
+                                Icons.contact_mail_outlined,
+                              ),
+                            ],
                           ),
                           _buildSubExpansionMenu(
                             context,
@@ -422,12 +431,6 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                     Icons.people_alt_rounded,
                     "Business Partner Master Data",
                   ),
-                  
-                  _buildSimpleMenu(
-                    Icons.admin_panel_settings_outlined,
-                    "Data Admin",
-                  ),
-
                   _buildExpansionMenu(
                     context,
                     Icons.shopping_bag_rounded,
@@ -437,13 +440,12 @@ class _SidebarWidgetState extends State<SidebarWidget> {
                         "Satuan",
                         Icons.description_outlined,
                       ),
-                     
                     ],
-                  ),                
-
-
-
-                  
+                  ),
+                  _buildSimpleMenu(
+                    Icons.admin_panel_settings_outlined,
+                    "Data Admin",
+                  ),
                   const SizedBox(height: 20),
                   Divider(
                       color: Colors.white24,

@@ -11,6 +11,11 @@ class SalesOrderPage extends StatefulWidget {
 
 class _SalesOrderPageState extends State<SalesOrderPage>
     with SingleTickerProviderStateMixin {
+  // ========================================================
+  // STATE PENAHAN LAYAR (GATE KEEPER)
+  // ========================================================
+  bool _hasSelectedPath = false;
+
   bool showSidePanel = false;
   late TabController _tabController;
   int _rowCount = 10;
@@ -28,7 +33,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String?> _formValues = {};
 
-  // --- DATA DUMMY DROPDOWN (Sesuai Rekaman Bunda) ---
   final List<String> listCompany = ['PT DLM', 'PT Senzo', 'PT Dempo', 'PT ADE'];
   final List<String> listDocType = [
     'SO Resmi (1)',
@@ -47,18 +51,12 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     '2619-0005 - Repair Mesin'
   ];
 
-  // ========================================================
-  // LOGIKA "RAHASIA" BUNDA: AUTO GENERATE SO NUMBER
-  // ========================================================
   void _generateAutoSONumber() {
-    // 1. Ambil pilihan user saat ini (Default ke yang pertama kalau kosong)
     String company = _dropdownValues["h_company"] ?? listCompany.first;
     String docType = _dropdownValues["h_doc_type"] ?? listDocType.first;
 
-    // 2. Format Tahun (Contoh: "26" buat 2026)
     String year = DateFormat('yy').format(DateTime.now());
 
-    // 3. Digit ke-3: Kode PT (DLM=1, Senzo=2, Dempo=3, ADE=4)
     String compCode = "1";
     if (company.contains("Senzo"))
       compCode = "2";
@@ -66,23 +64,18 @@ class _SalesOrderPageState extends State<SalesOrderPage>
       compCode = "3";
     else if (company.contains("ADE")) compCode = "4";
 
-    // 4. Digit ke-4: Kode Jenis Dokumen (Resmi=1, Intern=2, Project=9)
     String docCode = "1";
     if (docType.contains("Intern") || docType.contains("(2)"))
       docCode = "2";
     else if (docType.contains("Project") || docType.contains("(9)"))
       docCode = "9";
 
-    // 5. Gabungin kodenya jadi satu + nomor urut fiktif
     String generatedCode = "$year$compCode$docCode";
-    String finalSONumber =
-        "$generatedCode-0001"; // Nanti 0001 ini dari backend Laravel
+    String finalSONumber = "$generatedCode-0001";
 
-    // 6. Tembak langsung ke textfield SO No.
     _getCtrl("h_no_val").text = finalSONumber;
     _fieldValues["h_no_val"] = finalSONumber;
   }
-  // ========================================================
 
   String formatPrice(String value) {
     String cleanText = value.replaceAll(RegExp(r'[^0-9]'), '');
@@ -218,11 +211,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-
-    // Memicu logika auto-generate pertama kali saat layar dibuka
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generateAutoSONumber();
-    });
   }
 
   @override
@@ -234,11 +222,158 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     super.dispose();
   }
 
+  Widget _buildPathSelectionScreen() {
+    return Scaffold(
+      backgroundColor: bgSlate,
+      body: Center(
+        child: Container(
+          width: 700,
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: primaryIndigo.withValues(alpha: 0.1),
+                blurRadius: 30,
+                spreadRadius: 10,
+                offset: const Offset(0, 15),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.assignment_add, size: 60, color: primaryIndigo),
+              const SizedBox(height: 16),
+              const Text(
+                "Pilih Jenis Dokumen",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Apa yang ingin Anda buat hari ini? Sistem akan menyesuaikan form otomatis.",
+                style: TextStyle(fontSize: 14, color: secondarySlate),
+              ),
+              const SizedBox(height: 40),
+              _buildSelectionCard(
+                title: "1. Create Project Master",
+                description:
+                    "Buat project baru sebagai payung utama (Contoh: Project Merah Putih).",
+                icon: Icons.account_tree_rounded,
+                color: Colors.blue.shade600,
+                onTap: () => _selectPath('Project Master (9)'),
+              ),
+              const SizedBox(height: 16),
+              _buildSelectionCard(
+                title: "2. Create SO Resmi",
+                description:
+                    "Buat Sales Order resmi untuk ditagihkan ke customer (Wajib masuk Project).",
+                icon: Icons.request_quote_rounded,
+                color: Colors.green.shade600,
+                onTap: () => _selectPath('SO Resmi (1)'),
+              ),
+              const SizedBox(height: 16),
+              _buildSelectionCard(
+                title: "3. Create SO Intern / Protolan",
+                description:
+                    "Buat dokumen internal protolan. (Khusus Senzo wajib masuk project, PT lain mandiri).",
+                icon: Icons.build_circle_rounded,
+                color: Colors.orange.shade600,
+                onTap: () => _selectPath('SO Intern/Protolan (2)'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectionCard({
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: borderGrey),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(description,
+                      style: TextStyle(
+                          fontSize: 13, color: secondarySlate, height: 1.4)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade400),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _selectPath(String docTypeSelected) {
+    setState(() {
+      _dropdownValues["h_doc_type"] = docTypeSelected;
+      _hasSelectedPath = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generateAutoSONumber();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_hasSelectedPath) {
+      return _buildPathSelectionScreen();
+    }
+
     if (_rowCount < 10) _rowCount = 10;
     return Scaffold(
       backgroundColor: bgSlate,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: primaryIndigo),
+          tooltip: "Kembali ke Menu Pilihan",
+          onPressed: () => setState(() => _hasSelectedPath = false),
+        ),
+        title: Text("Form Input - ${_dropdownValues['h_doc_type']}",
+            style: TextStyle(
+                color: primaryIndigo,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
+      ),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -250,7 +385,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
                 _buildTabSection(),
                 const SizedBox(height: 16),
                 _buildModernFooter(),
-                const SizedBox(height: 100), // Space bawah
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -266,68 +401,139 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  // --- HEADER TETAP SAMA, CUMA NOMORNYA SEKARANG HIDUP ---
-  Widget _buildModernHeader() => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        padding: const EdgeInsets.all(24),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-              color: primaryIndigo.withValues(alpha: 0.4), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 18,
-              spreadRadius: 2,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 6,
-              child: Column(
-                children: [
-                  _buildSmallDropdownRowModern(
-                      "Company (PT)", "h_company", listCompany),
-                  _buildSmallDropdownRowModern(
-                      "SO Type", "h_doc_type", listDocType),
-                  _buildSmallDropdownRowModern(
-                      "Customer", "h_customer", listCustomer),
+  // ========================================================
+  // REVISI SUPER LOGIKA: HEADER PROJECT REF
+  // ========================================================
+  Widget _buildModernHeader() {
+    String currentDocType = _dropdownValues["h_doc_type"] ?? listDocType.first;
+
+    // KONDISI 1: Apakah user lagi bikin Project Master? (Kalo iya, matiin Project Ref)
+    bool isCreatingProjectMaster = currentDocType.contains("Project");
+
+    // KONDISI 2: Apakah user bikin SO Intern khusus DLM, Dempo, ADE? (Kalo iya, matiin Project Ref)
+    // Ingat: Senzo nggak ikutan di list ini karena Senzo masuk project!
+    bool isInternNonProject = currentDocType.contains("Intern");
+
+    // TENTUKAN: Apakah Project Ref harus dimatikan?
+    bool disableProjectRef = isCreatingProjectMaster || isInternNonProject;
+
+    // Pesan khusus kalau dimatikan biar admin gak bingung
+    String disabledText = isCreatingProjectMaster
+        ? "N/A (Membuat Induk Baru)"
+        : "N/A (Tidak Masuk Project)";
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(24),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        border:
+            Border.all(color: primaryIndigo.withValues(alpha: 0.4), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 18,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 6,
+            child: Column(
+              children: [
+                _buildSmallDropdownRowModern(
+                    "Company (PT)", "h_company", listCompany),
+                _buildSmallDropdownRowModern(
+                    "SO Type", "h_doc_type", listDocType),
+                _buildSmallDropdownRowModern(
+                    "Customer", "h_customer", listCustomer),
+
+                // IF-ELSE untuk kolom Project Ref yang super pintar
+                if (disableProjectRef)
+                  _buildDisabledProjectRefRow(disabledText)
+                else
                   _buildSmallDropdownRowModern(
                       "Project Ref", "h_project", listProject),
-                  _buildSmallDropdownRowModern(
-                      "Local Currency", "h_curr", ["IDR", "USD", "EUR"]),
-                ],
+
+                _buildSmallDropdownRowModern(
+                    "Local Currency", "h_curr", ["IDR", "USD", "EUR"]),
+              ],
+            ),
+          ),
+          const SizedBox(width: 60),
+          Expanded(
+            flex: 4,
+            child: Column(
+              children: [
+                _buildModernNoFieldRow(
+                  "SO No.",
+                  "h_no_series",
+                  ["2026-SO", "2025-SO"],
+                  "h_no_val",
+                  initialNo: "2611-0001",
+                ),
+                _buildModernFieldRow("Status", "h_stat", initial: "Open"),
+                _buildHeaderDate("Posting Date", "h_post_date", ""),
+                _buildHeaderDate("Delivery Date", "h_deliv", ""),
+                _buildHeaderDate("Document Date", "h_doc", ""),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // WIDGET KHUSUS BUAT NAMPILIN PROJECT REF YANG MATI DENGAN TEXT DINAMIS
+  Widget _buildDisabledProjectRefRow(String textHint) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              "Project Ref",
+              style: TextStyle(
+                  fontSize: 12,
+                  color: secondarySlate,
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+          const SizedBox(width: 28),
+          Expanded(
+            child: Container(
+              height: 35,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              alignment: Alignment.centerLeft,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: borderGrey, width: 1),
+              ),
+              child: Text(
+                textHint,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors
+                      .red.shade400, // Warna merah biar kelihatan jelas ini N/A
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(width: 60),
-            Expanded(
-              flex: 4,
-              child: Column(
-                children: [
-                  _buildModernNoFieldRow(
-                    "SO No.",
-                    "h_no_series",
-                    ["2026-SO", "2025-SO"],
-                    "h_no_val",
-                    initialNo:
-                        "2611-0001", // Nanti dioverride otomatis sama logika
-                  ),
-                  _buildModernFieldRow("Status", "h_stat", initial: "Open"),
-                  _buildHeaderDate("Posting Date", "h_post_date", ""),
-                  _buildHeaderDate("Delivery Date", "h_deliv", ""),
-                  _buildHeaderDate("Document Date", "h_doc", ""),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTabSection() {
     return Container(
@@ -1545,7 +1751,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
             setState(() {
               _dropdownValues[key] = val!;
 
-              // KALO YANG DIPILIH ITU DROPDOWN COMPANY ATAU SO TYPE, GENERATE ULANG NOMORNYA!
               if (key == "h_company" || key == "h_doc_type") {
                 _generateAutoSONumber();
               }
@@ -1831,7 +2036,7 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  // --- BAGIAN SIDE PANEL SAMA SEKALI GAK DIUBAH (Sesuai Request Lu!) ---
+  // --- BAGIAN SIDE PANEL SAMA SEKALI GAK DIUBAH ---
   Widget _buildFloatingSidePanel() => Container(
         width: 380,
         decoration: const BoxDecoration(
