@@ -226,73 +226,95 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     return Scaffold(
       backgroundColor: bgSlate,
       body: Center(
-        child: Container(
-          width: 700,
-          padding: const EdgeInsets.all(40),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: primaryIndigo.withValues(alpha: 0.1),
-                blurRadius: 30,
-                spreadRadius: 10,
-                offset: const Offset(0, 15),
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.assignment_add, size: 60, color: primaryIndigo),
-              const SizedBox(height: 16),
-              const Text(
-                "Pilih Jenis Dokumen",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+        // INI OBATNYA BRO: Bikin bisa di-scroll kalo layarnya kekecilan
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+          child: Container(
+            width: 750,
+            padding: const EdgeInsets.all(48),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryIndigo.withValues(alpha: 0.08),
+                  blurRadius: 40,
+                  spreadRadius: 10,
+                  offset: const Offset(0, 20),
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: primaryIndigo.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.note_add_rounded,
+                      size: 50, color: primaryIndigo),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Apa yang ingin Anda buat hari ini? Sistem akan menyesuaikan form otomatis.",
-                style: TextStyle(fontSize: 14, color: secondarySlate),
-              ),
-              const SizedBox(height: 40),
-              _buildSelectionCard(
-                title: "1. Create Project Master",
-                description:
-                    "Buat project baru sebagai payung utama (Contoh: Project Merah Putih).",
-                icon: Icons.account_tree_rounded,
-                color: Colors.blue.shade600,
-                onTap: () => _selectPath('Project Master (9)'),
-              ),
-              const SizedBox(height: 16),
-              _buildSelectionCard(
-                title: "2. Create SO Resmi",
-                description:
-                    "Buat Sales Order resmi untuk ditagihkan ke customer (Wajib masuk Project).",
-                icon: Icons.request_quote_rounded,
-                color: Colors.green.shade600,
-                onTap: () => _selectPath('SO Resmi (1)'),
-              ),
-              const SizedBox(height: 16),
-              _buildSelectionCard(
-                title: "3. Create SO Intern / Protolan",
-                description:
-                    "Buat dokumen internal protolan. (Khusus Senzo wajib masuk project, PT lain mandiri).",
-                icon: Icons.build_circle_rounded,
-                color: Colors.orange.shade600,
-                onTap: () => _selectPath('SO Intern/Protolan (2)'),
-              ),
-            ],
+                const SizedBox(height: 24),
+                const Text(
+                  "Pilih Jenis Dokumen",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black87,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Silakan pilih jenis dokumen yang ingin Anda buat hari ini.\nForm akan otomatis menyesuaikan kebutuhan Anda.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 15, color: secondarySlate, height: 1.5),
+                ),
+                const SizedBox(height: 48),
+
+                // KARTU 1
+                _buildSelectionCard(
+                  title: "1. Bikin Project Master (Induk)",
+                  description:
+                      "Pilih ini jika Anda ingin membuat 'Rumah/Folder' baru untuk sebuah proyek besar (Contoh: Bikin rumah untuk Project Merah Putih).",
+                  icon: Icons.account_tree_rounded,
+                  color: Colors.blue.shade600,
+                  onTap: () => _selectPath('Project Master (9)'),
+                ),
+                const SizedBox(height: 20),
+
+                // KARTU 2
+                _buildSelectionCard(
+                  title: "2. Bikin SO Resmi",
+                  description:
+                      "Pilih ini untuk membuat tagihan/pengiriman barang utama ke customer. (Dokumen ini wajib dimasukkan ke dalam sebuah Project Master).",
+                  icon: Icons.request_quote_rounded,
+                  color: Colors.green.shade600,
+                  onTap: () => _selectPath('SO Resmi (1)'),
+                ),
+                const SizedBox(height: 20),
+
+                // KARTU 3
+                _buildSelectionCard(
+                  title: "3. Bikin SO Intern / Protolan",
+                  description:
+                      "Pilih ini untuk keperluan internal pabrik (contoh: barang protolan, cacat, dsb). Dokumen ini sifatnya mandiri dan tidak perlu diikat ke Project Master.",
+                  icon: Icons.build_circle_rounded,
+                  color: Colors.orange.shade600,
+                  onTap: () => _selectPath('SO Intern/Protolan (2)'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // WIDGET KARTU YANG UDAH DI-UPGRADE DESAINNYA
   Widget _buildSelectionCard({
     required String title,
     required String description,
@@ -300,42 +322,90 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     required Color color,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: borderGrey),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(icon, color: color, size: 28),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 8), // Shadow turun ke bawah
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 5,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          hoverColor: color.withValues(alpha: 0.05), // Efek hover cakep
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+            decoration: BoxDecoration(
+              border:
+                  Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  Text(description,
-                      style: TextStyle(
-                          fontSize: 13, color: secondarySlate, height: 1.4)),
-                ],
-              ),
+            child: Row(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Ikonnya di tengah vertikal
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 32),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.arrow_forward_ios_rounded,
+                      size: 16, color: color),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade400),
-          ],
+          ),
         ),
       ),
     );
@@ -407,11 +477,10 @@ class _SalesOrderPageState extends State<SalesOrderPage>
   Widget _buildModernHeader() {
     String currentDocType = _dropdownValues["h_doc_type"] ?? listDocType.first;
 
-    // KONDISI 1: Apakah user lagi bikin Project Master? (Kalo iya, matiin Project Ref)
+    // KONDISI 1: Apakah user lagi bikin Project Master?
     bool isCreatingProjectMaster = currentDocType.contains("Project");
 
-    // KONDISI 2: Apakah user bikin SO Intern khusus DLM, Dempo, ADE? (Kalo iya, matiin Project Ref)
-    // Ingat: Senzo nggak ikutan di list ini karena Senzo masuk project!
+    // KONDISI 2: Apakah user bikin SO Intern? (Semua PT)
     bool isInternNonProject = currentDocType.contains("Intern");
 
     // TENTUKAN: Apakah Project Ref harus dimatikan?
@@ -419,8 +488,8 @@ class _SalesOrderPageState extends State<SalesOrderPage>
 
     // Pesan khusus kalau dimatikan biar admin gak bingung
     String disabledText = isCreatingProjectMaster
-        ? "N/A (Membuat Induk Baru)"
-        : "N/A (Tidak Masuk Project)";
+        ? "N/A (Sedang Bikin Rumah Induk)"
+        : "N/A (SO Mandiri, Tanpa Project)";
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1750,7 +1819,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
           onChanged: (val) {
             setState(() {
               _dropdownValues[key] = val!;
-
               if (key == "h_company" || key == "h_doc_type") {
                 _generateAutoSONumber();
               }
@@ -2036,7 +2104,6 @@ class _SalesOrderPageState extends State<SalesOrderPage>
     );
   }
 
-  // --- BAGIAN SIDE PANEL SAMA SEKALI GAK DIUBAH ---
   Widget _buildFloatingSidePanel() => Container(
         width: 380,
         decoration: const BoxDecoration(
